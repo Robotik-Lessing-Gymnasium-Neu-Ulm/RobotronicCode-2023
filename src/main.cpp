@@ -127,7 +127,6 @@ void loop() {
   if (!torwart) {
     if (bodenrichtung == -1) { //der Boden sieht nichts
       //geschwindigkeiten ändern, je nach Entfernung zum Ball
-      Serial.println(richtung);
       if (richtung != -1) { //der IR sieht etwas
         motor(richtung,veloAnf,rotation);
       }

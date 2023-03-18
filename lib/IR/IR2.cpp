@@ -20,11 +20,8 @@
 #define AM1 A17 //analog Multiplexer Oben
 #endif
 
-#ifndef RoboRadius
-#define RoboRadius 20
-#endif
 #ifndef AnfahrtsRadius
-#define AnfahrtsRadius 27
+#define AnfahrtsRadius 15
 #endif
 
 int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {  //Verkürzung Auslesen
@@ -36,7 +33,7 @@ int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {  //Verkürzung Ausles
 }
 void IRsens(int* IR, int& IRbest, int& Icball, double& richtung, double &veloAnf) {
   //alle IRs auslesen und mappen
-  IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 300, 1023, 0, 100);
+  IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 350, 1023, 0, 100);
   IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), 300, 1023, 0, 100);
   IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), 305, 1023, 0, 100);
   IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), 315, 1023, 0, 100);
@@ -61,43 +58,30 @@ void IRsens(int* IR, int& IRbest, int& Icball, double& richtung, double &veloAnf
     }
   }
   //Der Winkel zum Ball in Grad (Hier gehe ich davon aus, dass 0 vorne ist und dann gegen den Uhrzeigersinn gezählt wird)
-  double WinkelBall=22.5*Icball+90;
+  double WinkelBall=90-22.5*Icball;
   if(WinkelBall>=360){
-    WinkelBall-=360;
+    WinkelBall-=360; 
   }
-  //PID-Regler, der nur die Geschwindigkeit regelt (veloAnf – velocityAnfahrt)
-  static double Ziel=0;
-  static double BetrWinkel=WinkelBall-90; //Winkel zum Ball neu ausrichten
-  PID veloPID(&BetrWinkel,&veloAnf,&Ziel,0.5,0,0,P_ON_M,DIRECT); //noch nicht eingestellt
-  veloPID.SetMode(AUTOMATIC);
-  //die Verschiebung nach unten ist noch nicht implementiert
-  //richtung berechnen (Die "untere" Tangente mit dem Anfahrtskreis um den Ball)
-  Serial.println(IRbest);
-  if(IRbest>=90){
-    richtung=-1;
+  if(WinkelBall<0){
+    WinkelBall+=360;
   }
-  else if(Icball<=8){//der ball liegt links vom Roboter
-    //Richtung berechnen
-    richtung =WinkelBall+asin(AnfahrtsRadius/(IRbest+RoboRadius));
-    //verschiebe den neu ausgerichteten Winkel teilweise ins Negative
-    if(BetrWinkel>300){
-        BetrWinkel-=360;
-    }
-    veloPID.SetControllerDirection(DIRECT);
-    veloPID.Compute();
-  }
-  else{//der ball liegt rechts vom Roboter
-    //Richtung berechnen
-    richtung =WinkelBall-asin(AnfahrtsRadius/(IRbest+RoboRadius));
-    //verschiebe den neu ausgerichteten Winkel teilweise ins Negative
-    if(BetrWinkel<60){ //überprüfe das noch mal
-        BetrWinkel+=360;
-    }
-    veloPID.SetControllerDirection(REVERSE);
-    veloPID.Compute(); //jetzt ist der als Output: veloAnf
-  }
-  if(Icball==0){//wenn der Ball vor dem Roboter liegt
+  if(IRbest<AnfahrtsRadius){        //Wenn der Roboter im Anfahrtskreis steht
+    richtung=270;
     veloAnf=100;
+  }else if(Icball==0){              //Ball vor dem Roboter
     richtung=90;
+    veloAnf=150;
+  }else if(Icball<=8){              //Ball rechts vom Roboter; Der RoboRadius von 4 wurde noch miteinbezogen
+    richtung=WinkelBall-(asin((double)AnfahrtsRadius/IRbest))*180/PI;
+  }else{                            //Ball links vom Roboter
+    richtung=WinkelBall+(asin((double)AnfahrtsRadius/IRbest))*180/PI;
   }
+
+  if(richtung<0){ //richtung noch verschieben (von 0°-360°)
+    richtung+=360;
+  }
+  if(richtung>360){
+    richtung-=360;
+  }
+  Serial.println(richtung);
 }
