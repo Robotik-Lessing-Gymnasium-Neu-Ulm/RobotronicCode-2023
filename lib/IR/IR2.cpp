@@ -33,22 +33,22 @@ int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {  //Verkürzung Ausles
 }
 void IRsens(int* IR, int& IRbest, int& Icball, double& richtung, double &veloAnf) {
   //alle IRs auslesen und mappen
-  IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 350, 1023, 0, 100);
-  IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), 300, 1023, 0, 100);
-  IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), 305, 1023, 0, 100);
-  IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), 315, 1023, 0, 100);
-  IR[4] = map(lesenMultiplexerOben(0, 1, 0, 0), 295, 1023, 0, 100);
-  IR[5] = map(lesenMultiplexerOben(0, 1, 0, 1), 300, 1023, 0, 100);
-  IR[6] = map(lesenMultiplexerOben(0, 1, 1, 0), 315, 1023, 0, 100);
-  IR[7] = map(lesenMultiplexerOben(0, 1, 1, 1), 300, 1023, 0, 100);
-  IR[8] = map(lesenMultiplexerOben(1, 0, 0, 0), 295, 1023, 0, 100);
-  IR[9] = map(lesenMultiplexerOben(1, 0, 0, 1), 310, 1023, 0, 100);
-  IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0), 300, 1023, 0, 100);
-  IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1), 310, 1023, 0, 100);
-  IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0), 295, 1023, 0, 100);
-  IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1), 295, 1023, 0, 100);
-  IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0), 305, 1023, 0, 100);
-  IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1), 305, 1023, 0, 100);
+  IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 409, 1023, 0, 100);
+  IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), 413, 1023, 0, 100);
+  IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), 416, 1023, 0, 100);
+  IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), 410, 1023, 0, 100);
+  IR[4] = map(lesenMultiplexerOben(0, 1, 0, 0), 408, 1023, 0, 100);
+  IR[5] = map(lesenMultiplexerOben(0, 1, 0, 1), 410, 1023, 0, 100);
+  IR[6] = map(lesenMultiplexerOben(0, 1, 1, 0), 420, 1023, 0, 100);
+  IR[7] = map(lesenMultiplexerOben(0, 1, 1, 1), 415, 1023, 0, 100);
+  IR[8] = map(lesenMultiplexerOben(1, 0, 0, 0), 409, 1023, 0, 100);
+  IR[9] = map(lesenMultiplexerOben(1, 0, 0, 1), 411, 1023, 0, 100);
+  IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0), 409, 1023, 0, 100);
+  IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1), 412, 1023, 0, 100);
+  IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0), 412, 1023, 0, 100);
+  IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1), 407, 1023, 0, 100);
+  IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0), 410, 1023, 0, 100);
+  IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1), 240, 1023, 0, 100);
   //bestimmen des niedrigsten, gemessenen Wertes und Speichern des Index in Icball
   IRbest = 90;
   for (int i = 0; i < 16; i++) {
