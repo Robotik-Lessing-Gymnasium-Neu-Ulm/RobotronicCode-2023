@@ -119,7 +119,11 @@ void loop() {
   //Die grünen Kontroll-LEDs leuchten lassen
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa);
   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
-  IRsens(IR,IRbest,Icball,richtung,veloAnf); //………
+  if(Roboter == 1){
+    IRsens(IR,IRbest,Icball,richtung,veloAnf); //………
+  }else{
+    //Infrared program robot 2
+  }
   Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
   compass(gyro,buttonGpressed,minus,rotation,alterWinkel);
   //empfangen und senden

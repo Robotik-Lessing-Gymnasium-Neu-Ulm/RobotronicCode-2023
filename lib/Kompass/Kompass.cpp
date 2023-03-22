@@ -3,28 +3,28 @@
 #include <Adafruit_BNO055.h>
 
 void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double& rotation, int& alterWinkel) {
-  sensors_event_t orientationData;                                          //momentane Aufnahmeder der Sensorwerte
+  sensors_event_t orientationData;                                                                              //getting reading from gyro
   sensors_event_t angVelocityData;
-  gyro.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
-  gyro.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);           //holt neue Werte in Grad
-  double winkel = orientationData.orientation.x;         //variable winkel enthält Drehung auf der Ebene in Grad
+  gyro.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);                                           //receiving angular velocity
+  gyro.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);                                               //receiving angle in degrees
+  double winkel = orientationData.orientation.x;                            
   double rotationSpeed = angVelocityData.orientation.z;
-  if (buttonGpressed) {                                                     //wenn Button gedrückt speichern des Offsets
+  if (buttonGpressed) {                                                                                         //if button was pressed saves the offset
     minus = winkel;
     Serial.print("MINUS:");
     Serial.println(minus);
     buttonGpressed = false;
   }
   winkel = winkel - minus;
-  if (winkel > 180) {                                                       //Werte umrechnen von 0-359 auf Werte von -180 - +180 => für Formel
+  if (winkel > 180) {                                                                                           //to be usable angle needs to be between 180 and -180
     winkel = winkel - 360;
   }
   if (winkel < -180) {
     winkel = winkel + 360;
   }
-  double p = 11;                                                          //korrekturfaktor
-  double d = 50;                                                          //korrekturfaktor
-  rotation = (p * winkel) - d * rotationSpeed;   //Berechnung der drehung
+  double p = 11;                                                          
+  double d = 50;                                                          
+  rotation = (p * winkel) - d * rotationSpeed;                                                                  //calculate rotation needed
   alterWinkel = winkel;
   rotation = -rotation / 4.5;
 }

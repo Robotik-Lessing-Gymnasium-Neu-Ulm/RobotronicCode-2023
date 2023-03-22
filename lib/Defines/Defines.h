@@ -27,9 +27,9 @@
 #define S3 14
 
 #define UAM1 A15 //analog Multiplexer Unten 1
-#define UAM2 A16 //analog Multplexer Unten 2
-#define UAM3 A14 // analog Multiplexer Unten 3
-#define AM1 A17 //analog Multiplexer Oben
+#define UAM2 A16 //analog mux groumd 2
+#define UAM3 A14 // analog mux ground 3
+#define AM1 A17 //analog mux main pcb
 
 #define gyroButton 31
 #define calibrationButton 32
@@ -48,5 +48,7 @@
 #define Nah 25
 #define Mittel 50
 #define Fern 70
+
+#define Roboter EEPROM.read(0)
 
 #endif
