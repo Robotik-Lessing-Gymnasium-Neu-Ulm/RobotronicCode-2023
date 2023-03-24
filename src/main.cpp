@@ -123,12 +123,18 @@ void loop() {
   Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
   compass(gyro,buttonGpressed,minus,rotation,alterWinkel);
   //empfangen und senden
-  bluetooth(torwart,IRbest);
+  //bluetooth(torwart,IRbest);
   if (!torwart) {
     if (bodenrichtung == -1) { //der Boden sieht nichts
       //geschwindigkeiten ändern, je nach Entfernung zum Ball
       if (richtung != -1) { //der IR sieht etwas
         motor(richtung,veloAnf,rotation);
+        Serial.print(richtung);
+        Serial.print(" | ");
+        Serial.print(rotation);
+        Serial.print(" | ");
+        Serial.print(veloAnf);
+        Serial.println();
       }
       else { //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
         motor(0, 0,rotation); //nur ausrichten

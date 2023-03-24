@@ -20,7 +20,7 @@
 #endif
 
 #ifndef AnfahrtsRadius
-#define AnfahrtsRadius 15
+#define AnfahrtsRadius 10  //Achtung: auch bei der IR Kalibration ändern!
 #endif
 
 int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzung Auslesen
@@ -31,7 +31,7 @@ int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzu
   return analogRead(AM1);
 }
 void IRsens(int* IR, int& IRbest, int& Icball, double& richtung, double &veloAnf) {
-  IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 409, 1023, 0, 100);   //alle IRs auslesen und mappen
+  IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 250, 1023, 0, 100);   //alle IRs auslesen und mappen
   IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), 413, 1023, 0, 100);
   IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), 416, 1023, 0, 100);
   IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), 410, 1023, 0, 100);
@@ -61,19 +61,24 @@ void IRsens(int* IR, int& IRbest, int& Icball, double& richtung, double &veloAnf
   if(WinkelBall<0){
     WinkelBall+=360;
   }
+  if(Icball==0){                                                //Ball vor dem Roboter
+    richtung=90;                                                      //nach vorne fahren
+    veloAnf=150;
+    //Serial.println("vor");
+  }
   if(IRbest<AnfahrtsRadius){                                          //Wenn der Roboter im Anfahrtskreis steht
     richtung=270;                                                     //nach hinten fahren
     veloAnf=100;
-  }else if(Icball==0){                                                //Ball vor dem Roboter
-    richtung=90;                                                      //nach vorne fahren
-    veloAnf=150;
+    Serial.println("drinne");
   }else if(Icball<=8){                                                //Ball rechts vom Roboter; Der RoboRadius von 4 wurde noch miteinbezogen
     richtung=WinkelBall-(asin((double)AnfahrtsRadius/IRbest))*180/PI; //auf der unteren Tangente fahren
     veloAnf=50;
+    //Serial.println("rechts");
     //… Verschiebung nach unten: Auf den asin Teil eine Konstante>0 addieren (Konstante möglichste klein)
   }else{                                                              //Ball links vom Roboter
     richtung=WinkelBall+(asin((double)AnfahrtsRadius/IRbest))*180/PI; //auf der unteren Tangente fahren
     veloAnf=50;
+    //Serial.println("links");
     //… Verschiebung nach unten: Auf den asin Teil eine Konstante>0 subtrahieren (Konstanten möglichst klein)
   }
   if(richtung<0){                                                     //auf Wertebereich 0-360 verscheiben
@@ -82,5 +87,4 @@ void IRsens(int* IR, int& IRbest, int& Icball, double& richtung, double &veloAnf
   if(richtung>360){
     richtung-=360;
   }
-  Serial.println(richtung);
 }
