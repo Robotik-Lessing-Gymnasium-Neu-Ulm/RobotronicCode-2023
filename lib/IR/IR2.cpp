@@ -68,9 +68,13 @@ void IRsens(int* IR, int& IRbest, int& Icball, double& richtung, double &veloAnf
     richtung=90;                                                      //nach vorne fahren
     veloAnf=150;
   }else if(Icball<=8){                                                //Ball rechts vom Roboter; Der RoboRadius von 4 wurde noch miteinbezogen
-    richtung=WinkelBall-(asin((double)AnfahrtsRadius/IRbest))*180/PI;
+    richtung=WinkelBall-(asin((double)AnfahrtsRadius/IRbest))*180/PI; //auf der unteren Tangente fahren
+    veloAnf=50;
+    //… Verschiebung nach unten: Auf den asin Teil eine Konstante>0 addieren (Konstante möglichste klein)
   }else{                                                              //Ball links vom Roboter
-    richtung=WinkelBall+(asin((double)AnfahrtsRadius/IRbest))*180/PI;
+    richtung=WinkelBall+(asin((double)AnfahrtsRadius/IRbest))*180/PI; //auf der unteren Tangente fahren
+    veloAnf=50;
+    //… Verschiebung nach unten: Auf den asin Teil eine Konstante>0 subtrahieren (Konstanten möglichst klein)
   }
   if(richtung<0){                                                     //auf Wertebereich 0-360 verscheiben
     richtung+=360;
