@@ -19,9 +19,6 @@
 #define AM1 A17     //analog Multiplexer Oben
 #endif
 
-#ifndef AnfahrtsRadius
-#define AnfahrtsRadius 10  //Achtung: auch bei der IR Kalibration ändern!
-#endif
 
 int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzung Auslesen
   digitalWrite(S0, s3);
@@ -30,7 +27,8 @@ int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzu
   digitalWrite(S3, s0);
   return analogRead(AM1);
 }
-void IRsens(int* IR, int& IRbest, int& Icball, double& richtung, double &veloAnf) {
+void IRsens(int* IR, double& IRbest, int& Icball, double& richtung, double &veloAnf) {
+  static double AnfahrtsRadius=3.5;                                   //Achtung: auch bei der IR Kalibration ändern!
   IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 250, 1023, 0, 100);   //alle IRs auslesen und mappen
   IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), 413, 1023, 0, 100);
   IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), 416, 1023, 0, 100);
@@ -61,11 +59,14 @@ void IRsens(int* IR, int& IRbest, int& Icball, double& richtung, double &veloAnf
   if(WinkelBall<0){
     WinkelBall+=360;
   }
-  if(Icball==0){                                                //Ball vor dem Roboter
+  if(Icball==0){                                                      //Ball vor dem Roboter
     richtung=90;                                                      //nach vorne fahren
     veloAnf=150;
+    return;                                                           //damit die Werte nicht noch überschrieben werden
     //Serial.println("vor");
   }
+  static PID vPID(&IRbest,&veloAnf,&AnfahrtsRadius,(double)1,(double)0,(double)0,REVERSE);
+  Serial.println();
   if(IRbest<AnfahrtsRadius){                                          //Wenn der Roboter im Anfahrtskreis steht
     richtung=270;                                                     //nach hinten fahren
     veloAnf=100;

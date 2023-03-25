@@ -24,7 +24,7 @@
 #define LEDballcaught    30
 #endif
 
-void ControlLEDs(bool& buttonGpressed, double &richtung,int& IRbest, int& Icball, double& rotation,bool& minEinerDa) {
+void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa) {
   // Einzelne Variablen überprüfen und dann die Pins schreiben
   if (digitalRead(gyroButton) == LOW) {
     buttonGpressed = true;

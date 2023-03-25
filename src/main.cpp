@@ -57,7 +57,7 @@ double rotation;
 
 //Variablen für IR
 int IR[16];
-int IRbest = -1;
+double IRbest = -1;
 double richtung = -1;
 int Icball = -1;
 double veloAnf = 50; //Geschwindigkeit vom PID gesteuert bei der Ballanfahrt
@@ -129,12 +129,12 @@ void loop() {
       //geschwindigkeiten ändern, je nach Entfernung zum Ball
       if (richtung != -1) { //der IR sieht etwas
         motor(richtung,veloAnf,rotation);
-        Serial.print(richtung);
+        /* Serial.print(richtung);
         Serial.print(" | ");
         Serial.print(rotation);
         Serial.print(" | ");
         Serial.print(veloAnf);
-        Serial.println();
+        Serial.println(); */
       }
       else { //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
         motor(0, 0,rotation); //nur ausrichten
