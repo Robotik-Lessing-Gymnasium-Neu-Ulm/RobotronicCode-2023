@@ -5,6 +5,7 @@
 #include <EEPROM.h>
 #define I2C
 #include <Pixy2I2C.h>
+#include<PID_v1.h>
 //eigene Bibliotheken
 #include<Boden.h>
 #include<Motoren.h>
@@ -75,6 +76,11 @@ double phi;*/
 //bluetooth
 bool torwart;
 
+
+//PID-Regler
+double setpoint=5;    //wird sich nach dem Anfahrtsradius richten
+PID vPID(&IRbest,&veloAnf,&setpoint,(double)1,(double)0,(double)0,REVERSE);
+
 void setup() {
   //Seriellen Monitor initialisieren
   Serial.begin(115200);
@@ -113,13 +119,14 @@ void setup() {
   AutoCalibration(LED,Schwellwerte);
   //den gyro losmessen lassen (ich musste die 8 auskommentieren, hoffentlich funktionierts trotzdem)
   gyro.begin(/*8*/);
+  vPID.SetMode(AUTOMATIC);
 }
 
 void loop() {
   //Die grünen Kontroll-LEDs leuchten lassen
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa);
   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
-  IRsens(IR,IRbest,Icball,richtung,veloAnf); //………
+  IRsens(IR,IRbest,Icball,richtung,veloAnf,setpoint); //………
   Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
   compass(gyro,buttonGpressed,minus,rotation,alterWinkel);
   //empfangen und senden
@@ -155,4 +162,5 @@ void loop() {
       motor(90, 60, rotation); //nach vorne fahren
     }
   }
+  vPID.Compute();
 }
