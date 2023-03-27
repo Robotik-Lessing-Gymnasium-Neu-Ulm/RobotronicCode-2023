@@ -57,6 +57,10 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung, double &velo
   if(WinkelBall>=360){                                                //auf Wertebereich 0-360 verschieben
     WinkelBall-=360; 
   }
+  if(IRbest>75){                                                      //Wenn er den Ball nicht sieht (experimentell!)
+    richtung=-1;
+    return;
+  }
   if(WinkelBall<0){
     WinkelBall+=360;
   }
