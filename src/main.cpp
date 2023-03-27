@@ -6,8 +6,8 @@
 #define I2C
 #include <Pixy2I2C.h>
 #include<PID_v1.h>
-//eigene Bibliotheken
-#include<Boden.h>
+
+#include<Boden.h>                                   //eigene Bibliotheken
 #include<Motoren.h>
 #include <myPixy.h>
 #include <Lichtschranke.h>
@@ -18,14 +18,11 @@
 #include<Defines.h>
 
 
-//pixi im i2c-kommunikations-modus initialisieren
-Pixy2I2C pixy;
+Pixy2I2C pixy;                                      //pixi im i2c-kommunikations-modus initialisieren
 
-//Erstellen eines Obketes der Klasse Adafruit_BNO055 mit Namen gyro
-Adafruit_BNO055 gyro = Adafruit_BNO055(55, 0x28);
+Adafruit_BNO055 gyro = Adafruit_BNO055(55, 0x28);   //Erstellen eines Obketes der Klasse Adafruit_BNO055 mit Namen gyro
 
-//Variablen für Boden
-bool Photo[48];
+bool Photo[48];                                     //Variablen für Boden
 int Schwellwerte[48];
 bool gesehenSensor[48];
 int LED[48];
@@ -43,25 +40,19 @@ bool ySum;
 int US[4];
 int Wert[4];*/
 
-//Other
-bool buttonGpressed = true;
-
-//Variablen für Kamera
-bool piread;
+bool piread;                                          //Variablen für Kamera
 double TorRichtungKamera;
 
-//Variablen für Gyro
-long alteZeit;
+long alteZeit;                                        //Variablen für Gyro
 int alterWinkel;
 double minus;
 double rotation;
 
-//Variablen für IR
-int IR[16];
+int IR[16];                                           //Variablen für IR
 double IRbest = -1;
 double richtung = -1;
 int Icball = -1;
-double veloAnf = 50; //Geschwindigkeit vom PID gesteuert bei der Ballanfahrt
+double veloAnf = 50;                                  //Geschwindigkeit vom PID gesteuert bei der Ballanfahrt
 /*int IRalt0[16];
 int IRalt1[16];
 int IRalt2[16];*/
@@ -73,67 +64,51 @@ double m3;
 double m4;
 double phi;*/
 
-//bluetooth
-bool torwart;
+bool torwart;                                         //bluetooth
 
-
-//PID-Regler
-double setpoint=5;    //wird sich nach dem Anfahrtsradius richten
+double setpoint=5;                                    //wird sich nach dem Anfahrtsradius richten
 PID vPID(&IRbest,&veloAnf,&setpoint,(double)1,(double)0,(double)0,REVERSE);
 
+bool buttonGpressed = true;                           //other
+
 void setup() {
-  //Seriellen Monitor initialisieren
-  Serial.begin(115200);
-  //Bluetooth initialisieren
-  Serial5.begin(115200);
-  //Multiplexer Oben Pin Festlegung
-  pinMode(S0, OUTPUT);
+  Serial.begin(115200);                         //Seriellen Monitor initialisieren
+  Serial5.begin(115200);                        //Bluetooth initialisieren
+  pinMode(S0, OUTPUT);                          //Multiplexer Oben Pin Festlegung
   pinMode(S1, OUTPUT);
   pinMode(S2, OUTPUT);
   pinMode(S3, OUTPUT);
   pinMode(AM1, INPUT);
   pinMode(UAM1, INPUT);
   pinMode(UAM2, INPUT);
-  pinMode(UAM3, INPUT);
-  //Linker Motor Pin Festlegung
+  pinMode(UAM3, INPUT);                         //Linker Motor Pin Festlegung
   pinMode(M1_FW, OUTPUT);
-  pinMode(M1_RW, OUTPUT);
-  //Hinterer Motor Pin Festlegung
+  pinMode(M1_RW, OUTPUT);                       //Hinterer Motor Pin Festlegung
   pinMode(M2_FW, OUTPUT);
-  pinMode(M2_RW, OUTPUT);
-  //Rechter Motor Pin Festlegung
+  pinMode(M2_RW, OUTPUT);                       //Rechter Motor Pin Festlegung
   pinMode(M3_FW, OUTPUT);
-  pinMode(M3_RW, OUTPUT);
-  //links hinten
+  pinMode(M3_RW, OUTPUT);                       //links hinten
   pinMode(M4_FW, OUTPUT);
-  pinMode(M4_RW, OUTPUT);
-  //Control LEDs
+  pinMode(M4_RW, OUTPUT);                       //Control LEDs
   pinMode(LEDboden, OUTPUT);
   pinMode(LEDir, OUTPUT);
   pinMode(LEDgyro, OUTPUT);
-  pinMode(LEDballcaught, OUTPUT);
-  //Die Button-Pins an einen Pullup-Widerstand hängen
+  pinMode(LEDballcaught, OUTPUT);               //Die Button-Pins an einen Pullup-Widerstand hängen
   pinMode(calibrationButton, INPUT_PULLUP);
-  pinMode(gyroButton, INPUT_PULLUP);
-  //den Boden automatisch kalibrieren
+  pinMode(gyroButton, INPUT_PULLUP);            //den Boden automatisch kalibrieren
   AutoCalibration(LED,Schwellwerte);
-  //den gyro losmessen lassen (ich musste die 8 auskommentieren, hoffentlich funktionierts trotzdem)
-  gyro.begin(/*8*/);
+  gyro.begin(/*8*/);                            //den gyro losmessen lassen (ich musste die 8 auskommentieren, es funktioniert trotzdem)
   vPID.SetMode(AUTOMATIC);
 }
 
 void loop() {
-  //Die grünen Kontroll-LEDs leuchten lassen
-  ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa);
-  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
-  IRsens(IR,IRbest,Icball,richtung,veloAnf,setpoint); //………
+  ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa); //Die grünen Kontroll-LEDs leuchten lassen
+  IRsens(IR,IRbest,Icball,richtung,veloAnf,setpoint);                     //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
   Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
   compass(gyro,buttonGpressed,minus,rotation,alterWinkel);
-  //empfangen und senden
-  //bluetooth(torwart,IRbest);
+  //bluetooth(torwart,IRbest);                                            //empfangen und senden
   if (!torwart) {
-    if (bodenrichtung == -1) { //der Boden sieht nichts
-      //geschwindigkeiten ändern, je nach Entfernung zum Ball
+    if (bodenrichtung == -1) {                                            //der Boden sieht nichts
       if (richtung != -1) { //der IR sieht etwas
         motor(richtung,veloAnf,rotation);
         /* Serial.print(richtung);
@@ -143,23 +118,23 @@ void loop() {
         Serial.print(veloAnf);
         Serial.println(); */
       }
-      else { //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
-        motor(0, 0,rotation); //nur ausrichten
+      else {                                                              //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
+        motor(0, 0,rotation);                                             //nur ausrichten
       }
     }
-    else { //der Boden sieht etwas
-      motor(bodenrichtung, 200,rotation); //sehr schnell von der Linie wegfahren
+    else {                                                                //der Boden sieht etwas
+      motor(bodenrichtung, 200,rotation);                                 //sehr schnell von der Linie wegfahren
     }
   }
-  else { //stehen bleiben, falls der Andere den Ball hat (torwart)
+  else {                                                                  //stehen bleiben, falls der Andere den Ball hat (torwart)
     motor(0, 0,rotation);
   }
-  if (hatBall() && ( Icball == 0 || Icball == 15 || Icball == 1 )) { //Ermitteln ob er den Ball hat
-    if (piread) { //sieht die pixy etwas
-      motor(Pixy(pixy,piread), 100,rotation); //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
+  if (hatBall() && ( Icball == 0 || Icball == 15 || Icball == 1 )) {      //Ermitteln ob er den Ball hat
+    if (piread) {                                                         //sieht die pixy etwas
+      motor(Pixy(pixy,piread), 100,rotation);                             //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
     }
     else {
-      motor(90, 60, rotation); //nach vorne fahren
+      motor(90, 60, rotation);                                            //nach vorne fahren
     }
   }
   vPID.Compute();
