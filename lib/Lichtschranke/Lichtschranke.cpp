@@ -2,7 +2,7 @@
 #include<Arduino.h>
 
 boolean hatBall() {
-  // buffern der letzten 5 Werte
+  /* // buffern der letzten 5 Werte
   static int MittelwertLS[5];
   MittelwertLS[4] = MittelwertLS[3];
   MittelwertLS[3] = MittelwertLS[2];
@@ -15,6 +15,6 @@ boolean hatBall() {
   }
   else {
     return false;
-  }
-
+  } */
+  return false;
 }

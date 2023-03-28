@@ -67,7 +67,7 @@ double phi;*/
 bool torwart;                                         //bluetooth
 
 double setpoint=5;                                    //wird sich nach dem Anfahrtsradius richten
-PID vPID(&IRbest,&veloAnf,&setpoint,(double)1,(double)0,(double)0,REVERSE);
+PID vPID(&IRbest,&veloAnf,&setpoint,(double)7.2,(double)0.0028 ,(double)1.05,REVERSE);
 
 bool buttonGpressed = true;                           //other
 
@@ -119,6 +119,7 @@ void loop() {
         Serial.println(); */
       }
       else {                                                              //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
+        Serial.print("Nicht gesehen");
         motor(0, 0,rotation);                                             //nur ausrichten
       }
     }
@@ -134,7 +135,7 @@ void loop() {
       motor(Pixy(pixy,piread), 100,rotation);                             //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
     }
     else {
-      motor(90, 60, rotation);                                            //nach vorne fahren
+      motor(0,0, rotation);                                            //nach vorne fahren
     }
   }
   vPID.Compute();

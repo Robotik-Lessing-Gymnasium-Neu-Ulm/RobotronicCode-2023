@@ -30,7 +30,7 @@ int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzu
 void IRsens(int* IR, double& IRbest, int& Icball, double& richtung, double &veloAnf, double &setpoint) {
   static double AnfahrtsRadius=3.5;                                   //Achtung: auch bei der IR Kalibration ändern!
   setpoint=AnfahrtsRadius;
-  IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 250, 1023, 0, 100);   //alle IRs auslesen und mappen
+  IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 250, 1023, 0, 100)+10;   //alle IRs auslesen und mappen
   IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), 413, 1023, 0, 100);
   IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), 416, 1023, 0, 100);
   IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), 410, 1023, 0, 100);
@@ -57,6 +57,9 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung, double &velo
   if(WinkelBall>=360){                                                //auf Wertebereich 0-360 verschieben
     WinkelBall-=360; 
   }
+  Serial.print(IRbest);
+  Serial.print(" ");
+  Serial.println(richtung);
   if(IRbest>75){                                                      //Wenn er den Ball nicht sieht (experimentell!)
     richtung=-1;
     return;
@@ -64,15 +67,14 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung, double &velo
   if(WinkelBall<0){
     WinkelBall+=360;
   }
-  if(Icball==0){                                                      //Ball vor dem Roboter
-    richtung=90;                                                      //nach vorne fahren
-    veloAnf=0;                                                        //200
+  if(Icball==0&&IRbest<=AnfahrtsRadius+1.5){                          //Ball vor dem Roboter
+    richtung=90;                                                      //nach vorne fahren                                                      //200
     return;                                                           //damit die Werte nicht noch überschrieben werden
     //Serial.println("vor");
   }
-  Serial.println(veloAnf);
   if(IRbest<AnfahrtsRadius){                                          //Wenn der Roboter im Anfahrtskreis steht
     richtung=270;                                                     //nach hinten fahren
+    return;
     //Serial.print("drinne");
   }else if(Icball<=8){                                                //Ball rechts vom Roboter; Der RoboRadius von 4 wurde noch miteinbezogen
     richtung=WinkelBall-(asin((double)AnfahrtsRadius/IRbest))*180/PI; //auf der unteren Tangente fahren
