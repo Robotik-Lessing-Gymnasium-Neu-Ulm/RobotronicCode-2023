@@ -52,7 +52,8 @@ int IR[16];                                           //Variablen für IR
 double IRbest = -1;
 double richtung = -1;
 int Icball = -1;
-double veloAnf = 50;                                  //Geschwindigkeit vom PID gesteuert bei der Ballanfahrt
+double entfVelo = 50;                                  //Geschwindigkeit vom PID gesteuert bei der Ballanfahrt (Entfernungs-PID)
+double wiVelo = 50;                                    //Gesch.-Output des Winkelpids
 /*int IRalt0[16];
 int IRalt1[16];
 int IRalt2[16];*/
@@ -66,8 +67,11 @@ double phi;*/
 
 bool torwart;                                         //bluetooth
 
-double setpoint=5;                                    //wird sich nach dem Anfahrtsradius richten
-PID vPID(&IRbest,&veloAnf,&setpoint,(double)7.2,(double)0.0028 ,(double)1.05,REVERSE);
+double entfSet=5;                                                 //wird sich nach dem Anfahrtsradius richten
+PID entfPID(&IRbest,&entfVelo,&entfSet,7.2,0.0028,1.05,REVERSE);  //PID-Regler über die Enfernung
+double wiSet=0;                                                   //Setpoint des Winkelpids (vorne)
+double wiIn;                                                      //Inpunt des Winkelpids
+PID wiPID(&wiIn,&wiVelo,&wiSet,1,0,0,REVERSE);                    //PID-Regler über den Winkel
 
 bool buttonGpressed = true;                           //other
 
@@ -98,24 +102,26 @@ void setup() {
   pinMode(gyroButton, INPUT_PULLUP);            //den Boden automatisch kalibrieren
   AutoCalibration(LED,Schwellwerte);
   gyro.begin(/*8*/);                            //den gyro losmessen lassen (ich musste die 8 auskommentieren, es funktioniert trotzdem)
-  vPID.SetMode(AUTOMATIC);
+  entfPID.SetMode(AUTOMATIC);
+  wiPID.SetMode(AUTOMATIC);
 }
 
 void loop() {
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa); //Die grünen Kontroll-LEDs leuchten lassen
-  IRsens(IR,IRbest,Icball,richtung,veloAnf,setpoint);                     //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
+  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID);                   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
   Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
   compass(gyro,buttonGpressed,minus,rotation,alterWinkel);
   //bluetooth(torwart,IRbest);                                            //empfangen und senden
   if (!torwart) {
     if (bodenrichtung == -1) {                                            //der Boden sieht nichts
       if (richtung != -1) { //der IR sieht etwas
-        motor(richtung,veloAnf,rotation);
+        motor(richtung, wiVelo,rotation);                                 //Zum Testen
+        //motor(richtung,entfVelo,rotation);
         /* Serial.print(richtung);
         Serial.print(" | ");
         Serial.print(rotation);
         Serial.print(" | ");
-        Serial.print(veloAnf);
+        Serial.print(entfVelo);
         Serial.println(); */
       }
       else {                                                              //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
@@ -135,8 +141,9 @@ void loop() {
       motor(Pixy(pixy,piread), 100,rotation);                             //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
     }
     else {
-      motor(0,0, rotation);                                            //nach vorne fahren
+      motor(0,0, rotation);                                               //nach vorne fahren
     }
   }
-  vPID.Compute();
+  entfPID.Compute();
+  wiPID.Compute();
 }

@@ -27,10 +27,11 @@ int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzu
   digitalWrite(S3, s0);
   return analogRead(AM1);
 }
-void IRsens(int* IR, double& IRbest, int& Icball, double& richtung, double &veloAnf, double &setpoint) {
+void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfSet, double &wiIn, PID &wiPID) {
   static double AnfahrtsRadius=3.5;                                   //Achtung: auch bei der IR Kalibration ändern!
-  setpoint=AnfahrtsRadius;
-  IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 250, 1023, 0, 100)+10;   //alle IRs auslesen und mappen
+  static double BallWegRadius=75;
+  entfSet=AnfahrtsRadius;
+  IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 250, 1023, 0, 100)+10;//alle IRs auslesen und mappen
   IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), 413, 1023, 0, 100);
   IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), 416, 1023, 0, 100);
   IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), 410, 1023, 0, 100);
@@ -55,12 +56,14 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung, double &velo
   }
   double WinkelBall=90-22.5*Icball;                                   //Berechnen des Winkels zum Ball
   if(WinkelBall>=360){                                                //auf Wertebereich 0-360 verschieben
-    WinkelBall-=360; 
+    WinkelBall-=360;
   }
-  Serial.print(IRbest);
-  Serial.print(" ");
-  Serial.println(richtung);
-  if(IRbest>75){                                                      //Wenn er den Ball nicht sieht (experimentell!)
+  wiIn=WinkelBall-90;                                                 //Winkel berechnen, sodass der Vorzeichen-Wechsel hinten beim Roboter liegt
+  if(wiIn>180){
+    wiIn-=360;
+  }
+  //berechne die zu fahrenden Richtungen!!!
+  if(IRbest>BallWegRadius){                                           //Wenn er den Ball nicht sieht
     richtung=-1;
     return;
   }
@@ -68,22 +71,20 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung, double &velo
     WinkelBall+=360;
   }
   if(Icball==0&&IRbest<=AnfahrtsRadius+1.5){                          //Ball vor dem Roboter
-    richtung=90;                                                      //nach vorne fahren                                                      //200
+    richtung=90;                                                      //nach vorne fahren
     return;                                                           //damit die Werte nicht noch überschrieben werden
     //Serial.println("vor");
   }
   if(IRbest<AnfahrtsRadius){                                          //Wenn der Roboter im Anfahrtskreis steht
     richtung=270;                                                     //nach hinten fahren
     return;
-    //Serial.print("drinne");
-  }else if(Icball<=8){                                                //Ball rechts vom Roboter; Der RoboRadius von 4 wurde noch miteinbezogen
+  }
+  if(Icball<=8){                                                      //Ball rechts vom Roboter
     richtung=WinkelBall-(asin((double)AnfahrtsRadius/IRbest))*180/PI; //auf der unteren Tangente fahren
-    //Serial.println("rechts");
-    //… Verschiebung nach unten: Auf den asin Teil eine Konstante>0 addieren (Konstante möglichste klein)
+    wiPID.SetControllerDirection(DIRECT);
   }else{                                                              //Ball links vom Roboter
     richtung=WinkelBall+(asin((double)AnfahrtsRadius/IRbest))*180/PI; //auf der unteren Tangente fahren
-    //Serial.println("links");
-    //… Verschiebung nach unten: Auf den asin Teil eine Konstante>0 subtrahieren (Konstanten möglichst klein)
+    wiPID.SetControllerDirection(REVERSE);
   }
   if(richtung<0){                                                     //auf Wertebereich 0-360 verscheiben
     richtung+=360;
