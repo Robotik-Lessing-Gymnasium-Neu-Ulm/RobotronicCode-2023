@@ -71,7 +71,7 @@ double entfSet=5;                                                 //wird sich na
 PID entfPID(&IRbest,&entfVelo,&entfSet,7.2,0.0028,1.05,REVERSE);  //PID-Regler über die Enfernung
 double wiSet=0;                                                   //Setpoint des Winkelpids (vorne)
 double wiIn;                                                      //Inpunt des Winkelpids
-PID wiPID(&wiIn,&wiVelo,&wiSet,1,0,0,REVERSE);                    //PID-Regler über den Winkel
+PID wiPID(&wiIn,&wiVelo,&wiSet,10,0,0,REVERSE);                   //PID-Regler über den Winkel
 
 bool buttonGpressed = true;                           //other
 
@@ -114,8 +114,11 @@ void loop() {
   //bluetooth(torwart,IRbest);                                            //empfangen und senden
   if (!torwart) {
     if (bodenrichtung == -1) {                                            //der Boden sieht nichts
-      if (richtung != -1) { //der IR sieht etwas
+      if (richtung != -1) {                                               //der IR sieht etwas
         motor(richtung, wiVelo,rotation);                                 //Zum Testen
+        /* Serial.print(entfVelo);
+        Serial.print(" | ");
+        Serial.println(wiVelo); */
         //motor(richtung,entfVelo,rotation);
         /* Serial.print(richtung);
         Serial.print(" | ");
@@ -125,7 +128,6 @@ void loop() {
         Serial.println(); */
       }
       else {                                                              //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
-        Serial.print("Nicht gesehen");
         motor(0, 0,rotation);                                             //nur ausrichten
       }
     }

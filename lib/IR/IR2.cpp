@@ -31,7 +31,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
   static double AnfahrtsRadius=3.5;                                   //Achtung: auch bei der IR Kalibration ändern!
   static double BallWegRadius=75;
   entfSet=AnfahrtsRadius;
-  IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 250, 1023, 0, 100)+10;//alle IRs auslesen und mappen
+  IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 400, 1023, 0, 100);   //alle IRs auslesen und mappen
   IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), 413, 1023, 0, 100);
   IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), 416, 1023, 0, 100);
   IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), 410, 1023, 0, 100);
@@ -59,6 +59,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     WinkelBall-=360;
   }
   wiIn=WinkelBall-90;                                                 //Winkel berechnen, sodass der Vorzeichen-Wechsel hinten beim Roboter liegt
+  Serial.println(WinkelBall);
   if(wiIn>180){
     wiIn-=360;
   }
