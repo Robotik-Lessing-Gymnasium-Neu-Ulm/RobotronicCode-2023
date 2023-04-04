@@ -30,6 +30,10 @@ int LEDbest;
 double bodenrichtung = -1;
 bool minEinerDa = false;
 
+bool irAutoCalibration = false;                     //für IR-Kalibration
+int minWert[16];
+
+
 /*//Variablen US
 double vect;
 long timeold;
@@ -68,10 +72,10 @@ double phi;*/
 bool torwart;                                         //bluetooth
 
 double entfSet=5;                                                 //wird sich nach dem Anfahrtsradius richten
-PID entfPID(&IRbest,&entfVelo,&entfSet,7.2,0.0028,1.05,REVERSE);  //PID-Regler über die Enfernung
+PID entfPID(&IRbest,&entfVelo,&entfSet,5,0,0,REVERSE);  //PID-Regler über die Enfernung
 double wiSet=0;                                                   //Setpoint des Winkelpids (vorne)
 double wiIn;                                                      //Inpunt des Winkelpids
-PID wiPID(&wiIn,&wiVelo,&wiSet,10,0,0,REVERSE);                   //PID-Regler über den Winkel
+PID wiPID(&wiIn,&wiVelo,&wiSet,0.1,0,0,REVERSE);                   //PID-Regler über den Winkel
 
 bool buttonGpressed = true;                           //other
 
@@ -104,28 +108,26 @@ void setup() {
   gyro.begin(/*8*/);                            //den gyro losmessen lassen (ich musste die 8 auskommentieren, es funktioniert trotzdem)
   entfPID.SetMode(AUTOMATIC);
   wiPID.SetMode(AUTOMATIC);
+  for(int i=0;i<16;i++){
+    minWert[i]=1023;
+  }
 }
 
 void loop() {
-  ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa); //Die grünen Kontroll-LEDs leuchten lassen
-  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID);                   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
-  Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
+  ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration); //Die grünen Kontroll-LEDs leuchten lassen
+  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration);           //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
+  //Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
   compass(gyro,buttonGpressed,minus,rotation,alterWinkel);
   //bluetooth(torwart,IRbest);                                            //empfangen und senden
   if (!torwart) {
     if (bodenrichtung == -1) {                                            //der Boden sieht nichts
       if (richtung != -1) {                                               //der IR sieht etwas
-        motor(richtung, wiVelo,rotation);                                 //Zum Testen
-        /* Serial.print(entfVelo);
-        Serial.print(" | ");
-        Serial.println(wiVelo); */
-        //motor(richtung,entfVelo,rotation);
-        /* Serial.print(richtung);
-        Serial.print(" | ");
-        Serial.print(rotation);
-        Serial.print(" | ");
-        Serial.print(entfVelo);
-        Serial.println(); */
+        if(Icball==0){
+          motor(90,100,rotation);
+        }else{
+          //motor(richtung,entfVelo,rotation);
+          motor(richtung, wiVelo,rotation);
+        }
       }
       else {                                                              //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
         motor(0, 0,rotation);                                             //nur ausrichten
