@@ -24,22 +24,14 @@
 #define LEDballcaught    30
 #endif
 
-void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa) {
+void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration) {
   // Einzelne Variablen überprüfen und dann die Pins schreiben
   if (digitalRead(gyroButton) == LOW) {
     buttonGpressed = true;
   }
   if (digitalRead(calibrationButton) == LOW) {
-    /*digitalWrite(LEDir, HIGH);
-    digitalWrite(LEDboden, HIGH);
-    digitalWrite(LEDballcaught, HIGH);
-    digitalWrite(LEDgyro, HIGH);
-    counterBoost = 0;
-    while (counterBoost < 400) {
-      compass();
-      motor(90, 200);
-      counterBoost++;
-    }*/
+    irAutoCalibration=!irAutoCalibration;
+    Serial.println("IR-KALIBRATION");
   }
   if (richtung >= 0) {
     digitalWrite(LEDir, HIGH);
