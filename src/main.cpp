@@ -56,8 +56,11 @@ int IR[16];                                           //Variablen für IR
 double IRbest = -1;
 double richtung = -1;
 int Icball = -1;
-double entfVelo = 50;                                  //Geschwindigkeit vom PID gesteuert bei der Ballanfahrt (Entfernungs-PID)
-double wiVelo = 50;                                    //Gesch.-Output des Winkelpids
+double entfVelo = 50;                                 //Geschwindigkeit vom PID gesteuert bei der Ballanfahrt (Entfernungs-PID)
+double wiVelo = 50;                                   //Gesch.-Output des Winkelpids
+double addRot = 0;                                    //temporäre Drehung, wenn er nah am Ball ist
+double WinkelBall=90;
+
 /*int IRalt0[16];
 int IRalt1[16];
 int IRalt2[16];*/
@@ -75,7 +78,7 @@ double entfSet=5;                                                 //wird sich na
 PID entfPID(&IRbest,&entfVelo,&entfSet,5,0,0,REVERSE);  //PID-Regler über die Enfernung
 double wiSet=0;                                                   //Setpoint des Winkelpids (vorne)
 double wiIn;                                                      //Inpunt des Winkelpids
-PID wiPID(&wiIn,&wiVelo,&wiSet,0.1,0,0,REVERSE);                   //PID-Regler über den Winkel
+PID wiPID(&wiIn,&wiVelo,&wiSet,1.31,0,1.7,REVERSE);                  //PID-Regler über den Winkel
 
 bool buttonGpressed = true;                           //other
 
@@ -115,15 +118,16 @@ void setup() {
 
 void loop() {
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration); //Die grünen Kontroll-LEDs leuchten lassen
-  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration);           //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
+  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
   //Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
-  compass(gyro,buttonGpressed,minus,rotation,alterWinkel);
+  compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot);
   //bluetooth(torwart,IRbest);                                            //empfangen und senden
-  if (!torwart) {
+  motor(0,0,rotation);
+  /* if (!torwart) {
     if (bodenrichtung == -1) {                                            //der Boden sieht nichts
       if (richtung != -1) {                                               //der IR sieht etwas
-        if(Icball==0){
-          motor(90,100,rotation);
+        if(WinkelBall<22||WinkelBall>338){                                                    //Ball Vor dem Roboter
+          motor(85,100,rotation);                                         
         }else{
           //motor(richtung,entfVelo,rotation);
           motor(richtung, wiVelo,rotation);
@@ -149,5 +153,5 @@ void loop() {
     }
   }
   entfPID.Compute();
-  wiPID.Compute();
+  wiPID.Compute(); */
 }

@@ -2,7 +2,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 
-void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double& rotation, int& alterWinkel) {
+void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double& rotation, int& alterWinkel, double& addRot) {
   sensors_event_t orientationData;                                          //momentane Aufnahmeder der Sensorwerte
   sensors_event_t angVelocityData;
   gyro.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
@@ -15,7 +15,7 @@ void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double&
     Serial.println(minus);
     buttonGpressed = false;
   }
-  winkel = winkel - minus;
+  winkel = winkel - minus +addRot;
   if (winkel > 180) {                                                       //Werte umrechnen von 0-359 auf Werte von -180 - +180 => für Formel
     winkel = winkel - 360;
   }

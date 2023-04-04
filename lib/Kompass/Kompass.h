@@ -3,6 +3,6 @@
 
 #include <Adafruit_BNO055.h>
 
-void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double& rotation, int& alterWinkel);
+void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double& rotation, int& alterWinkel, double& addRot);
 
 #endif

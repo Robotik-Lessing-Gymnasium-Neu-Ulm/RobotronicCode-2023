@@ -27,10 +27,11 @@ int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzu
   digitalWrite(S3, s0);
   return analogRead(AM1);
 }
-void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfSet, double &wiIn, PID &wiPID, int* minWert, bool& irAutoCalibration) {
+void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfSet, double &wiIn, PID &wiPID, int* minWert, bool& irAutoCalibration, double& addRot, double& WinkelBall) {
   if(!irAutoCalibration){
-    static double AnfahrtsRadius=13;                                   //Achtung: auch bei der IR Kalibration ändern!
+    static double AnfahrtsRadius=7;                                   //Achtung: auch bei der IR Kalibration ändern!
     static double BallWegRadius=75;
+    static double Drehradius=7;
     entfSet=AnfahrtsRadius;
     /* static int min=1023;
     int gelesen=lesenMultiplexerOben(0,0,1,0);
@@ -39,39 +40,39 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
       Serial.println(gelesen);
     } */
     if(minWert[0]==1023){//414|417|416|417|414|414|425|420|418|418|416|418|417|417|412|422|;
-      IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 414 , 1023, 0, 100);   //alle IRs auslesen und mappen
-      IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), 417 , 1023, 0, 100);
-      IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), 416 , 1023, 0, 100);
-      IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), 417 , 1023, 0, 100);
-      IR[4] = map(lesenMultiplexerOben(0, 1, 0, 0), 414 , 1023, 0, 100);
-      IR[5] = map(lesenMultiplexerOben(0, 1, 0, 1), 414 , 1023, 0, 100);
-      IR[6] = map(lesenMultiplexerOben(0, 1, 1, 0), 425 , 1023, 0, 100);
-      IR[7] = map(lesenMultiplexerOben(0, 1, 1, 1), 420 , 1023, 0, 100);
-      IR[8] = map(lesenMultiplexerOben(1, 0, 0, 0), 418 , 1023, 0, 100);
-      IR[9] = map(lesenMultiplexerOben(1, 0, 0, 1), 418 , 1023, 0, 100);
-      IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0),416 , 1023, 0, 100);
-      IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1),418 , 1023, 0, 100);
-      IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0),417 , 1023, 0, 100);
-      IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1),417 , 1023, 0, 100);
-      IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0),412 , 1023, 0, 100);
-      IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1),422 , 1023, 0, 100);
+      IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 414 , 1023, 0, 200);          //alle IRs auslesen und mappen (standart)
+      IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), 417 , 1023, 0, 200);
+      IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), 416 , 1023, 0, 200);
+      IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), 417 , 1023, 0, 200);
+      IR[4] = map(lesenMultiplexerOben(0, 1, 0, 0), 414 , 1023, 0, 200);
+      IR[5] = map(lesenMultiplexerOben(0, 1, 0, 1), 414 , 1023, 0, 200);
+      IR[6] = map(lesenMultiplexerOben(0, 1, 1, 0), 425 , 1023, 0, 200);
+      IR[7] = map(lesenMultiplexerOben(0, 1, 1, 1), 420 , 1023, 0, 200);
+      IR[8] = map(lesenMultiplexerOben(1, 0, 0, 0), 418 , 1023, 0, 200);
+      IR[9] = map(lesenMultiplexerOben(1, 0, 0, 1), 418 , 1023, 0, 200);
+      IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0),416 , 1023, 0, 200);
+      IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1),418 , 1023, 0, 200);
+      IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0),417 , 1023, 0, 200);
+      IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1),417 , 1023, 0, 200);
+      IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0),412 , 1023, 0, 200);
+      IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1),422 , 1023, 0, 200);
     }else{
-      IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), minWert[0], 1023, 0, 100);   //alle IRs auslesen und mappen
-      IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), minWert[1], 1023, 0, 100);
-      IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), minWert[2], 1023, 0, 100);
-      IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), minWert[3], 1023, 0, 100);
-      IR[4] = map(lesenMultiplexerOben(0, 1, 0, 0), minWert[4], 1023, 0, 100);
-      IR[5] = map(lesenMultiplexerOben(0, 1, 0, 1), minWert[5], 1023, 0, 100);
-      IR[6] = map(lesenMultiplexerOben(0, 1, 1, 0), minWert[6], 1023, 0, 100);
-      IR[7] = map(lesenMultiplexerOben(0, 1, 1, 1), minWert[7], 1023, 0, 100);
-      IR[8] = map(lesenMultiplexerOben(1, 0, 0, 0), minWert[8], 1023, 0, 100);
-      IR[9] = map(lesenMultiplexerOben(1, 0, 0, 1), minWert[9], 1023, 0, 100);
-      IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0), minWert[10], 1023, 0, 100);
-      IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1), minWert[11], 1023, 0, 100);
-      IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0), minWert[12], 1023, 0, 100);
-      IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1), minWert[13], 1023, 0, 100);
-      IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0), minWert[14], 1023, 0, 100);
-      IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1), minWert[15], 1023, 0, 100);
+      IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), minWert[0] , 1023, 0, 200);   //alle IRs auslesen und mappen (auto-kalibration)
+      IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), minWert[1] , 1023, 0, 200);
+      IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), minWert[2] , 1023, 0, 200);
+      IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), minWert[3] , 1023, 0, 200);
+      IR[4] = map(lesenMultiplexerOben(0, 1, 0, 0), minWert[4] , 1023, 0, 200);
+      IR[5] = map(lesenMultiplexerOben(0, 1, 0, 1), minWert[5] , 1023, 0, 200);
+      IR[6] = map(lesenMultiplexerOben(0, 1, 1, 0), minWert[6] , 1023, 0, 200);
+      IR[7] = map(lesenMultiplexerOben(0, 1, 1, 1), minWert[7] , 1023, 0, 200);
+      IR[8] = map(lesenMultiplexerOben(1, 0, 0, 0), minWert[8] , 1023, 0, 200);
+      IR[9] = map(lesenMultiplexerOben(1, 0, 0, 1), minWert[9] , 1023, 0, 200);
+      IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0),minWert[10], 1023, 0, 200);
+      IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1),minWert[11], 1023, 0, 200);
+      IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0),minWert[12], 1023, 0, 200);
+      IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1),minWert[13], 1023, 0, 200);
+      IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0),minWert[14], 1023, 0, 200);
+      IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1),minWert[15], 1023, 0, 200);
     }
     IRbest = 90;                                                        //bestimmen des niedrigsten, gemessenen Wertes und Speichern des Index in Icball
     for (int i = 0; i < 16; i++) {
@@ -80,7 +81,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
         Icball = i;
       }
     }
-    double WinkelBall=90-22.5*Icball;                                   //Berechnen des Winkels zum Ball
+    WinkelBall=90-22.5*Icball-addRot;                                   //Berechnen des Winkels zum Ball
     if(WinkelBall<=0){                                                  //auf Wertebereich 0-360 verschieben
       WinkelBall+=360;
     }
@@ -89,7 +90,6 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     if(wiIn>180){
       wiIn-=360;
     }
-    //Serial.println(wiIn);
     if(IRbest>BallWegRadius){                                           //Wenn er den Ball nicht sieht
       richtung=-1;
       return;
@@ -106,7 +106,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
       richtung=270;                                                     //nach hinten fahren
       return;
     }
-    if(Icball<=8){                                                      //Ball rechts vom Roboter
+    if(WinkelBall<=90||WinkelBall>=270){                                //Ball rechts vom Roboter
       richtung=WinkelBall-(asin((double)AnfahrtsRadius/IRbest))*180/PI; //auf der unteren Tangente fahren
       wiPID.SetControllerDirection(DIRECT);
     }else{                                                              //Ball links vom Roboter
