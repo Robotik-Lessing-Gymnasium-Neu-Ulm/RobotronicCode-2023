@@ -132,7 +132,13 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     }
 
     String Data;
-    File file = SD.open("minWerte.txt", FILE_WRITE);
+    File file = SD.open("minWerte.txt", FILE_WRITE | O_TRUNC | O_CREAT);//Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
+    for(int i=0;i<16;i++){
+      file.write(minWert[i]);
+      file.write("|");
+    }
+    file.write(";");
+    file.close();
   }else{
     irAutoCal(minWert);
     for(int i=0;i<16;i++){

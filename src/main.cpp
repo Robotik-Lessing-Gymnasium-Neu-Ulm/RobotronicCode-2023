@@ -110,14 +110,31 @@ void setup() {
   pinMode(ButtonII, INPUT_PULLUP);
   pinMode(ButtonIII, INPUT_PULLUP);
   pinMode(ButtonIV, INPUT_PULLUP);              //IR-Kalibration
-  SD.begin(BUILTIN_SDCARD);
   AutoCalibration(LED,Schwellwerte);
   gyro.begin(/*8*/);                            //den gyro losmessen lassen (ich musste die 8 auskommentieren, es funktioniert trotzdem)
   entfPID.SetMode(AUTOMATIC);
   wiPID.SetMode(AUTOMATIC);
-  for(int i=0;i<16;i++){
-    minWert[i]=600;
+  SD.begin(BUILTIN_SDCARD);                     //SD-Karte initialisieren
+  File myFile=SD.open("minWerte.txt",FILE_READ);//Datei öffnen, lesen
+  char buf[1];
+  int count=0;
+  for(int i=0;i<16;){
+    myFile.read(buf,1);
+    Serial.print(buf);
+    switch(buf[0]){
+      case ';'||-1:
+        minWert[i++]=600;
+        break;
+      case '|':
+        count=0;
+        minWert[++i]=0;
+        break;
+      default:
+        count++;
+        minWert[i]+=10^count*buf[0];
+    }
   }
+  myFile.close();
 }
 
 void loop() {
