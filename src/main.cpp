@@ -7,6 +7,7 @@
 #include <Pixy2I2C.h>
 #include<PID_v1.h>
 #include<SD.h>
+#include <ArduinoJson.h>
 
 #include<Boden.h>                                   //eigene Bibliotheken
 #include<Motoren.h>
@@ -114,9 +115,23 @@ void setup() {
   gyro.begin(/*8*/);                            //den gyro losmessen lassen (ich musste die 8 auskommentieren, es funktioniert trotzdem)
   entfPID.SetMode(AUTOMATIC);
   wiPID.SetMode(AUTOMATIC);
+
   SD.begin(BUILTIN_SDCARD);                     //SD-Karte initialisieren
-  File myFile=SD.open("minWerte.txt",FILE_READ);//Datei öffnen, lesen
-  
+  File myFile=SD.open("minWerte.js",FILE_READ); //Datei öffnen, lesen
+    String buf="";
+    while(myFile.available()){
+      buf+=myFile.read();
+    }
+    StaticJsonDocument<200> doc;
+    deserializeJson(doc, buf);
+    Serial.println(">>>>>>>>>>>>>>(minWert)");
+    for(int i{0};i<16;i++){
+      minWert[i]=doc["minWerte"][i];
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.println(minWert[i]);
+    }
+    Serial.println("(minWert)<<<<<<<<<<<<<<");
   myFile.close();
 }
 

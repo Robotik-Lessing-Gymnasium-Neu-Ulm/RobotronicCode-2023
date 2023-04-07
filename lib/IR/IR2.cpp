@@ -2,6 +2,8 @@
 #include<Arduino.h>
 #include<PID_v1.h>
 #include<SD.h>
+#include <ArduinoJson.h>
+
 
 #ifndef S0          //Multiplexer Unten
 #define S0 36
@@ -132,7 +134,13 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     }
 
     File file = SD.open("minWerte.js", FILE_WRITE | O_TRUNC | O_CREAT);//Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
-    
+      StaticJsonDocument<200> doc;
+      doc["minWerte"]=minWert;
+      String buf{""};
+      serializeJsonPretty(doc,buf);
+      for(auto elem:buf){
+        file.write(elem);
+      }
     file.close();
   }else{
     irAutoCal(minWert);
