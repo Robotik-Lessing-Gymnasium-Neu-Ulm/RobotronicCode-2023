@@ -1,29 +1,7 @@
 #include<ControlLEDs.h>
 #include<Arduino.h>
 #include<Lichtschranke.h>
-#include<Defines.h>
-
-#ifndef ButtonII
-#define ButtonII 4
-#endif
-
-#ifndef ButtonI
-#define ButtonI 5
-#endif
-
-//Control LEDs
-#ifndef LEDboden
-#define LEDboden 13
-#endif
-#ifndef LEDir
-#define LEDir    17
-#endif
-#ifndef LEDgyro
-#define LEDgyro  20
-#endif
-#ifndef LEDballcaught
-#define LEDballcaught    37
-#endif
+#include<betterDefines.h>
 
 void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration) {
   // Einzelne Variablen überprüfen und dann die Pins schreiben

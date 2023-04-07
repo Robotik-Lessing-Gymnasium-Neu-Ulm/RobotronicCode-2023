@@ -17,7 +17,7 @@
 #include <Kompass.h>
 #include<ControlLEDs.h>
 #include <Bluetooth.h>
-#include<Defines.h>
+#include<betterDefines.h>
 
 Pixy2I2C pixy;                                      //pixi im i2c-kommunikations-modus initialisieren
 
@@ -118,20 +118,20 @@ void setup() {
 
   SD.begin(BUILTIN_SDCARD);                     //SD-Karte initialisieren
   File myFile=SD.open("minWerte.js",FILE_READ); //Datei öffnen, lesen
-    String buf="";
+    String buf="";                              //Zwischenspeicher des Inhalts der geöffneten *.js-Datei
     while(myFile.available()){
       buf+=myFile.read();
     }
-    StaticJsonDocument<200> doc;
-    deserializeJson(doc, buf);
-    Serial.println(">>>>>>>>>>>>>>(minWert)");
+    StaticJsonDocument<500> doc;
+    deserializeJson(doc, buf);                  
+    Serial.println(">>>>>>>>>>>>>>(IR)");       //Befüllen von minWert & Ausgabe
     for(int i{0};i<16;i++){
-      minWert[i]=doc["minWerte"][i];
+      minWert[i]=doc["IR"][i];
       Serial.print(i);
       Serial.print(": ");
       Serial.println(minWert[i]);
     }
-    Serial.println("(minWert)<<<<<<<<<<<<<<");
+    Serial.println("(IR)<<<<<<<<<<<<<<");
   myFile.close();
 }
 

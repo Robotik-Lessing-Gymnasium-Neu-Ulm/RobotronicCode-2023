@@ -3,24 +3,7 @@
 #include<PID_v1.h>
 #include<SD.h>
 #include <ArduinoJson.h>
-
-
-#ifndef S0          //Multiplexer Unten
-#define S0 36
-#endif
-#ifndef S1
-#define S1 35
-#endif
-#ifndef S2
-#define S2 34
-#endif
-#ifndef S3
-#define S3 33
-#endif
-
-#ifndef AM1
-#define AM1 A14     //analog Multiplexer Oben
-#endif
+#include <betterDefines.h>
 
 
 int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzung Auslesen
@@ -145,11 +128,18 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     if(richtung>360){
       richtung-=360;
     }
+    //speichern
+    File file = SD.open("minWerte.js", FILE_WRITE | O_TRUNC  | O_CREAT); //Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
+      StaticJsonDocument<500> doc;
+      int values[16];                                                    //ein echter C-Array für minWert
+      for(int i=0;i<16;i++){
+        values[i]=minWert[i];
+      }
+      JsonArray Jarr;                                                     //Json-Array von minWert
+      copyArray(values, Jarr);
+      doc["IR"]=Jarr;
 
-    File file = SD.open("minWerte.js", FILE_WRITE | O_TRUNC | O_CREAT); //Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
-      StaticJsonDocument<200> doc;
-      doc["minWerte"]=minWert;
-      String buf{""};
+      String buf{""};                                                     //Buffer, der in die geöffnete *.js-Datei geschrieben wird
       serializeJsonPretty(doc,buf);
       for(auto elem:buf){
         file.write(elem);

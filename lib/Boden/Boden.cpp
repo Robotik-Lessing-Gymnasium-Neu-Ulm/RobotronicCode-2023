@@ -3,38 +3,39 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <Motoren.h>
+#include <betterDefines.h>
 
 //Multiplexer Unten
-#ifndef S0
-#define S0 36
-#endif
-#ifndef S1
-#define S1 35
-#endif
-#ifndef S2
-#define S2 34
-#endif
-#ifndef S3
-#define S3 33
-#endif
+// #ifndef S0
+// #define S0 36
+// #endif
+// #ifndef S1
+// #define S1 35
+// #endif
+// #ifndef S2
+// #define S2 34
+// #endif
+// #ifndef S3
+// #define S3 33
+// #endif
 
-#ifndef UAM1
-#define UAM1 A17 //analog Multiplexer Unten 1
-#endif
-#ifndef UAM2
-#define UAM2 A15 //analog Multplexer Unten 2
-#endif
-#ifndef UAM3
-#define UAM3 A16 // analog Multiplexer Unten 3
-#endif
+// #ifndef UAM1
+// #define UAM1 A17 //analog Multiplexer Unten 1
+// #endif
+// #ifndef UAM2
+// #define UAM2 A15 //analog Multplexer Unten 2
+// #endif
+// #ifndef UAM3
+// #define UAM3 A16 // analog Multiplexer Unten 3
+// #endif
 
-#ifndef LEDboden
-#define LEDboden 13
-#endif
+// #ifndef LEDboden
+// #define LEDboden 13
+// #endif
 
-#ifndef ButtonI
-#define ButtonI 5
-#endif
+// #ifndef ButtonI
+// #define ButtonI 5
+// #endif
 
 void AutoCalibration(int* LED, int* Schwellwerte) {
   int CalStatus = 0;

@@ -1,45 +1,6 @@
 #include <Motoren.h>
 #include <Arduino.h>
-
-#ifndef M1_FW
-#define M1_FW 26 //richtig
-#endif
-#ifndef M1_RW
-#define M1_RW 28
-#endif
-#ifndef M1_PWM
-#define M1_PWM 29
-#endif
-
-#ifndef M2_FW
-#define M2_FW 12 //richtig
-#endif
-#ifndef M2_RW
-#define M2_RW 25
-#endif
-#ifndef M2_PWM
-#define M2_PWM 24
-#endif
-
-#ifndef M3_FW
-#define M3_FW  9  //richtig!
-#endif
-#ifndef M3_RW
-#define M3_RW 11
-#endif
-#ifndef M3_PWM
-#define M3_PWM 10
-#endif
-
-#ifndef M4_FW
-#define M4_FW  6  //richtig!
-#endif
-#ifndef M4_RW
-#define M4_RW 8
-#endif
-#ifndef M4_PWM
-#define M4_PWM 7
-#endif
+#include <betterDefines.h>
 
 void motor (double dir, double velocity, double rotation) {
   // dir Umrechnen ins Bogenmaß
