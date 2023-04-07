@@ -116,24 +116,7 @@ void setup() {
   wiPID.SetMode(AUTOMATIC);
   SD.begin(BUILTIN_SDCARD);                     //SD-Karte initialisieren
   File myFile=SD.open("minWerte.txt",FILE_READ);//Datei öffnen, lesen
-  char buf[1];
-  int count=0;
-  for(int i=0;i<16;){
-    myFile.read(buf,1);
-    Serial.print(buf);
-    switch(buf[0]){
-      case ';'||-1:
-        minWert[i++]=600;
-        break;
-      case '|':
-        count=0;
-        minWert[++i]=0;
-        break;
-      default:
-        count++;
-        minWert[i]+=10^count*buf[0];
-    }
-  }
+  
   myFile.close();
 }
 
