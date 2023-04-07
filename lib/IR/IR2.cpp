@@ -1,22 +1,23 @@
 #include<IR2.h>
 #include<Arduino.h>
 #include<PID_v1.h>
+#include<SD.h>
 
 #ifndef S0          //Multiplexer Unten
-#define S0 17
+#define S0 36
 #endif
 #ifndef S1
-#define S1 16
+#define S1 35
 #endif
 #ifndef S2
-#define S2 15
+#define S2 34
 #endif
 #ifndef S3
-#define S3 14
+#define S3 33
 #endif
 
 #ifndef AM1
-#define AM1 A17     //analog Multiplexer Oben
+#define AM1 A14     //analog Multiplexer Oben
 #endif
 
 
@@ -27,53 +28,34 @@ int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzu
   digitalWrite(S3, s0);
   return analogRead(AM1);
 }
-void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfSet, double &wiIn, PID &wiPID, int* minWert, bool& irAutoCalibration, double& addRot, double& WinkelBall) {
+void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfSet, double &wiIn, PID &wiPID, int* minWert, bool& irAutoCalibration, double& addRot, double& WinkelBall, unsigned long& addRotTime, bool& torwart) {
   if(!irAutoCalibration){
     static double AnfahrtsRadius=7;                                   //Achtung: auch bei der IR Kalibration ändern!
     static double BallWegRadius=75;
-    static double Drehradius=7;
     entfSet=AnfahrtsRadius;
-    /* static int min=1023;
-    int gelesen=lesenMultiplexerOben(0,0,1,0);
-    if(min>gelesen){
-      min=gelesen;
-      Serial.println(gelesen);
-    } */
-    if(minWert[0]==1023){//414|417|416|417|414|414|425|420|418|418|416|418|417|417|412|422|;
-      IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), 414 , 1023, 0, 200);          //alle IRs auslesen und mappen (standart)
-      IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), 417 , 1023, 0, 200);
-      IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), 416 , 1023, 0, 200);
-      IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), 417 , 1023, 0, 200);
-      IR[4] = map(lesenMultiplexerOben(0, 1, 0, 0), 414 , 1023, 0, 200);
-      IR[5] = map(lesenMultiplexerOben(0, 1, 0, 1), 414 , 1023, 0, 200);
-      IR[6] = map(lesenMultiplexerOben(0, 1, 1, 0), 425 , 1023, 0, 200);
-      IR[7] = map(lesenMultiplexerOben(0, 1, 1, 1), 420 , 1023, 0, 200);
-      IR[8] = map(lesenMultiplexerOben(1, 0, 0, 0), 418 , 1023, 0, 200);
-      IR[9] = map(lesenMultiplexerOben(1, 0, 0, 1), 418 , 1023, 0, 200);
-      IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0),416 , 1023, 0, 200);
-      IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1),418 , 1023, 0, 200);
-      IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0),417 , 1023, 0, 200);
-      IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1),417 , 1023, 0, 200);
-      IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0),412 , 1023, 0, 200);
-      IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1),422 , 1023, 0, 200);
-    }else{
-      IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), minWert[0] , 1023, 0, 200);   //alle IRs auslesen und mappen (auto-kalibration)
-      IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), minWert[1] , 1023, 0, 200);
-      IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), minWert[2] , 1023, 0, 200);
-      IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), minWert[3] , 1023, 0, 200);
-      IR[4] = map(lesenMultiplexerOben(0, 1, 0, 0), minWert[4] , 1023, 0, 200);
-      IR[5] = map(lesenMultiplexerOben(0, 1, 0, 1), minWert[5] , 1023, 0, 200);
-      IR[6] = map(lesenMultiplexerOben(0, 1, 1, 0), minWert[6] , 1023, 0, 200);
-      IR[7] = map(lesenMultiplexerOben(0, 1, 1, 1), minWert[7] , 1023, 0, 200);
-      IR[8] = map(lesenMultiplexerOben(1, 0, 0, 0), minWert[8] , 1023, 0, 200);
-      IR[9] = map(lesenMultiplexerOben(1, 0, 0, 1), minWert[9] , 1023, 0, 200);
-      IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0),minWert[10], 1023, 0, 200);
-      IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1),minWert[11], 1023, 0, 200);
-      IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0),minWert[12], 1023, 0, 200);
-      IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1),minWert[13], 1023, 0, 200);
-      IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0),minWert[14], 1023, 0, 200);
-      IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1),minWert[15], 1023, 0, 200);
-    }
+    // static int min=1023;
+    // int gelesen=lesenMultiplexerOben(0,1,0,0);
+    // if(min>gelesen){
+    //   min=gelesen;
+    //   Serial.println(gelesen);
+    // }
+    //static unsigned int count[16];
+    IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), minWert[0] , 1023, 0, 200);   //alle IRs auslesen und mappen (auto-kalibration)
+    IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), minWert[1] , 1023, 0, 200);
+    IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), minWert[2] , 1023, 0, 200);
+    IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), minWert[3] , 1023, 0, 200);
+    IR[4] = map(lesenMultiplexerOben(0, 1, 0, 0), minWert[4] , 1023, 0, 200);
+    IR[5] = map(lesenMultiplexerOben(0, 1, 0, 1), minWert[5] , 1023, 0, 200);
+    IR[6] = map(lesenMultiplexerOben(0, 1, 1, 0), minWert[6] , 1023, 0, 200);
+    IR[7] = map(lesenMultiplexerOben(0, 1, 1, 1), minWert[7] , 1023, 0, 200);
+    IR[8] = map(lesenMultiplexerOben(1, 0, 0, 0), minWert[8] , 1023, 0, 200);
+    IR[9] = map(lesenMultiplexerOben(1, 0, 0, 1), minWert[9] , 1023, 0, 200);
+    IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0),minWert[10], 1023, 0, 200);
+    IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1),minWert[11], 1023, 0, 200);
+    IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0),minWert[12], 1023, 0, 200);
+    IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1),minWert[13], 1023, 0, 200);
+    IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0),minWert[14], 1023, 0, 200);
+    IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1),minWert[15], 1023, 0, 200);
     IRbest = 90;                                                        //bestimmen des niedrigsten, gemessenen Wertes und Speichern des Index in Icball
     for (int i = 0; i < 16; i++) {
       if (IR[i] < IRbest) {
@@ -81,29 +63,58 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
         Icball = i;
       }
     }
-    WinkelBall=90-22.5*Icball-addRot;                                   //Berechnen des Winkels zum Ball
+    // if(!torwart){
+      for(int i=0;i<16;i++){
+        if(IR[i]<0){
+          minWert[i]--;
+        }
+        //   if(IR[i]>10){
+        //     count[i]++;
+        //   }
+        //   if(count[i]>=2.1*minWert[i]){
+        //     minWert[i]+=2;
+        //     count[i]=0;
+        //   }
+      }
+    // }
+    WinkelBall=90-22.5*Icball+addRot;                                   //Berechnen des Winkels zum Ball
     if(WinkelBall<=0){                                                  //auf Wertebereich 0-360 verschieben
       WinkelBall+=360;
     }
     wiIn=WinkelBall-90;                                                 //Winkel berechnen, sodass der Vorzeichen-Wechsel hinten beim Roboter liegt
-    //Serial.println(WinkelBall);
     if(wiIn>180){
       wiIn-=360;
     }
+    // Serial.print(Icball);
+    // Serial.print("|");
+    // Serial.println(WinkelBall);
     if(IRbest>BallWegRadius){                                           //Wenn er den Ball nicht sieht
       richtung=-1;
+      addRot=0;
+      WinkelBall=90;
       return;
     }
     if(WinkelBall<0){
       WinkelBall+=360;
     }
-    if(Icball==0&&IRbest<=AnfahrtsRadius+3){                            //Ball vor dem Roboter
-      richtung=90;                                                      //nach vorne fahren
-      return;                                                           //damit die Werte nicht noch überschrieben werden
-      //Serial.println("vor");
-    }
+    // Serial.print(addRot);Serial.print("|");
     if(IRbest<AnfahrtsRadius){                                          //Wenn der Roboter im Anfahrtskreis steht
-      richtung=270;                                                     //nach hinten fahren
+      int delay=50;
+      if(addRot!=0){
+            delay=1200;
+          }
+      if(WinkelBall>=90&&WinkelBall<270){
+        if(addRotTime+delay<millis()){
+          addRot=-20;
+          addRotTime=millis();
+        }
+      }else{
+        if(addRotTime+delay<millis()){
+          addRot=20;
+          addRotTime=millis();
+        }
+      }
+      richtung=270-addRot;                                                     //nach hinten fahren
       return;
     }
     if(WinkelBall<=90||WinkelBall>=270){                                //Ball rechts vom Roboter
@@ -119,6 +130,9 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     if(richtung>360){
       richtung-=360;
     }
+
+    String Data;
+    File file = SD.open("minWerte.txt", FILE_WRITE);
   }else{
     irAutoCal(minWert);
     for(int i=0;i<16;i++){

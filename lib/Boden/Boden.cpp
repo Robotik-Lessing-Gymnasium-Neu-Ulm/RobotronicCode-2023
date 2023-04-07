@@ -6,34 +6,34 @@
 
 //Multiplexer Unten
 #ifndef S0
-#define S0 17
+#define S0 36
 #endif
 #ifndef S1
-#define S1 16
+#define S1 35
 #endif
 #ifndef S2
-#define S2 15
+#define S2 34
 #endif
 #ifndef S3
-#define S3 14
+#define S3 33
 #endif
 
 #ifndef UAM1
-#define UAM1 A15 //analog Multiplexer Unten 1
+#define UAM1 A17 //analog Multiplexer Unten 1
 #endif
 #ifndef UAM2
-#define UAM2 A16 //analog Multplexer Unten 2
+#define UAM2 A15 //analog Multplexer Unten 2
 #endif
 #ifndef UAM3
-#define UAM3 A14 // analog Multiplexer Unten 3
+#define UAM3 A16 // analog Multiplexer Unten 3
 #endif
 
 #ifndef LEDboden
-#define LEDboden 27
+#define LEDboden 13
 #endif
 
-#ifndef calibrationButton
-#define calibrationButton 32
+#ifndef ButtonI
+#define ButtonI 5
 #endif
 
 void AutoCalibration(int* LED, int* Schwellwerte) {
@@ -102,24 +102,24 @@ void AutoCalibration(int* LED, int* Schwellwerte) {
   }
 }
 int lesenMultiplexerUnten(int s0, int s1, int s2, int s3) {  //Verkürzung Auslesen
-  digitalWrite(S0, s3);
-  digitalWrite(S1, s2);
-  digitalWrite(S2, s1);
-  digitalWrite(S3, s0);
+  digitalWrite(S0, s0);
+  digitalWrite(S1, s1);
+  digitalWrite(S2, s2);
+  digitalWrite(S3, s3);
   return analogRead(UAM1);
 }
 int lesenMultiplexerUnten2(int s0, int s1, int s2, int s3) {  //Verkürzung Auslesen
-  digitalWrite(S0, s3);
-  digitalWrite(S1, s2);
-  digitalWrite(S2, s1);
-  digitalWrite(S3, s0);
+  digitalWrite(S0, s0);
+  digitalWrite(S1, s1);
+  digitalWrite(S2, s2);
+  digitalWrite(S3, s3);
   return analogRead(UAM2);
 }
 int lesenMultiplexerUnten3(int s0, int s1, int s2, int s3) {  //Verkürzung Auslesen
-  digitalWrite(S0, s3);
-  digitalWrite(S1, s2);
-  digitalWrite(S2, s1);
-  digitalWrite(S3, s0);
+  digitalWrite(S0, s0);
+  digitalWrite(S1, s1);
+  digitalWrite(S2, s2);
+  digitalWrite(S3, s3);
   return analogRead(UAM3);
 }
 void bodenlesen(bool& minEinerDa,int* LED, int* Schwellwerte, bool* Photo) {
@@ -299,7 +299,7 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
       motor(bodenrichtung, 150,rotation);
       //Serial.println(compass());
       digitalWrite(LEDboden, HIGH);
-      if (digitalRead(calibrationButton) == LOW) {
+      if (digitalRead(ButtonI) == LOW) {
         AutoCalibration(LED,Schwellwerte);
 
       }

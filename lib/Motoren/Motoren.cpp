@@ -2,52 +2,52 @@
 #include <Arduino.h>
 
 #ifndef M1_FW
-#define M1_FW 0 //richtig
+#define M1_FW 26 //richtig
 #endif
 #ifndef M1_RW
-#define M1_RW 2
+#define M1_RW 28
 #endif
 #ifndef M1_PWM
-#define M1_PWM 1
+#define M1_PWM 29
 #endif
 
 #ifndef M2_FW
-#define M2_FW 3 //richtig
+#define M2_FW 12 //richtig
 #endif
 #ifndef M2_RW
-#define M2_RW 5
+#define M2_RW 25
 #endif
 #ifndef M2_PWM
-#define M2_PWM 4
+#define M2_PWM 24
 #endif
 
 #ifndef M3_FW
-#define M3_FW  6  //richtig!
+#define M3_FW  9  //richtig!
 #endif
 #ifndef M3_RW
-#define M3_RW 8
+#define M3_RW 11
 #endif
 #ifndef M3_PWM
-#define M3_PWM 7
+#define M3_PWM 10
 #endif
 
 #ifndef M4_FW
-#define M4_FW  11  //richtig!
+#define M4_FW  6  //richtig!
 #endif
 #ifndef M4_RW
-#define M4_RW 9
+#define M4_RW 8
 #endif
 #ifndef M4_PWM
-#define M4_PWM 10
+#define M4_PWM 7
 #endif
 
 void motor (double dir, double velocity, double rotation) {
   // dir Umrechnen ins Bogenmaß
   double phi = (dir / 180) * PI;
   // Aufteilen des damit aufgespannten Vektors auf die 4 Motoren
-  double m2 = sin(phi - 5 * PI / 4) * velocity + rotation; //VR
+  double m4 = sin(phi - 5 * PI / 4) * velocity + rotation; //VR
   double m1 = sin(phi - 7 * PI / 4) * velocity + rotation; //VL
-  double m4 = sin(phi - PI / 4) * velocity + rotation;     //HL
+  double m2 = sin(phi - PI / 4) * velocity + rotation;     //HL
   double m3 = sin(phi - 3 * PI / 4) * velocity + rotation; //HR
   //Aufteilen in Drehrichtungen
   //VL

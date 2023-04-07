@@ -1,35 +1,36 @@
 #include<ControlLEDs.h>
 #include<Arduino.h>
 #include<Lichtschranke.h>
+#include<Defines.h>
 
-#ifndef gyroButton
-#define gyroButton 31
+#ifndef ButtonII
+#define ButtonII 4
 #endif
 
-#ifndef calibrationButton
-#define calibrationButton 32
+#ifndef ButtonI
+#define ButtonI 5
 #endif
 
 //Control LEDs
 #ifndef LEDboden
-#define LEDboden 27
+#define LEDboden 13
 #endif
 #ifndef LEDir
-#define LEDir    28
+#define LEDir    17
 #endif
 #ifndef LEDgyro
-#define LEDgyro  29
+#define LEDgyro  20
 #endif
 #ifndef LEDballcaught
-#define LEDballcaught    30
+#define LEDballcaught    37
 #endif
 
 void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration) {
   // Einzelne Variablen überprüfen und dann die Pins schreiben
-  if (digitalRead(gyroButton) == LOW) {
+  if (digitalRead(ButtonI) == LOW) {
     buttonGpressed = true;
   }
-  if (digitalRead(calibrationButton) == LOW) {
+  if (digitalRead(ButtonIV) == LOW) {
     irAutoCalibration=!irAutoCalibration;
     Serial.println("IR-KALIBRATION");
   }

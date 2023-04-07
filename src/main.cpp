@@ -6,6 +6,7 @@
 #define I2C
 #include <Pixy2I2C.h>
 #include<PID_v1.h>
+#include<SD.h>
 
 #include<Boden.h>                                   //eigene Bibliotheken
 #include<Motoren.h>
@@ -16,7 +17,6 @@
 #include<ControlLEDs.h>
 #include <Bluetooth.h>
 #include<Defines.h>
-
 
 Pixy2I2C pixy;                                      //pixi im i2c-kommunikations-modus initialisieren
 
@@ -59,6 +59,7 @@ int Icball = -1;
 double entfVelo = 50;                                 //Geschwindigkeit vom PID gesteuert bei der Ballanfahrt (Entfernungs-PID)
 double wiVelo = 50;                                   //Gesch.-Output des Winkelpids
 double addRot = 0;                                    //temporäre Drehung, wenn er nah am Ball ist
+unsigned long addRotTime=0;
 double WinkelBall=90;
 
 /*int IRalt0[16];
@@ -75,10 +76,10 @@ double phi;*/
 bool torwart;                                         //bluetooth
 
 double entfSet=5;                                                 //wird sich nach dem Anfahrtsradius richten
-PID entfPID(&IRbest,&entfVelo,&entfSet,5,0,0,REVERSE);  //PID-Regler über die Enfernung
+PID entfPID(&IRbest,&entfVelo,&entfSet,7,0,1.5,REVERSE);          //PID-Regler über die Enfernung
 double wiSet=0;                                                   //Setpoint des Winkelpids (vorne)
 double wiIn;                                                      //Inpunt des Winkelpids
-PID wiPID(&wiIn,&wiVelo,&wiSet,1.31,0,1.7,REVERSE);                  //PID-Regler über den Winkel
+PID wiPID(&wiIn,&wiVelo,&wiSet,0.9,0,0.2,REVERSE);               //PID-Regler über den Winkel
 
 bool buttonGpressed = true;                           //other
 
@@ -105,32 +106,56 @@ void setup() {
   pinMode(LEDir, OUTPUT);
   pinMode(LEDgyro, OUTPUT);
   pinMode(LEDballcaught, OUTPUT);               //Die Button-Pins an einen Pullup-Widerstand hängen
-  pinMode(calibrationButton, INPUT_PULLUP);
-  pinMode(gyroButton, INPUT_PULLUP);            //den Boden automatisch kalibrieren
+  pinMode(ButtonI, INPUT_PULLUP);
+  pinMode(ButtonII, INPUT_PULLUP);
+  pinMode(ButtonIII, INPUT_PULLUP);
+  pinMode(ButtonIV, INPUT_PULLUP);              //IR-Kalibration
+  SD.begin(BUILTIN_SDCARD);
   AutoCalibration(LED,Schwellwerte);
   gyro.begin(/*8*/);                            //den gyro losmessen lassen (ich musste die 8 auskommentieren, es funktioniert trotzdem)
   entfPID.SetMode(AUTOMATIC);
   wiPID.SetMode(AUTOMATIC);
   for(int i=0;i<16;i++){
-    minWert[i]=1023;
+    minWert[i]=600;
   }
 }
 
 void loop() {
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration); //Die grünen Kontroll-LEDs leuchten lassen
-  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
+  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
   //Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
   compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot);
-  //bluetooth(torwart,IRbest);                                            //empfangen und senden
-  motor(0,0,rotation);
-  /* if (!torwart) {
+  // bluetooth(torwart,IRbest);                                           //empfangen und senden
+  if (!torwart) {
     if (bodenrichtung == -1) {                                            //der Boden sieht nichts
       if (richtung != -1) {                                               //der IR sieht etwas
-        if(WinkelBall<22||WinkelBall>338){                                                    //Ball Vor dem Roboter
-          motor(85,100,rotation);                                         
+        if(WinkelBall<130&&WinkelBall>50){                                //Ball Vor dem Roboter
+          int delay=50;
+          if(addRot!=0){
+            delay=1200;
+          }
+          if(WinkelBall>=90&&WinkelBall<270){
+            if(addRotTime+delay<millis()){
+              addRot=-25;
+              addRotTime=millis();
+            }
+          }else{
+            if(addRotTime+delay<millis()){
+              addRot=25;
+              addRotTime=millis();
+            }
+          }
+          motor(90-addRot/2,100,rotation);
         }else{
-          //motor(richtung,entfVelo,rotation);
-          motor(richtung, wiVelo,rotation);
+          motor(richtung-addRot,((IRbest-entfSet)/(75-entfSet))*entfVelo+wiVelo,(1-(IRbest-entfSet)/(75-entfSet))*rotation);
+          int delay=50;
+          if(addRot!=0){
+            delay=500;
+          }
+          if(addRotTime+delay<millis()){
+            addRot=0;
+            addRotTime=millis();
+          }
         }
       }
       else {                                                              //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
@@ -153,5 +178,5 @@ void loop() {
     }
   }
   entfPID.Compute();
-  wiPID.Compute(); */
+  wiPID.Compute();
 }

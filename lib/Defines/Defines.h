@@ -31,8 +31,10 @@
 #define UAM3 A14 // analog Multiplexer Unten 3
 #define AM1 A17 //analog Multiplexer Oben
 
-#define gyroButton 31
-#define calibrationButton 32
+#define ButtonIV 2
+#define ButtonIII 3
+#define ButtonII 4
+#define ButtonI 5
 
 #define VR 1 //m1
 #define VL 2 //m2
@@ -40,10 +42,10 @@
 #define HL 4 //m4
 
 //Control LEDs
-#define LEDboden 27
-#define LEDir    28
-#define LEDgyro  29
-#define LEDballcaught    30
+#define LEDboden 13
+#define LEDir    37
+#define LEDgyro  17
+#define LEDballcaught    20
 
 #define Nah 25
 #define Mittel 50
