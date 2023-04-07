@@ -87,9 +87,6 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     if(wiIn>180){
       wiIn-=360;
     }
-    // Serial.print(Icball);
-    // Serial.print("|");
-    // Serial.println(WinkelBall);
     if(IRbest>BallWegRadius){                                           //Wenn er den Ball nicht sieht
       richtung=-1;
       addRot=0;
@@ -99,12 +96,11 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     if(WinkelBall<0){
       WinkelBall+=360;
     }
-    // Serial.print(addRot);Serial.print("|");
-    if(IRbest<AnfahrtsRadius){                                          //Wenn der Roboter im Anfahrtskreis steht
+    if(IRbest<3*AnfahrtsRadius/2){
       int delay=50;
       if(addRot!=0){
-            delay=1200;
-          }
+        delay=1200;
+      }
       if(WinkelBall>=90&&WinkelBall<270){
         if(addRotTime+delay<millis()){
           addRot=-20;
@@ -116,7 +112,24 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
           addRotTime=millis();
         }
       }
-      richtung=270-addRot;                                                     //nach hinten fahren
+    }
+    if(IRbest<AnfahrtsRadius){                                          //Wenn der Roboter im Anfahrtskreis steht
+      int delay=50;
+      if(addRot!=0){
+        delay=1200;
+      }
+      if(WinkelBall>=90&&WinkelBall<270){
+        if(addRotTime+delay<millis()){
+          addRot=-30;
+          addRotTime=millis();
+        }
+      }else{
+        if(addRotTime+delay<millis()){
+          addRot=30;
+          addRotTime=millis();
+        }
+      }
+      richtung=270-addRot;                                              //nach hinten fahren
       return;
     }
     if(WinkelBall<=90||WinkelBall>=270){                                //Ball rechts vom Roboter
@@ -133,7 +146,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
       richtung-=360;
     }
 
-    File file = SD.open("minWerte.js", FILE_WRITE | O_TRUNC | O_CREAT);//Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
+    File file = SD.open("minWerte.js", FILE_WRITE | O_TRUNC | O_CREAT); //Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
       StaticJsonDocument<200> doc;
       doc["minWerte"]=minWert;
       String buf{""};

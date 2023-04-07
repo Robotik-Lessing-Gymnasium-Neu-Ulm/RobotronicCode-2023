@@ -151,12 +151,12 @@ void loop() {
           }
           if(WinkelBall>=90&&WinkelBall<270){
             if(addRotTime+delay<millis()){
-              addRot=-25;
+              addRot=-22;
               addRotTime=millis();
             }
           }else{
             if(addRotTime+delay<millis()){
-              addRot=25;
+              addRot=22;
               addRotTime=millis();
             }
           }
