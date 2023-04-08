@@ -1,8 +1,7 @@
 #include <Motoren.h>
 #include <Arduino.h>
-#include <betterDefines.h>
 
-void motor (double dir, double velocity, double rotation) {
+void motor (double dir, double velocity, double rotation, uint8_t M1_FW,uint8_t M1_RW,uint8_t M1_PWM, uint8_t M2_FW,uint8_t M2_RW,uint8_t M2_PWM, uint8_t M3_FW,uint8_t M3_RW,uint8_t M3_PWM, uint8_t M4_FW,uint8_t M4_RW,uint8_t M4_PWM) {
   // dir Umrechnen ins Bogenmaß
   double phi = (dir / 180) * PI;
   // Aufteilen des damit aufgespannten Vektors auf die 4 Motoren

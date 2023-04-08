@@ -52,4 +52,6 @@ int Nah = 25;
 int Mittel = 50;
 int Fern = 70;
 
+uint8_t Lichtschranke=A9;
+
 #endif

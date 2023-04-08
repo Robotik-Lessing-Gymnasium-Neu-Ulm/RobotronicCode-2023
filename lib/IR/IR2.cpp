@@ -3,17 +3,16 @@
 #include<PID_v1.h>
 #include<SD.h>
 #include <ArduinoJson.h>
-#include <betterDefines.h>
 
 
-int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzung Auslesen
+int lesenMultiplexerOben(int s0, int s1, int s2, int s3, uint8_t S0, uint8_t S1,uint8_t S2,uint8_t S3,uint8_t AM1) {           //Verkürzung Auslesen
   digitalWrite(S0, s3);
   digitalWrite(S1, s2);
   digitalWrite(S2, s1);
   digitalWrite(S3, s0);
   return analogRead(AM1);
 }
-void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfSet, double &wiIn, PID &wiPID, int* minWert, bool& irAutoCalibration, double& addRot, double& WinkelBall, unsigned long& addRotTime, bool& torwart) {
+void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfSet, double &wiIn, PID &wiPID, int* minWert, bool& irAutoCalibration, double& addRot, double& WinkelBall, unsigned long& addRotTime, bool& torwart, uint8_t S0, uint8_t S1,uint8_t S2,uint8_t S3,uint8_t AM1) {
   if(!irAutoCalibration){
     static double AnfahrtsRadius=7;                                   //Achtung: auch bei der IR Kalibration ändern!
     static double BallWegRadius=75;
@@ -25,22 +24,22 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     //   Serial.println(gelesen);
     // }
     //static unsigned int count[16];
-    IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0), minWert[0] , 1023, 0, 200);   //alle IRs auslesen und mappen (auto-kalibration)
-    IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1), minWert[1] , 1023, 0, 200);
-    IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0), minWert[2] , 1023, 0, 200);
-    IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1), minWert[3] , 1023, 0, 200);
-    IR[4] = map(lesenMultiplexerOben(0, 1, 0, 0), minWert[4] , 1023, 0, 200);
-    IR[5] = map(lesenMultiplexerOben(0, 1, 0, 1), minWert[5] , 1023, 0, 200);
-    IR[6] = map(lesenMultiplexerOben(0, 1, 1, 0), minWert[6] , 1023, 0, 200);
-    IR[7] = map(lesenMultiplexerOben(0, 1, 1, 1), minWert[7] , 1023, 0, 200);
-    IR[8] = map(lesenMultiplexerOben(1, 0, 0, 0), minWert[8] , 1023, 0, 200);
-    IR[9] = map(lesenMultiplexerOben(1, 0, 0, 1), minWert[9] , 1023, 0, 200);
-    IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0),minWert[10], 1023, 0, 200);
-    IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1),minWert[11], 1023, 0, 200);
-    IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0),minWert[12], 1023, 0, 200);
-    IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1),minWert[13], 1023, 0, 200);
-    IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0),minWert[14], 1023, 0, 200);
-    IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1),minWert[15], 1023, 0, 200);
+    IR[0] = map(lesenMultiplexerOben(0, 0, 0, 0,S0,S1,S2,S3,AM1), minWert[0] , 1023, 0, 200);   //alle IRs auslesen und mappen (auto-kalibration)
+    IR[1] = map(lesenMultiplexerOben(0, 0, 0, 1,S0,S1,S2,S3,AM1), minWert[1] , 1023, 0, 200);
+    IR[2] = map(lesenMultiplexerOben(0, 0, 1, 0,S0,S1,S2,S3,AM1), minWert[2] , 1023, 0, 200);
+    IR[3] = map(lesenMultiplexerOben(0, 0, 1, 1,S0,S1,S2,S3,AM1), minWert[3] , 1023, 0, 200);
+    IR[4] = map(lesenMultiplexerOben(0, 1, 0, 0,S0,S1,S2,S3,AM1), minWert[4] , 1023, 0, 200);
+    IR[5] = map(lesenMultiplexerOben(0, 1, 0, 1,S0,S1,S2,S3,AM1), minWert[5] , 1023, 0, 200);
+    IR[6] = map(lesenMultiplexerOben(0, 1, 1, 0,S0,S1,S2,S3,AM1), minWert[6] , 1023, 0, 200);
+    IR[7] = map(lesenMultiplexerOben(0, 1, 1, 1,S0,S1,S2,S3,AM1), minWert[7] , 1023, 0, 200);
+    IR[8] = map(lesenMultiplexerOben(1, 0, 0, 0,S0,S1,S2,S3,AM1), minWert[8] , 1023, 0, 200);
+    IR[9] = map(lesenMultiplexerOben(1, 0, 0, 1,S0,S1,S2,S3,AM1), minWert[9] , 1023, 0, 200);
+    IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0,S0,S1,S2,S3,AM1),minWert[10], 1023, 0, 200);
+    IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1,S0,S1,S2,S3,AM1),minWert[11], 1023, 0, 200);
+    IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0,S0,S1,S2,S3,AM1),minWert[12], 1023, 0, 200);
+    IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1,S0,S1,S2,S3,AM1),minWert[13], 1023, 0, 200);
+    IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0,S0,S1,S2,S3,AM1),minWert[14], 1023, 0, 200);
+    IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1,S0,S1,S2,S3,AM1),minWert[15], 1023, 0, 200);
     IRbest = 90;                                                        //bestimmen des niedrigsten, gemessenen Wertes und Speichern des Index in Icball
     for (int i = 0; i < 16; i++) {
       if (IR[i] < IRbest) {
@@ -151,6 +150,5 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
       Serial.print("|");
     }
     Serial.println(";");
-    
   }
 }

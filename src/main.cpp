@@ -107,11 +107,11 @@ void setup() {
   myFile.close();
 
   File file=SD.open("Verbindungen.json",FILE_READ);
-  String buf="";                              //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
+  buf="";                                       //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
     while(myFile.available()){
       buf+=myFile.read();
     }
-    StaticJsonDocument<500> doc;
+    doc.clear();
     deserializeJson(doc, buf);
     Serial.println(">>>>>>>>>>>>>>(Verbindungen)");
     M1_FW=doc["M1_FW"];
@@ -225,6 +225,9 @@ void setup() {
     Fern=doc["Fern"];
     Serial.print("Fern: ");
     Serial.println(Fern);
+    Lichtschranke=doc["Lichtschranke"];
+    Serial.print("Lichtschranke: ");
+    Serial.println(Lichtschranke);
     Serial.println("(Verbindungen)<<<<<<<<<<<<<<");
   file.close();
 
@@ -252,16 +255,16 @@ void setup() {
   pinMode(ButtonII, INPUT_PULLUP);
   pinMode(ButtonIII, INPUT_PULLUP);
   pinMode(ButtonIV, INPUT_PULLUP);              //IR-Kalibration
-  AutoCalibration(LED,Schwellwerte);
+  AutoCalibration(LED,Schwellwerte,LEDboden,S0,S1,S2,S3,UAM1,UAM2,UAM3);
   gyro.begin(/*8*/);                            //den gyro losmessen lassen (ich musste die 8 auskommentieren, es funktioniert trotzdem)
   entfPID.SetMode(AUTOMATIC);
   wiPID.SetMode(AUTOMATIC);
 }
 
 void loop() {
-  ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration); //Die grünen Kontroll-LEDs leuchten lassen
-  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
-  //Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
+  ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,LED,Schwellwerte,S0,S1,S2,S3,UAM1,UAM2,UAM3,LEDboden,ButtonI,ButtonII,ButtonIII,ButtonIV,LEDir,LEDballcaught,LEDgyro,Lichtschranke); //Die grünen Kontroll-LEDs leuchten lassen
+  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,S0,S1,S2,S3,AM1);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
+  Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,S0,S1,S2,S3,UAM1,UAM2,UAM3,LEDboden,ButtonI, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);
   compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot);
   // bluetooth(torwart,IRbest);                                           //empfangen und senden
   if (!torwart) {
@@ -283,9 +286,9 @@ void loop() {
               addRotTime=millis();
             }
           }
-          motor(90-addRot/2,100,rotation);
+          motor(90-addRot/2,100,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);
         }else{
-          motor(richtung-addRot,((IRbest-entfSet)/(75-entfSet))*entfVelo+wiVelo,(1-(IRbest-entfSet)/(75-entfSet))*rotation);
+          motor(richtung-addRot,((IRbest-entfSet)/(75-entfSet))*entfVelo+wiVelo,(1-(IRbest-entfSet)/(75-entfSet))*rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);
           int delay=50;
           if(addRot!=0){
             delay=500;
@@ -297,22 +300,22 @@ void loop() {
         }
       }
       else {                                                              //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
-        motor(0, 0,rotation);                                             //nur ausrichten
+        motor(0, 0,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                                             //nur ausrichten
       }
     }
     else {                                                                //der Boden sieht etwas
-      motor(bodenrichtung, 200,rotation);                                 //sehr schnell von der Linie wegfahren
+      motor(bodenrichtung, 200,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                                 //sehr schnell von der Linie wegfahren
     }
   }
   else {                                                                  //stehen bleiben, falls der Andere den Ball hat (torwart)
-    motor(0, 0,rotation);
+    motor(0, 0,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);
   }
-  if (hatBall() && ( Icball == 0 || Icball == 15 || Icball == 1 )) {      //Ermitteln ob er den Ball hat
+  if (hatBall(Lichtschranke) && ( Icball == 0 || Icball == 15 || Icball == 1 )) {      //Ermitteln ob er den Ball hat
     if (piread) {                                                         //sieht die pixy etwas
-      motor(Pixy(pixy,piread), 100,rotation);                             //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
+      motor(Pixy(pixy,piread), 100,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                             //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
     }
     else {
-      motor(0,0, rotation);                                               //nach vorne fahren
+      motor(0,0, rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                                               //nach vorne fahren
     }
   }
   entfPID.Compute();
