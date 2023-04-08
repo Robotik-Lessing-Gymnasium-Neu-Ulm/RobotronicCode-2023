@@ -129,7 +129,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
       richtung-=360;
     }
     //speichern
-    File file = SD.open("minWerte.js", FILE_WRITE | O_TRUNC  | O_CREAT); //Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
+    File file = SD.open("minWerte.json", FILE_WRITE | O_TRUNC  | O_CREAT); //Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
       StaticJsonDocument<500> doc;
       int values[16];                                                    //ein echter C-Array für minWert
       for(int i=0;i<16;i++){
@@ -139,37 +139,18 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
       copyArray(values, Jarr);
       doc["IR"]=Jarr;
 
-      String buf{""};                                                     //Buffer, der in die geöffnete *.js-Datei geschrieben wird
+      String buf{""};                                                     //Buffer, der in die geöffnete *.json-Datei geschrieben wird
       serializeJsonPretty(doc,buf);
       for(auto elem:buf){
         file.write(elem);
       }
     file.close();
   }else{
-    irAutoCal(minWert);
     for(int i=0;i<16;i++){
       Serial.print(minWert[i]);
       Serial.print("|");
     }
     Serial.println(";");
+    
   }
-}
-
-void irAutoCal(int* minWert){
-  if(minWert[0]>lesenMultiplexerOben(0, 0, 0, 0)){minWert[0]=lesenMultiplexerOben(0, 0, 0, 0);}
-  if(minWert[1]>lesenMultiplexerOben(0, 0, 0, 1)){minWert[1]=lesenMultiplexerOben(0, 0, 0, 1);}
-  if(minWert[2]>lesenMultiplexerOben(0, 0, 1, 0)){minWert[2]=lesenMultiplexerOben(0, 0, 1, 0);}
-  if(minWert[3]>lesenMultiplexerOben(0, 0, 1, 1)){minWert[3]=lesenMultiplexerOben(0, 0, 1, 1);}
-  if(minWert[4]>lesenMultiplexerOben(0, 1, 0, 0)){minWert[4]=lesenMultiplexerOben(0, 1, 0, 0);}
-  if(minWert[5]>lesenMultiplexerOben(0, 1, 0, 1)){minWert[5]=lesenMultiplexerOben(0, 1, 0, 1);}
-  if(minWert[6]>lesenMultiplexerOben(0, 1, 1, 0)){minWert[6]=lesenMultiplexerOben(0, 1, 1, 0);}
-  if(minWert[7]>lesenMultiplexerOben(0, 1, 1, 1)){minWert[7]=lesenMultiplexerOben(0, 1, 1, 1);}
-  if(minWert[8]>lesenMultiplexerOben(1, 0, 0, 0)){minWert[8]=lesenMultiplexerOben(1, 0, 0, 0);}
-  if(minWert[9]>lesenMultiplexerOben(1, 0, 0, 1)){minWert[9]=lesenMultiplexerOben(1, 0, 0, 1);}
-  if(minWert[10]>lesenMultiplexerOben(1, 0, 1, 0)){minWert[10]=lesenMultiplexerOben(1, 0, 1, 0);}
-  if(minWert[11]>lesenMultiplexerOben(1, 0, 1, 1)){minWert[11]=lesenMultiplexerOben(1, 0, 1, 1);}
-  if(minWert[12]>lesenMultiplexerOben(1, 1, 0, 0)){minWert[12]=lesenMultiplexerOben(1, 1, 0, 0);}
-  if(minWert[13]>lesenMultiplexerOben(1, 1, 0, 1)){minWert[13]=lesenMultiplexerOben(1, 1, 0, 1);}
-  if(minWert[14]>lesenMultiplexerOben(1, 1, 1, 0)){minWert[14]=lesenMultiplexerOben(1, 1, 1, 0);}
-  if(minWert[15]>lesenMultiplexerOben(1, 1, 1, 1)){minWert[15]=lesenMultiplexerOben(1, 1, 1, 1);}
 }

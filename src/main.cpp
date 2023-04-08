@@ -87,6 +87,147 @@ bool buttonGpressed = true;                           //other
 void setup() {
   Serial.begin(115200);                         //Seriellen Monitor initialisieren
   Serial5.begin(115200);                        //Bluetooth initialisieren
+  
+  SD.begin(BUILTIN_SDCARD);                     //SD-Karte initialisieren
+  File myFile=SD.open("minWerte.json",FILE_READ); //Datei öffnen, lesen
+    String buf="";                              //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
+    while(myFile.available()){
+      buf+=myFile.read();
+    }
+    StaticJsonDocument<500> doc;
+    deserializeJson(doc, buf);             
+    Serial.println(">>>>>>>>>>>>>>(IR)");       //Befüllen von minWert & Ausgabe
+    for(int i{0};i<16;i++){
+      minWert[i]=doc["IR"][i];
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.println(minWert[i]);
+    }
+    Serial.println("(IR)<<<<<<<<<<<<<<");
+  myFile.close();
+
+  File file=SD.open("Verbindungen.json",FILE_READ);
+  String buf="";                              //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
+    while(myFile.available()){
+      buf+=myFile.read();
+    }
+    StaticJsonDocument<500> doc;
+    deserializeJson(doc, buf);
+    Serial.println(">>>>>>>>>>>>>>(Verbindungen)");
+    M1_FW=doc["M1_FW"];
+    Serial.print("M1_FW: ");
+    Serial.println(M1_FW);
+    M1_RW=doc["M1_RW"];
+    Serial.print("M1_RW: ");
+    Serial.println(M1_RW);
+    M1_PWM=doc["M1_PWM"];
+    Serial.print("M1_PWM: ");
+    Serial.println(M1_PWM);
+    M2_FW=doc["M2_FW"];
+    Serial.print("M2_FW: ");
+    Serial.println(M2_FW);
+    M2_RW=doc["M2_RW"];
+    Serial.print("M2_RW: ");
+    Serial.println(M2_RW);
+    M2_PWM=doc["M2_PWM"];
+    Serial.print("M2_PWM: ");
+    Serial.println(M2_PWM);
+    M3_FW=doc["M3_FW"];
+    Serial.print("M3_FW: ");
+    Serial.println(M3_FW);
+    M3_RW=doc["M3_RW"];
+    Serial.print("M3_RW: ");
+    Serial.println(M3_RW);
+    M3_PWM=doc["M3_PWM"];
+    Serial.print("M3_PWM: ");
+    Serial.println(M3_PWM);
+    M4_FW=doc["M4_FW"];
+    Serial.print("M4_FW: ");
+    Serial.println(M4_FW);
+    M4_RW=doc["M4_RW"];
+    Serial.print("M4_RW: ");
+    Serial.println(M4_RW);
+    M4_PWM=doc["M4_PWM"];
+    Serial.print("M4_PWM: ");
+    Serial.println(M4_PWM);
+    S0=doc["S0"];
+    Serial.print("S0: ");
+    Serial.println(S0);
+    S1=doc["S1"];
+    Serial.print("S1: ");
+    Serial.println(S1);
+    S2=doc["S2"];
+    Serial.print("S2: ");
+    Serial.println(S2);
+    S3=doc["S3"];
+    Serial.print("S3: ");
+    Serial.println(S3);
+    UAM1=doc["UAM1"];
+    Serial.print("UAM1: ");
+    Serial.println(UAM1);
+    UAM2=doc["UAM2"];
+    Serial.print("UAM2: ");
+    Serial.println(UAM2);
+    UAM3=doc["UAM3"];
+    Serial.print("UAM3: ");
+    Serial.println(UAM3);
+    AM1=doc["AM1"];
+    Serial.print("AM1: ");
+    Serial.println(AM1);
+    ButtonIV=doc["ButtonIV"];
+    Serial.print("ButtonIV: ");
+    Serial.println(ButtonIV);
+    ButtonIII=doc["ButtonIII"];
+    Serial.print("ButtonIII: ");
+    Serial.println(ButtonIII);
+    ButtonII=doc["ButtonII"];
+    Serial.print("ButtonII: ");
+    Serial.println(ButtonII);
+    ButtonI=doc["ButtonI"];
+    Serial.print("ButtonI: ");
+    Serial.println(ButtonI);
+    VR=doc["VR"];
+    Serial.print("VR: ");
+    Serial.println(VR);
+    VL=doc["VL"];
+    Serial.print("VL: ");
+    Serial.println(VL);
+    HR=doc["HR"];
+    Serial.print("HR: ");
+    Serial.println(HR);
+    HL=doc["HL"];
+    Serial.print("HL: ");
+    Serial.println(HL);
+    LEDboden=doc["LEDboden"];
+    Serial.print("LEDboden: ");
+    Serial.println(LEDboden);
+    LEDir=doc["LEDir"];
+    Serial.print("LEDir: ");
+    Serial.println(LEDir);
+    LEDgyro=doc["LEDgyro"];
+    Serial.print("LEDgyro: ");
+    Serial.println(LEDgyro);
+    LEDballcaught=doc["LEDballcaught"];
+    Serial.print("LEDballcaught: ");
+    Serial.println(LEDballcaught);
+    breite=doc["breite"];
+    Serial.print("breite: ");
+    Serial.println(breite);
+    laenge=doc["laenge"];
+    Serial.print("laenge: ");
+    Serial.println(laenge);
+    Nah=doc["Nah"];
+    Serial.print("Nah: ");
+    Serial.println(Nah);
+    Mittel=doc["Mittel"];
+    Serial.print("Mittel: ");
+    Serial.println(Mittel);
+    Fern=doc["Fern"];
+    Serial.print("Fern: ");
+    Serial.println(Fern);
+    Serial.println("(Verbindungen)<<<<<<<<<<<<<<");
+  file.close();
+
   pinMode(S0, OUTPUT);                          //Multiplexer Oben Pin Festlegung
   pinMode(S1, OUTPUT);
   pinMode(S2, OUTPUT);
@@ -115,24 +256,6 @@ void setup() {
   gyro.begin(/*8*/);                            //den gyro losmessen lassen (ich musste die 8 auskommentieren, es funktioniert trotzdem)
   entfPID.SetMode(AUTOMATIC);
   wiPID.SetMode(AUTOMATIC);
-
-  SD.begin(BUILTIN_SDCARD);                     //SD-Karte initialisieren
-  File myFile=SD.open("minWerte.js",FILE_READ); //Datei öffnen, lesen
-    String buf="";                              //Zwischenspeicher des Inhalts der geöffneten *.js-Datei
-    while(myFile.available()){
-      buf+=myFile.read();
-    }
-    StaticJsonDocument<500> doc;
-    deserializeJson(doc, buf);                  
-    Serial.println(">>>>>>>>>>>>>>(IR)");       //Befüllen von minWert & Ausgabe
-    for(int i{0};i<16;i++){
-      minWert[i]=doc["IR"][i];
-      Serial.print(i);
-      Serial.print(": ");
-      Serial.println(minWert[i]);
-    }
-    Serial.println("(IR)<<<<<<<<<<<<<<");
-  myFile.close();
 }
 
 void loop() {
