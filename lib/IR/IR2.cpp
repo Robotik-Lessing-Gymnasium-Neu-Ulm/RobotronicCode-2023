@@ -127,23 +127,28 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     if(richtung>360){
       richtung-=360;
     }
-    //speichern
-    File file = SD.open("minWerte.json", FILE_WRITE | O_TRUNC  | O_CREAT); //Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
-      StaticJsonDocument<500> doc;
-      int values[16];                                                    //ein echter C-Array für minWert
-      for(int i=0;i<16;i++){
-        values[i]=minWert[i];
-      }
-      JsonArray Jarr;                                                     //Json-Array von minWert
-      copyArray(values, Jarr);
-      doc["IR"]=Jarr;
 
-      String buf{""};                                                     //Buffer, der in die geöffnete *.json-Datei geschrieben wird
-      serializeJsonPretty(doc,buf);
-      for(auto elem:buf){
-        file.write(elem);
-      }
-    file.close();
+    static unsigned long lastSave=0;                                     //Nur alle 5 Sek speichern
+    //speichern
+    if(millis()>=lastSave+5'000){
+      File file = SD.open("minWerte.json", FILE_WRITE | O_TRUNC  | O_CREAT); //Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
+        StaticJsonDocument<500> doc;
+        int values[16];                                                     //ein echter C-Array für minWert
+        for(int i=0;i<16;i++){
+          values[i]=minWert[i];
+        }
+        JsonArray Jarr;                                                     //Json-Array von minWert
+        copyArray(values, Jarr);
+        doc["IR"]=Jarr;
+
+        String buf{""};                                                     //Buffer, der in die geöffnete *.json-Datei geschrieben wird
+        serializeJsonPretty(doc,buf);
+        for(auto elem:buf){
+          file.write(elem);
+        }
+      file.close();
+      lastSave=millis();
+    }
   }else{
     for(int i=0;i<16;i++){
       Serial.print(minWert[i]);

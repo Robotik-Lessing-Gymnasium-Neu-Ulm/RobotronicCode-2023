@@ -3,6 +3,6 @@
 
 #include<Arduino.h>
 
-bool hatBall(uint8_t Lichtschranke);
+boolean hatBall(uint8_t Lichtschranke,int& minWertLS, char& PhaseLSKalibration);
 
 #endif

@@ -83,6 +83,8 @@ double wiIn;                                                      //Inpunt des W
 PID wiPID(&wiIn,&wiVelo,&wiSet,0.9,0,0.2,REVERSE);               //PID-Regler über den Winkel
 
 bool buttonGpressed = true;                           //other
+char PhaseLSKalibration=0;
+int minWertLS=400;
 
 void setup() {
   Serial.begin(115200);                         //Seriellen Monitor initialisieren
@@ -96,14 +98,20 @@ void setup() {
     }
     StaticJsonDocument<500> doc;
     deserializeJson(doc, buf);             
-    Serial.println(">>>>>>>>>>>>>>(IR)");       //Befüllen von minWert & Ausgabe
+    Serial.println(">>>>>>>>>>>>>>(minWerte)");       //Befüllen von minWert & Ausgabe
+    Serial.println(">>>>>>>>>>>>(IR)");
     for(int i{0};i<16;i++){
       minWert[i]=doc["IR"][i];
+      Serial.print(" ");
       Serial.print(i);
       Serial.print(": ");
       Serial.println(minWert[i]);
     }
-    Serial.println("(IR)<<<<<<<<<<<<<<");
+    Serial.println("(IR)<<<<<<<<<<<<");
+    minWertLS=doc["Lichtschranke"];
+    Serial.print("LS: ");
+    Serial.println(minWertLS);
+    Serial.println("(MinWerte)<<<<<<<<<<<<<<");
   myFile.close();
 
   File file=SD.open("Verbindungen.json",FILE_READ);
@@ -262,8 +270,8 @@ void setup() {
 }
 
 void loop() {
-  ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,LED,Schwellwerte,S0,S1,S2,S3,UAM1,UAM2,UAM3,LEDboden,ButtonI,ButtonII,ButtonIII,ButtonIV,LEDir,LEDballcaught,LEDgyro,Lichtschranke); //Die grünen Kontroll-LEDs leuchten lassen
-  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,S0,S1,S2,S3,AM1);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
+  ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,LED,Schwellwerte,S0,S1,S2,S3,UAM1,UAM2,UAM3,LEDboden,ButtonI,ButtonII,ButtonIII,ButtonIV,LEDir,LEDballcaught,LEDgyro,Lichtschranke,PhaseLSKalibration,minWertLS); //Die grünen Kontroll-LEDs leuchten lassen
+  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,S0,S1,S2,S3,AM1);   //die IR&Boden&Kompass-Sensoren messen und abspeichern lassen
   Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,S0,S1,S2,S3,UAM1,UAM2,UAM3,LEDboden,ButtonI, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);
   compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot);
   // bluetooth(torwart,IRbest);                                           //empfangen und senden
@@ -310,7 +318,7 @@ void loop() {
   else {                                                                  //stehen bleiben, falls der Andere den Ball hat (torwart)
     motor(0, 0,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);
   }
-  if (hatBall(Lichtschranke) && ( Icball == 0 || Icball == 15 || Icball == 1 )) {      //Ermitteln ob er den Ball hat
+  if (hatBall(Lichtschranke,minWertLS,PhaseLSKalibration) && ( Icball == 0 || Icball == 15 || Icball == 1 )) {      //Ermitteln ob er den Ball hat
     if (piread) {                                                         //sieht die pixy etwas
       motor(Pixy(pixy,piread), 100,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                             //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
     }

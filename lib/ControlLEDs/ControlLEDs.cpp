@@ -13,7 +13,7 @@ void blink(uint8_t pin,bool direction){  //synchronisiert
   }
 }
 
-void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration, int* LED, int* Schwellwerte,  uint8_t S0, uint8_t S1, uint8_t S2, uint8_t S3, uint8_t UAM1, uint8_t UAM2,uint8_t UAM3, uint8_t LEDboden, uint8_t ButtonI, uint8_t ButtonII, uint8_t ButtonIII, uint8_t ButtonIV, uint8_t LEDir, uint8_t LEDballcaught, uint8_t LEDgyro, uint8_t Lichtschranke) {
+void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration, int* LED, int* Schwellwerte,  uint8_t S0, uint8_t S1, uint8_t S2, uint8_t S3, uint8_t UAM1, uint8_t UAM2,uint8_t UAM3, uint8_t LEDboden, uint8_t ButtonI, uint8_t ButtonII, uint8_t ButtonIII, uint8_t ButtonIV, uint8_t LEDir, uint8_t LEDballcaught, uint8_t LEDgyro, uint8_t Lichtschranke, char& PhaseLSKalibration, int minWertLS) {
   // Einzelne Variablen überprüfen und dann die Pins schreiben
   if (digitalRead(ButtonI) == LOW) {
     buttonGpressed = true;
@@ -25,7 +25,17 @@ void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icb
       irAutoCalibration=!irAutoCalibration;
     }
   }
-  if(digitalRead(ButtonIII)){
+  if(digitalRead(ButtonII)==LOW){
+    static long LastTriggerLS=0;
+    if(LastTriggerLS+100<millis()){
+      LastTriggerLS=millis();
+      PhaseLSKalibration++;
+      if(PhaseLSKalibration>3){
+        PhaseLSKalibration=0;
+      }
+    }
+  }
+  if(digitalRead(ButtonIII)==LOW){
     AutoCalibration(LED,Schwellwerte,LEDboden,S0,S1,S2,S3,UAM1,UAM2,UAM3);
   }
   if(irAutoCalibration){
@@ -33,6 +43,21 @@ void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icb
     blink(LEDboden,1);
     blink(LEDballcaught,1);
     blink(LEDgyro,1);
+  }else if(PhaseLSKalibration){
+    switch (PhaseLSKalibration){
+      case 1:
+        blink(LEDir,0);
+        blink(LEDboden,0);
+        blink(LEDballcaught,1);
+        blink(LEDgyro,0);
+        break;
+      case 2:
+        blink(LEDir,1);
+        blink(LEDboden,0);
+        blink(LEDballcaught,1);
+        blink(LEDgyro,0);
+        break;
+    }
   }else{
     if (richtung >= 0) {
       digitalWrite(LEDir, HIGH);
@@ -44,7 +69,7 @@ void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icb
     } else {
       digitalWrite(LEDboden, LOW);
     }
-    if (hatBall(Lichtschranke) && IRbest <10&&( Icball == 0 || Icball == 15 || Icball == 1 )) {
+    if (hatBall(Lichtschranke,minWertLS,PhaseLSKalibration) && IRbest <10&&( Icball == 0 || Icball == 15 || Icball == 1 )) {
       digitalWrite(LEDballcaught, HIGH);
     } else {
       digitalWrite(LEDballcaught, LOW);
