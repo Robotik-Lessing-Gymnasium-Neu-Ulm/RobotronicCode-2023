@@ -74,6 +74,32 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
   if(wiIn>180){
     wiIn-=360;
   }
+  static unsigned long lastSave=0;                                     //Nur alle 5 Sek speichern
+  //alle 5sec speichern
+  if(millis()>=lastSave+5'000){
+    Serial.println("Speichern(IR)");
+    File myFile_=SD.open("minWerte.json",FILE_READ); //Datei öffnen, lesen
+      char buf_[myFile_.size()];                                  //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
+      myFile_.read(buf_,myFile_.size());
+      StaticJsonDocument<1000> doc_;
+      deserializeJson(doc_, buf_);
+    myFile_.close();
+    File s = SD.open("minWerte.json", FILE_WRITE); //Datei öffnen, schreiben erstellen, falls nicht existent
+      s.truncate();                                 //Datei leeren
+      for(int i=0;i<16;i++){
+        doc_["IR"][i]=minWert[i];
+      }
+      char b[500];                                                     //Buffer, der in die geöffnete *.json-Datei geschrieben wird
+      for(int i{0};i<500;i++){
+        b[i]=' ';
+      }
+      serializeJsonPretty(doc_,b);
+      for(auto elem:b){
+        s.write(elem);
+      }
+    s.close();
+    lastSave=millis();
+  }
   if(IRbest>BallWegRadius){                                           //Wenn er den Ball nicht sieht
     richtung=-1;
     addRot=0;
@@ -131,28 +157,5 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
   }
   if(richtung>360){
     richtung-=360;
-  }
-
-  static unsigned long lastSave=0;                                     //Nur alle 5 Sek speichern
-  //speichern
-  if(millis()>=lastSave+5'000){
-    File myFile_=SD.open("minWerte.json",FILE_READ); //Datei öffnen, lesen
-      char buf_[myFile_.size()];                                  //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
-      myFile_.read(buf_,myFile_.size());
-      StaticJsonDocument<1000> doc_;
-      deserializeJson(doc_, buf_);
-    myFile_.close();
-    File s = SD.open("minWerte.json", FILE_WRITE); //Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
-      s.truncate();
-      for(int i=0;i<16;i++){
-        doc_["IR"][i]=minWert[i];
-      }
-      char b[1000];                                                     //Buffer, der in die geöffnete *.json-Datei geschrieben wird
-      serializeJsonPretty(doc_,b);
-      for(auto elem:b){
-        s.write(elem);
-      }
-    s.close();
-    lastSave=millis();
   }
 }

@@ -42,10 +42,13 @@ boolean hatBall(uint8_t Lichtschranke,int& minWertLS, char& PhaseLSKalibration) 
         StaticJsonDocument<1000> doc_;
         deserializeJson(doc_, buf_);
       myFile_.close();
-      File s = SD.open("minWerte.json", FILE_WRITE); //Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
+      File s = SD.open("minWerte.json", FILE_WRITE); //Datei öffnen, schreiben
         s.truncate();
         doc_["Lichtschranke"]=minWertLS;
-        char b[1000];                                                     //Buffer, der in die geöffnete *.json-Datei geschrieben wird
+        char b[500];                                                     //Buffer, der in die geöffnete *.json-Datei geschrieben wird
+        for(int i{0};i<500;i++){
+          b[i]=' ';
+        }
         serializeJsonPretty(doc_,b);
         for(auto elem:b){
           s.write(elem);
