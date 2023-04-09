@@ -89,15 +89,16 @@ int minWertLS=400;
 void setup() {
   Serial.begin(115200);                         //Seriellen Monitor initialisieren
   Serial5.begin(115200);                        //Bluetooth initialisieren
-  
-  SD.begin(BUILTIN_SDCARD);                     //SD-Karte initialisieren
+  while (!SD.begin(BUILTIN_SDCARD)) {
+    Serial.println("Karte einstecken!");
+    // don't do anything more:
+  }
+  Serial.println("Karte initialisiert.");
   File myFile=SD.open("minWerte.json",FILE_READ); //Datei öffnen, lesen
-    String buf="";                              //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
-    while(myFile.available()){
-      buf+=myFile.read();
-    }
-    StaticJsonDocument<500> doc;
-    deserializeJson(doc, buf);             
+    char buf[myFile.size()];                                  //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
+    myFile.read(buf,myFile.size());
+    StaticJsonDocument<1000> doc;
+    deserializeJson(doc, buf);
     Serial.println(">>>>>>>>>>>>>>(minWerte)");       //Befüllen von minWert & Ausgabe
     Serial.println(">>>>>>>>>>>>(IR)");
     for(int i{0};i<16;i++){
@@ -114,13 +115,10 @@ void setup() {
     Serial.println("(MinWerte)<<<<<<<<<<<<<<");
   myFile.close();
 
-  File file=SD.open("Verbindungen.json",FILE_READ);
-  buf="";                                       //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
-    while(myFile.available()){
-      buf+=myFile.read();
-    }
-    doc.clear();
-    deserializeJson(doc, buf);
+  File file=SD.open("Verbindungen.json",FILE_READ);        
+    char buf2[file.size()];
+    file.read(buf2,file.size());
+    deserializeJson(doc, buf2);
     Serial.println(">>>>>>>>>>>>>>(Verbindungen)");
     M1_FW=doc["M1_FW"];
     Serial.print("M1_FW: ");
@@ -307,19 +305,19 @@ void loop() {
           }
         }
       }
-      else {                                                              //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
+      else {                                                                                                                                                      //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
         motor(0, 0,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                                             //nur ausrichten
       }
     }
-    else {                                                                //der Boden sieht etwas
+    else {                                                                                                                                                        //der Boden sieht etwas
       motor(bodenrichtung, 200,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                                 //sehr schnell von der Linie wegfahren
     }
   }
-  else {                                                                  //stehen bleiben, falls der Andere den Ball hat (torwart)
+  else {                                                                                                            //stehen bleiben, falls der Andere den Ball hat (torwart)
     motor(0, 0,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);
   }
   if (hatBall(Lichtschranke,minWertLS,PhaseLSKalibration) && ( Icball == 0 || Icball == 15 || Icball == 1 )) {      //Ermitteln ob er den Ball hat
-    if (piread) {                                                         //sieht die pixy etwas
+    if (piread) {                                                                                                   //sieht die pixy etwas
       motor(Pixy(pixy,piread), 100,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                             //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
     }
     else {

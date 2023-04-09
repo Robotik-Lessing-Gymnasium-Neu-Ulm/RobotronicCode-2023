@@ -21,26 +21,36 @@ boolean hatBall(uint8_t Lichtschranke,int& minWertLS, char& PhaseLSKalibration) 
       }
       break;
     case 1:                     //Ball draußen halten!!!
+      Serial.println("Kalibrierung(LS): Ball außerhalb der Kuhle!");
       if(analogRead(Lichtschranke)<outMin){
         outMin=analogRead(Lichtschranke);
       }
       break;
     case 2:                     //Ball in der Kuhle drehen
+      Serial.println("Kalibrierung(LS): Ball in der Kuhle!");
       if(analogRead(Lichtschranke)>inMax){
         inMax=analogRead(Lichtschranke);
       }
       break;
     case 3:               //Speicherphase, die sich automatisch schließt
       minWertLS=(inMax+outMin)/2;
-      File file = SD.open("minWerte.json", FILE_WRITE | O_TRUNC  | O_CREAT); //Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
-        StaticJsonDocument<500> doc;
-        doc["Lichtschranke"]=minWertLS;
-        String buf{""};                                                     //Buffer, der in die geöffnete *.json-Datei geschrieben wird
-        serializeJsonPretty(doc,buf);
-        for(auto elem:buf){
-          file.write(elem);
+      Serial.print("Kalibrierung(LS): speichern: ");
+      Serial.println(minWertLS);
+      File myFile_=SD.open("minWerte.json",FILE_READ); //Datei öffnen, lesen
+        char buf_[myFile_.size()];                                  //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
+        myFile_.read(buf_,myFile_.size());
+        StaticJsonDocument<1000> doc_;
+        deserializeJson(doc_, buf_);
+      myFile_.close();
+      File s = SD.open("minWerte.json", FILE_WRITE); //Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
+        s.truncate();
+        doc_["Lichtschranke"]=minWertLS;
+        char b[1000];                                                     //Buffer, der in die geöffnete *.json-Datei geschrieben wird
+        serializeJsonPretty(doc_,b);
+        for(auto elem:b){
+          s.write(elem);
         }
-      file.close();
+      s.close();
       PhaseLSKalibration=0;
       break;
   }
