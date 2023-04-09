@@ -3,29 +3,29 @@
 #include<Lichtschranke.h>
 #include<Boden.h>
 
-void blink(uint8_t pin,bool direction){  //synchronisiert
+void blink(uint8_t pin,bool direction){           //synchronisiert
   static long nextTrigger=0;
   static bool nextZustand=true;
-  if(millis()>=nextTrigger){
-    digitalWrite(pin,nextZustand==direction);
+  if(millis()>=nextTrigger){                      //Wenn die Zeit gekommen ist
+    digitalWrite(pin,nextZustand==direction);     //LED schreiben, Invertieren,falls direction==false
     nextZustand=!nextZustand;
     nextTrigger=millis()+500;
   }
 }
 
 void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration, int* LED, int* Schwellwerte,  uint8_t S0, uint8_t S1, uint8_t S2, uint8_t S3, uint8_t UAM1, uint8_t UAM2,uint8_t UAM3, uint8_t LEDboden, uint8_t ButtonI, uint8_t ButtonII, uint8_t ButtonIII, uint8_t ButtonIV, uint8_t LEDir, uint8_t LEDballcaught, uint8_t LEDgyro, uint8_t Lichtschranke, char& PhaseLSKalibration, int minWertLS) {
-  // Einzelne Variablen überprüfen und dann die Pins schreiben
+  // Einzelne Variablen überprüfen und dann die Pins schreiben (Pullups)
   if (digitalRead(ButtonI) == LOW) {
     buttonGpressed = true;
   }
   if (digitalRead(ButtonIV) == LOW) {
-    static long lastTrigger=0;
+    static long lastTrigger=0;                                  //um Ungenauigkeiten beim Drücken zu glätten
     if(lastTrigger+100<millis()){
       lastTrigger=millis();
-      irAutoCalibration=!irAutoCalibration;
+      irAutoCalibration=!irAutoCalibration;                     //der Wert wird invertiert beim Drücken
     }
   }
-  if(digitalRead(ButtonII)==LOW){
+  if(digitalRead(ButtonII)==LOW){                               //wie Button IV, wobei die Phase eins weiter gestellt wird
     static long LastTriggerLS=0;
     if(LastTriggerLS+100<millis()){
       LastTriggerLS=millis();
@@ -35,15 +35,15 @@ void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icb
       }
     }
   }
-  if(digitalRead(ButtonIII)==LOW){
+  if(digitalRead(ButtonIII)==LOW){                              //direktes Aufrufen von 
     AutoCalibration(LED,Schwellwerte,LEDboden,S0,S1,S2,S3,UAM1,UAM2,UAM3);
   }
-  if(irAutoCalibration){
+  if(irAutoCalibration){                                        //eigentlich unnötig, da nur minWert[] resettet wird
     blink(LEDir,1);
     blink(LEDboden,1);
     blink(LEDballcaught,1);
     blink(LEDgyro,1);
-  }else if(PhaseLSKalibration){
+  }else if(PhaseLSKalibration){                                 //Andere Blinkzeichen je nach Phase der LS-Kalibration
     switch (PhaseLSKalibration){
       case 1:
         blink(LEDir,0);
@@ -58,7 +58,7 @@ void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icb
         blink(LEDgyro,0);
         break;
     }
-  }else{
+  }else{                                                          //Es wird nirgends kalibriert -> einfach nur Anzeigen, ob gewisse Werte erreicht sind
     if (richtung >= 0) {
       digitalWrite(LEDir, HIGH);
     } else {

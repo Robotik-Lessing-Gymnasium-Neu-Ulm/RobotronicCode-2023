@@ -268,10 +268,10 @@ void bodenverarbeiten(bool* gesehenSensor,bool& minEinerDa,bool* Photo, double& 
     bodenrichtung = -1;
   }
 }
-void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation, uint8_t S0, uint8_t S1, uint8_t S2, uint8_t S3, uint8_t UAM1, uint8_t UAM2,uint8_t UAM3, uint8_t LEDboden, uint8_t ButtonI, uint8_t M1_FW, uint8_t M1_RW, uint8_t M1_PWM, uint8_t M2_FW, uint8_t M2_RW, uint8_t M2_PWM, uint8_t M3_FW, uint8_t M3_RW, uint8_t M3_PWM, uint8_t M4_FW, uint8_t M4_RW, uint8_t M4_PWM) {
+void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation, uint8_t S0, uint8_t S1, uint8_t S2, uint8_t S3, uint8_t UAM1, uint8_t UAM2,uint8_t UAM3, uint8_t LEDboden, uint8_t ButtonI, uint8_t M1_FW, uint8_t M1_RW, uint8_t M1_PWM, uint8_t M2_FW, uint8_t M2_RW, uint8_t M2_PWM, uint8_t M3_FW, uint8_t M3_RW, uint8_t M3_PWM, uint8_t M4_FW, uint8_t M4_RW, uint8_t M4_PWM) {//kalibriert den Boden automatisch
   bodenlesen(minEinerDa,LED,Schwellwerte,Photo,S0,S1,S2,S3,UAM1,UAM2,UAM3);
   bodenverarbeiten(gesehenSensor,minEinerDa,Photo,bodenrichtung,LED,gyro,buttonGpressed,Schwellwerte,minus,alteZeit,alterWinkel,rotation,S0,S1,S2,S3,UAM1,UAM2,UAM3,LEDboden,ButtonI,M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);
 }
-double bodenrichtungszuweisung(int n) {
+inline double bodenrichtungszuweisung(int n) {
   return ((n * 11.25 + 90 ) / 180 * PI );
 }

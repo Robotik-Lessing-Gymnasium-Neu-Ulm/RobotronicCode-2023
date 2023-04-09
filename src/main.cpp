@@ -23,16 +23,16 @@ Pixy2I2C pixy;                                      //pixi im i2c-kommunikations
 
 Adafruit_BNO055 gyro = Adafruit_BNO055(55, 0x28);   //Erstellen eines Obketes der Klasse Adafruit_BNO055 mit Namen gyro
 
-bool Photo[48];                                     //Variablen für Boden
-int Schwellwerte[48];
-bool gesehenSensor[48];
-int LED[48];
-int LEDbest;
-double bodenrichtung = -1;
-bool minEinerDa = false;
+bool Photo[48];                                     //Sieht der Phototransistor etwas?
+int Schwellwerte[48];                               //Schwellwerte, um zu entscheiden, ob der Phototransistor etwas sieht
+bool gesehenSensor[48];                             //
+int LED[48];                                        //Messwert jedes Phototransistors
+int LEDbest;                                        //der kleinste, gemessene Wert
+double bodenrichtung = -1;                          //zu fahrende Richtung
+bool minEinerDa = false;                            //sieht er überhaupt die Linie?
 
 bool irAutoCalibration = false;                     //für IR-Kalibration
-int minWert[16];
+int minWert[16];                                    //Schwellwerte der IRs
 
 
 /*//Variablen US
@@ -45,23 +45,23 @@ bool ySum;
 int US[4];
 int Wert[4];*/
 
-bool piread;                                          //Variablen für Kamera
-double TorRichtungKamera;
+bool piread;                                          //sieht die Kamera etwas
+double TorRichtungKamera;                             //Richtung zum Tor
 
 long alteZeit;                                        //Variablen für Gyro
-int alterWinkel;
-double minus;
-double rotation;
+int alterWinkel;                                      //Buffer des vorhergehenden Winkels
+double minus;                                         //Offset bei der Winkel-Bestimmung
+double rotation;                                      //zu drehen, um ausgerichtet zu bleiben
 
 int IR[16];                                           //Variablen für IR
-double IRbest = -1;
-double richtung = -1;
-int Icball = -1;
+double IRbest = -1;                                   //der Abstand zum Ball; der kleinste, gemessene Wert
+double richtung = -1;                                 //die zu fahrende Richtung in der Ballanfahrt
+int Icball = -1;                                      //index des Sensors, der den Ball gerade vor sich hat
 double entfVelo = 50;                                 //Geschwindigkeit vom PID gesteuert bei der Ballanfahrt (Entfernungs-PID)
 double wiVelo = 50;                                   //Gesch.-Output des Winkelpids
 double addRot = 0;                                    //temporäre Drehung, wenn er nah am Ball ist
-unsigned long addRotTime=0;
-double WinkelBall=90;
+unsigned long addRotTime=0;                           //wann wurde die temp. Drehung zuletzt geändert -> Glätten der Werte
+double WinkelBall=90;                                 //Winkel zum Ball (DEG): Rechts -> 0; Vorne -> 90
 
 /*int IRalt0[16];
 int IRalt1[16];
@@ -74,32 +74,31 @@ double m3;
 double m4;
 double phi;*/
 
-bool torwart;                                         //bluetooth
+bool torwart;                                             //bluetooth
 
-double entfSet=5;                                                 //wird sich nach dem Anfahrtsradius richten
-PID entfPID(&IRbest,&entfVelo,&entfSet,7,0,1.5,REVERSE);          //PID-Regler über die Enfernung
-double wiSet=0;                                                   //Setpoint des Winkelpids (vorne)
-double wiIn;                                                      //Inpunt des Winkelpids
-PID wiPID(&wiIn,&wiVelo,&wiSet,0.9,0,0.2,REVERSE);               //PID-Regler über den Winkel
+double entfSet=5;                                         //wird sich nach dem Anfahrtsradius richten
+PID entfPID(&IRbest,&entfVelo,&entfSet,7,0,1.5,REVERSE);  //PID-Regler über die Enfernung (Glieder ^ne^)
+double wiSet=0;                                           //Setpoint des Winkelpids (vorne)
+double wiIn;                                              //Inpunt des Winkelpids
+PID wiPID(&wiIn,&wiVelo,&wiSet,0.9,0,0.2,REVERSE);        //PID-Regler über den Winkel (Glieder ^ne^)
 
-bool buttonGpressed = true;                           //other
+bool buttonGpressed = true;                               //other
 char PhaseLSKalibration=0;
 int minWertLS=400;
 
 void setup() {
-  Serial.begin(115200);                         //Seriellen Monitor initialisieren
-  Serial5.begin(115200);                        //Bluetooth initialisieren
-  while (!SD.begin(BUILTIN_SDCARD)) {
+  Serial.begin(115200);                                   //Seriellen Monitor initialisieren
+  Serial5.begin(115200);                                  //Bluetooth initialisieren
+  while (!SD.begin(BUILTIN_SDCARD)) {                     //SD-Karte initialisieren
     Serial.println("Karte einstecken!");
-    // don't do anything more:
   }
   Serial.println("Karte initialisiert.");
-  File myFile=SD.open("minWerte.json",FILE_READ); //Datei öffnen, lesen
-    char buf[myFile.size()];                                  //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
+  File myFile=SD.open("minWerte.json",FILE_READ);         //Datei öffnen, lesen
+    char buf[myFile.size()];                              //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
     myFile.read(buf,myFile.size());
-    StaticJsonDocument<1000> doc;
+    StaticJsonDocument<1000> doc;                         //Json-Datei aus der Datei
     deserializeJson(doc, buf);
-    Serial.println(">>>>>>>>>>>>>>(minWerte)");       //Befüllen von minWert & Ausgabe
+    Serial.println(">>>>>>>>>>>>>>(minWerte)");           //Befüllen von minWert & Ausgabe
     Serial.println(">>>>>>>>>>>>(IR)");
     for(int i{0};i<16;i++){
       minWert[i]=doc["IR"][i];
@@ -108,18 +107,18 @@ void setup() {
       Serial.print(": ");
       Serial.println(minWert[i]);
     }
-    Serial.println("(IR)<<<<<<<<<<<<");
+    Serial.println("(IR)<<<<<<<<<<<<");                   //Befüllen von minWertLS
     minWertLS=doc["Lichtschranke"];
     Serial.print("LS: ");
     Serial.println(minWertLS);
     Serial.println("(MinWerte)<<<<<<<<<<<<<<");
   myFile.close();
 
-  File file=SD.open("Verbindungen.json",FILE_READ);        
-    char buf2[file.size()];
+  File file=SD.open("Verbindungen.json",FILE_READ);       //Datei öffnen, lesen
+    char buf2[file.size()];                               //Buffer des Dateiinhalts
     file.read(buf2,file.size());
     deserializeJson(doc, buf2);
-    Serial.println(">>>>>>>>>>>>>>(Verbindungen)");
+    Serial.println(">>>>>>>>>>>>>>(Verbindungen)");       //Json auslesen -> Verkabelung auslesen und ausgeben
     M1_FW=doc["M1_FW"];
     Serial.print("M1_FW: ");
     Serial.println(M1_FW);
@@ -236,7 +235,7 @@ void setup() {
     Serial.println(Lichtschranke);
     Serial.println("(Verbindungen)<<<<<<<<<<<<<<");
   file.close();
-
+  //Einstellung der Pins
   pinMode(S0, OUTPUT);                          //Multiplexer Oben Pin Festlegung
   pinMode(S1, OUTPUT);
   pinMode(S2, OUTPUT);
@@ -263,39 +262,39 @@ void setup() {
   pinMode(ButtonIV, INPUT_PULLUP);              //IR-Kalibration
   AutoCalibration(LED,Schwellwerte,LEDboden,S0,S1,S2,S3,UAM1,UAM2,UAM3);
   gyro.begin(/*8*/);                            //den gyro losmessen lassen (ich musste die 8 auskommentieren, es funktioniert trotzdem)
-  entfPID.SetMode(AUTOMATIC);
+  entfPID.SetMode(AUTOMATIC);                   //PIDs auf dauerndes ändern des Outputs einstellen
   wiPID.SetMode(AUTOMATIC);
 }
 
 void loop() {
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,LED,Schwellwerte,S0,S1,S2,S3,UAM1,UAM2,UAM3,LEDboden,ButtonI,ButtonII,ButtonIII,ButtonIV,LEDir,LEDballcaught,LEDgyro,Lichtschranke,PhaseLSKalibration,minWertLS); //Die grünen Kontroll-LEDs leuchten lassen
-  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,S0,S1,S2,S3,AM1);   //die IR&Boden&Kompass-Sensoren messen und abspeichern lassen
+  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,S0,S1,S2,S3,AM1);                                                                                                                   //die IR&Boden&Kompass-Sensoren messen und abspeichern lassen
   Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,S0,S1,S2,S3,UAM1,UAM2,UAM3,LEDboden,ButtonI, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);
   compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot);
   // bluetooth(torwart,IRbest);                                           //empfangen und senden
   if (!torwart) {
     if (bodenrichtung == -1) {                                            //der Boden sieht nichts
       if (richtung != -1) {                                               //der IR sieht etwas
-        if(WinkelBall<130&&WinkelBall>50){                                //Ball Vor dem Roboter
+        if(WinkelBall<130&&WinkelBall>50){                                //Ball ~vor dem Roboter (Toleranz, Drehwinkel, delay ^ne^)
           int delay=50;
           if(addRot!=0){
             delay=1200;
           }
-          if(WinkelBall>=90&&WinkelBall<270){
+          if(WinkelBall>=90&&WinkelBall<270){                             //Ball links -> temporäre Rotation nach rechts
             if(addRotTime+delay<millis()){
               addRot=-22;
               addRotTime=millis();
             }
-          }else{
+          }else{                                                          //Ball rechts -> temporäre Rotation nach links
             if(addRotTime+delay<millis()){
               addRot=22;
               addRotTime=millis();
             }
           }
-          motor(90-addRot/2,100,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);
+          motor(90-addRot/2,100,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);      //Nach vorne fahren (temporäre Rotation beachten), wobei der Overshoot ausgeglichen wird (Koeffizient ^ne^)
         }else{
-          motor(richtung-addRot,((IRbest-entfSet)/(75-entfSet))*entfVelo+wiVelo,(1-(IRbest-entfSet)/(75-entfSet))*rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);
-          int delay=50;
+          motor(richtung-addRot,((IRbest-entfSet)/(75-entfSet))*entfVelo+wiVelo,(1-(IRbest-entfSet)/(75-entfSet))*rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);    //Kombination der PID-Outputs als Konvexkombination
+          int delay=50;                                                                                                                 //Zurückstellen der temp. Rotation (Drehwinkel, delay ^ne^)
           if(addRot!=0){
             delay=500;
           }
@@ -305,25 +304,25 @@ void loop() {
           }
         }
       }
-      else {                                                                                                                                                      //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
-        motor(0, 0,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                                             //nur ausrichten
+      else {                                                                                                                            //der IR sieht nichts (später wahrscheinlich: stürmer->hinter neutralen Punkt fahren; torwart->Tormittelpunkt)
+        motor(0, 0,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                   //nur ausrichten
       }
     }
-    else {                                                                                                                                                        //der Boden sieht etwas
-      motor(bodenrichtung, 200,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                                 //sehr schnell von der Linie wegfahren
+    else {                                                                                                                              //der Boden sieht etwas
+      motor(bodenrichtung, 200,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);       //sehr schnell von der Linie wegfahren
     }
   }
-  else {                                                                                                            //stehen bleiben, falls der Andere den Ball hat (torwart)
+  else {                                                                                                                                //stehen bleiben, falls der Andere den Ball hat (torwart) -> später: Werte des kleinen Teensys nutzen
     motor(0, 0,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);
   }
-  if (hatBall(Lichtschranke,minWertLS,PhaseLSKalibration) && ( Icball == 0 || Icball == 15 || Icball == 1 )) {      //Ermitteln ob er den Ball hat
-    if (piread) {                                                                                                   //sieht die pixy etwas
-      motor(Pixy(pixy,piread), 100,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                             //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
+  if (hatBall(Lichtschranke,minWertLS,PhaseLSKalibration) && ( Icball == 0 || Icball == 15 || Icball == 1 )) {                          //Ermitteln ob er den Ball hat
+    if (piread) {                                                                                                                       //sieht die pixy etwas?
+      motor(Pixy(pixy,piread), 100,rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);   //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
     }
     else {
-      motor(0,0, rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                                               //nach vorne fahren
+      motor(0,0, rotation, M1_FW, M1_RW, M1_PWM, M2_FW, M2_RW, M2_PWM, M3_FW, M3_RW, M3_PWM, M4_FW, M4_RW, M4_PWM);                     //nach vorne fahren
     }
   }
-  entfPID.Compute();
+  entfPID.Compute();                                                                                                                    //PID berechnen
   wiPID.Compute();
 }
