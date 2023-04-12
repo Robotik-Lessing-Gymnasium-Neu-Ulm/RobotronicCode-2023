@@ -76,15 +76,42 @@ double phi;*/
 
 bool torwart;                                         //bluetooth
 
+int minWertLS;
+
 double entfSet=5;                                                 //wird sich nach dem Anfahrtsradius richten
-PID entfPID(&IRbest,&entfVelo,&entfSet,7,0,1.5,REVERSE);          //PID-Regler über die Enfernung
+PID entfPID(&IRbest,&entfVelo,&entfSet,5,0,0.35,REVERSE);          //PID-Regler über die Enfernung (5,0,0.3)
 double wiSet=0;                                                   //Setpoint des Winkelpids (vorne)
 double wiIn;                                                      //Inpunt des Winkelpids
-PID wiPID(&wiIn,&wiVelo,&wiSet,0.9,0,0.2,REVERSE);               //PID-Regler über den Winkel
+PID wiPID(&wiIn,&wiVelo,&wiSet,0.8,0,0.2307,REVERSE);               //PID-Regler über den Winkel (0.8,0,0.22)->(0.8,0,0.23)
 
 bool buttonGpressed = true;                           //other
 
 void setup() {
+  while (!SD.begin(BUILTIN_SDCARD)) {                     //SD-Karte initialisieren
+    Serial.println("Karte einstecken!");
+  }
+  Serial.println("Karte initialisiert.");
+  File myFile=SD.open("minWerte.json",FILE_READ);         //Datei öffnen, lesen
+    char buf[myFile.size()];                              //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
+    myFile.read(buf,myFile.size());
+    StaticJsonDocument<1000> doc;                         //Json-Datei aus der Datei
+    deserializeJson(doc, buf);
+    Serial.println(">>>>>>>>>>>>>>(minWerte)");           //Befüllen von minWert & Ausgabe
+    Serial.println(">>>>>>>>>>>>(IR)");
+    for(int i{0};i<16;i++){
+      minWert[i]=doc["IR"][i];
+      Serial.print(" ");
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.println(minWert[i]);
+    }
+    Serial.println("(IR)<<<<<<<<<<<<");                   //Befüllen von minWertLS
+    minWertLS=doc["Lichtschranke"];
+    Serial.print("LS: ");
+    Serial.println(minWertLS);
+    Serial.println("(MinWerte)<<<<<<<<<<<<<<");
+  myFile.close();
+  
   Serial.begin(115200);                         //Seriellen Monitor initialisieren
   Serial5.begin(115200);                        //Bluetooth initialisieren
   pinMode(S0, OUTPUT);                          //Multiplexer Oben Pin Festlegung
@@ -115,57 +142,40 @@ void setup() {
   gyro.begin(/*8*/);                            //den gyro losmessen lassen (ich musste die 8 auskommentieren, es funktioniert trotzdem)
   entfPID.SetMode(AUTOMATIC);
   wiPID.SetMode(AUTOMATIC);
-
-  SD.begin(BUILTIN_SDCARD);                     //SD-Karte initialisieren
-  File myFile=SD.open("minWerte.js",FILE_READ); //Datei öffnen, lesen
-    String buf="";
-    while(myFile.available()){
-      buf+=myFile.read();
-    }
-    StaticJsonDocument<200> doc;
-    deserializeJson(doc, buf);
-    Serial.println(">>>>>>>>>>>>>>(minWert)");
-    for(int i{0};i<16;i++){
-      minWert[i]=doc["minWerte"][i];
-      Serial.print(i);
-      Serial.print(": ");
-      Serial.println(minWert[i]);
-    }
-    Serial.println("(minWert)<<<<<<<<<<<<<<");
-  myFile.close();
 }
 
 void loop() {
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration); //Die grünen Kontroll-LEDs leuchten lassen
   IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
-  //Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
+  Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
   compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot);
   // bluetooth(torwart,IRbest);                                           //empfangen und senden
   if (!torwart) {
     if (bodenrichtung == -1) {                                            //der Boden sieht nichts
       if (richtung != -1) {                                               //der IR sieht etwas
-        if(WinkelBall<130&&WinkelBall>50){                                //Ball Vor dem Roboter
+        if(WinkelBall<115&&WinkelBall>65){                                //Ball Vor dem Roboter
           int delay=50;
           if(addRot!=0){
             delay=1200;
           }
           if(WinkelBall>=90&&WinkelBall<270){
             if(addRotTime+delay<millis()){
-              addRot=-25;
+              addRot=-18;
               addRotTime=millis();
             }
           }else{
             if(addRotTime+delay<millis()){
-              addRot=25;
+              addRot=18;
               addRotTime=millis();
             }
           }
-          motor(90-addRot/2,100,rotation);
+          motor(90-0.85*addRot,100,rotation);
         }else{
-          motor(richtung-addRot,((IRbest-entfSet)/(75-entfSet))*entfVelo+wiVelo,(1-(IRbest-entfSet)/(75-entfSet))*rotation);
+          motor(richtung-addRot,((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo,rotation);
+          //motor(richtung-addRot,entfVelo,rotation);
           int delay=50;
           if(addRot!=0){
-            delay=500;
+            delay=700;
           }
           if(addRotTime+delay<millis()){
             addRot=0;

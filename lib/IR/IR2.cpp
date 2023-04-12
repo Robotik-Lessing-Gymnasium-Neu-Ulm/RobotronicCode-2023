@@ -32,9 +32,9 @@ int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzu
 }
 void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfSet, double &wiIn, PID &wiPID, int* minWert, bool& irAutoCalibration, double& addRot, double& WinkelBall, unsigned long& addRotTime, bool& torwart) {
   if(!irAutoCalibration){
-    static double AnfahrtsRadius=7;                                   //Achtung: auch bei der IR Kalibration ändern!
-    static double BallWegRadius=75;
-    entfSet=AnfahrtsRadius;
+    static double AnfahrtsRadius=9;                                   //Achtung: auch bei der IR Kalibration ändern!
+    static double BallWegRadius=195;
+    entfSet=AnfahrtsRadius+3;
     // static int min=1023;
     // int gelesen=lesenMultiplexerOben(0,1,0,0);
     // if(min>gelesen){
@@ -58,18 +58,22 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1),minWert[13], 1023, 0, 200);
     IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0),minWert[14], 1023, 0, 200);
     IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1),minWert[15], 1023, 0, 200);
-    IRbest = 90;                                                        //bestimmen des niedrigsten, gemessenen Wertes und Speichern des Index in Icball
+    IRbest = 200;                                                        //bestimmen des niedrigsten, gemessenen Wertes und Speichern des Index in Icball
     for (int i = 0; i < 16; i++) {
       if (IR[i] < IRbest) {
         IRbest = IR[i];
         Icball = i;
       }
     }
+    for(int i=0;i<16;i++){
+      if(IR[i]<0){
+        minWert[i]--;
+      }
+    }
+    Serial.println(IRbest);
     // if(!torwart){
       for(int i=0;i<16;i++){
-        if(IR[i]<0){
-          minWert[i]--;
-        }
+        
         //   if(IR[i]>10){
         //     count[i]++;
         //   }
@@ -87,9 +91,33 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     if(wiIn>180){
       wiIn-=360;
     }
-    // Serial.print(Icball);
-    // Serial.print("|");
-    // Serial.println(WinkelBall);
+    // static unsigned long lastSave=0;                                      //Nur alle 5 Sek speichern
+    // //alle 5sec speichern
+    // if(millis()>=lastSave+5'000){
+    //   Serial.println("Speichern(IR)");
+    //   Serial.println(minWert[0]);
+    //   File myFile_=SD.open("minWerte.json",FILE_READ);                    //Datei öffnen, lesen
+    //     char buf_[myFile_.size()];                                        //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
+    //     myFile_.read(buf_,myFile_.size());                                //Buffer mit Dateiinhalt befüllen
+    //     StaticJsonDocument<1000> doc_;                                    //Json aus geöffneter Datei
+    //     deserializeJson(doc_, buf_);
+    //   myFile_.close();
+    //   File s = SD.open("minWerte.json", FILE_WRITE);                      //Datei öffnen, schreiben
+    //     s.truncate();                                                     //Datei leeren
+    //     for(int i=0;i<16;i++){                                            //Json-Datei mit neuen Daten füllen
+    //       doc_["IR"][i]=minWert[i];
+    //     }
+    //     char b[500];                                                      //Buffer, der in die geöffnete *.json-Datei geschrieben wird
+    //     for(int i{0};i<500;i++){                                          //Vordefinieren des buffers mit Leerzeichen
+    //       b[i]=' ';
+    //     }
+    //     serializeJsonPretty(doc_,b);                                      //Json in Text übersetzen
+    //     for(auto elem:b){                                                 //Datei mit Buffer befüllen
+    //       s.write(elem);
+    //     }
+    //   s.close();
+    //   lastSave=millis();
+    // }
     if(IRbest>BallWegRadius){                                           //Wenn er den Ball nicht sieht
       richtung=-1;
       addRot=0;
@@ -99,23 +127,25 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     if(WinkelBall<0){
       WinkelBall+=360;
     }
-    // Serial.print(addRot);Serial.print("|");
-    if(IRbest<AnfahrtsRadius){                                          //Wenn der Roboter im Anfahrtskreis steht
-      int delay=50;
+    if(IRbest<1.5*AnfahrtsRadius){
+      int delay=80;
       if(addRot!=0){
-            delay=1200;
-          }
+        delay=1300;
+      }
       if(WinkelBall>=90&&WinkelBall<270){
         if(addRotTime+delay<millis()){
-          addRot=-20;
+          addRot=-25;
           addRotTime=millis();
         }
       }else{
         if(addRotTime+delay<millis()){
-          addRot=20;
+          addRot=25;
           addRotTime=millis();
         }
       }
+    }
+    // Serial.print(addRot);Serial.print("|");
+    if(IRbest<AnfahrtsRadius){                                          //Wenn der Roboter im Anfahrtskreis steht
       richtung=270-addRot;                                                     //nach hinten fahren
       return;
     }
@@ -132,16 +162,6 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     if(richtung>360){
       richtung-=360;
     }
-
-    File file = SD.open("minWerte.js", FILE_WRITE | O_TRUNC | O_CREAT);//Datei öffnen, schreiben|leeren|neu erstellen, falls nicht existent
-      StaticJsonDocument<200> doc;
-      doc["minWerte"]=minWert;
-      String buf{""};
-      serializeJsonPretty(doc,buf);
-      for(auto elem:buf){
-        file.write(elem);
-      }
-    file.close();
   }else{
     irAutoCal(minWert);
     for(int i=0;i<16;i++){
