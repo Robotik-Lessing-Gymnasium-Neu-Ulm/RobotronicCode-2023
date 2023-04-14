@@ -28,8 +28,8 @@
 #define UAM3 A16 // analog Multiplexer Unten 3
 #endif
 
-#ifndef LEDboden
-#define LEDboden 13
+#ifndef LEDIV
+#define LEDIV 13
 #endif
 
 #ifndef ButtonI
@@ -298,7 +298,7 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
       rotation = -rotation / 4.5;
       motor(bodenrichtung, 150,rotation);
       //Serial.println(compass());
-      digitalWrite(LEDboden, HIGH);
+      digitalWrite(LEDIV, HIGH);
       if (digitalRead(ButtonI) == LOW) {
         AutoCalibration(LED,Schwellwerte);
 

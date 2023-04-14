@@ -30,7 +30,7 @@ int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzu
   digitalWrite(S3, s0);
   return analogRead(AM1);
 }
-void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfSet, double &wiIn, PID &wiPID, int* minWert, bool& irAutoCalibration, double& addRot, double& WinkelBall, unsigned long& addRotTime, bool& torwart) {
+void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfSet, double &wiIn, PID &wiPID, int* minWert, bool& irAutoCalibration, double& addRot, double& WinkelBall, unsigned long& addRotTime, bool& torwart, bool& IRsave) {
   if(!irAutoCalibration){
     static double AnfahrtsRadius=9;                                   //Achtung: auch bei der IR Kalibration ändern!
     static double BallWegRadius=195;
@@ -70,7 +70,6 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
         minWert[i]--;
       }
     }
-    Serial.println(IRbest);
     // if(!torwart){
       for(int i=0;i<16;i++){
         
@@ -91,33 +90,32 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     if(wiIn>180){
       wiIn-=360;
     }
-    // static unsigned long lastSave=0;                                      //Nur alle 5 Sek speichern
-    // //alle 5sec speichern
-    // if(millis()>=lastSave+5'000){
-    //   Serial.println("Speichern(IR)");
-    //   Serial.println(minWert[0]);
-    //   File myFile_=SD.open("minWerte.json",FILE_READ);                    //Datei öffnen, lesen
-    //     char buf_[myFile_.size()];                                        //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
-    //     myFile_.read(buf_,myFile_.size());                                //Buffer mit Dateiinhalt befüllen
-    //     StaticJsonDocument<1000> doc_;                                    //Json aus geöffneter Datei
-    //     deserializeJson(doc_, buf_);
-    //   myFile_.close();
-    //   File s = SD.open("minWerte.json", FILE_WRITE);                      //Datei öffnen, schreiben
-    //     s.truncate();                                                     //Datei leeren
-    //     for(int i=0;i<16;i++){                                            //Json-Datei mit neuen Daten füllen
-    //       doc_["IR"][i]=minWert[i];
-    //     }
-    //     char b[500];                                                      //Buffer, der in die geöffnete *.json-Datei geschrieben wird
-    //     for(int i{0};i<500;i++){                                          //Vordefinieren des buffers mit Leerzeichen
-    //       b[i]=' ';
-    //     }
-    //     serializeJsonPretty(doc_,b);                                      //Json in Text übersetzen
-    //     for(auto elem:b){                                                 //Datei mit Buffer befüllen
-    //       s.write(elem);
-    //     }
-    //   s.close();
-    //   lastSave=millis();
-    // }
+    if(IRsave){
+      Serial.println("Speichern(IR)");
+      Serial.println(minWert[0]);
+      File myFile_=SD.open("minWerte.json",FILE_READ);                    //Datei öffnen, lesen
+        char buf_[myFile_.size()];                                        //Zwischenspeicher des Inhalts der geöffneten *.json-Datei
+        myFile_.read(buf_,myFile_.size());                                //Buffer mit Dateiinhalt befüllen
+        StaticJsonDocument<1000> doc_;                                    //Json aus geöffneter Datei
+        deserializeJson(doc_, buf_);
+      myFile_.close();
+      File s = SD.open("minWerte.json", FILE_WRITE);                      //Datei öffnen, schreiben
+        s.truncate();                                                     //Datei leeren
+        for(int i=0;i<16;i++){                                            //Json-Datei mit neuen Daten füllen
+          doc_["IR"][i]=minWert[i];
+        }
+        char b[500];                                                      //Buffer, der in die geöffnete *.json-Datei geschrieben wird
+        for(int i{0};i<500;i++){                                          //Vordefinieren des buffers mit Leerzeichen
+          b[i]=' ';
+        }
+        serializeJsonPretty(doc_,b);                                      //Json in Text übersetzen
+        for(auto elem:b){                                                 //Datei mit Buffer befüllen
+          s.write(elem);
+        }
+      s.close();
+      Serial.println("IR-save abgeschlossen");
+      IRsave=false;
+    }
     if(IRbest>BallWegRadius){                                           //Wenn er den Ball nicht sieht
       richtung=-1;
       addRot=0;
@@ -163,7 +161,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
       richtung-=360;
     }
   }else{
-    irAutoCal(minWert);
+    irAutoCal(minWert,irAutoCalibration);
     for(int i=0;i<16;i++){
       Serial.print(minWert[i]);
       Serial.print("|");
@@ -172,21 +170,9 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
   }
 }
 
-void irAutoCal(int* minWert){
-  if(minWert[0]>lesenMultiplexerOben(0, 0, 0, 0)){minWert[0]=lesenMultiplexerOben(0, 0, 0, 0);}
-  if(minWert[1]>lesenMultiplexerOben(0, 0, 0, 1)){minWert[1]=lesenMultiplexerOben(0, 0, 0, 1);}
-  if(minWert[2]>lesenMultiplexerOben(0, 0, 1, 0)){minWert[2]=lesenMultiplexerOben(0, 0, 1, 0);}
-  if(minWert[3]>lesenMultiplexerOben(0, 0, 1, 1)){minWert[3]=lesenMultiplexerOben(0, 0, 1, 1);}
-  if(minWert[4]>lesenMultiplexerOben(0, 1, 0, 0)){minWert[4]=lesenMultiplexerOben(0, 1, 0, 0);}
-  if(minWert[5]>lesenMultiplexerOben(0, 1, 0, 1)){minWert[5]=lesenMultiplexerOben(0, 1, 0, 1);}
-  if(minWert[6]>lesenMultiplexerOben(0, 1, 1, 0)){minWert[6]=lesenMultiplexerOben(0, 1, 1, 0);}
-  if(minWert[7]>lesenMultiplexerOben(0, 1, 1, 1)){minWert[7]=lesenMultiplexerOben(0, 1, 1, 1);}
-  if(minWert[8]>lesenMultiplexerOben(1, 0, 0, 0)){minWert[8]=lesenMultiplexerOben(1, 0, 0, 0);}
-  if(minWert[9]>lesenMultiplexerOben(1, 0, 0, 1)){minWert[9]=lesenMultiplexerOben(1, 0, 0, 1);}
-  if(minWert[10]>lesenMultiplexerOben(1, 0, 1, 0)){minWert[10]=lesenMultiplexerOben(1, 0, 1, 0);}
-  if(minWert[11]>lesenMultiplexerOben(1, 0, 1, 1)){minWert[11]=lesenMultiplexerOben(1, 0, 1, 1);}
-  if(minWert[12]>lesenMultiplexerOben(1, 1, 0, 0)){minWert[12]=lesenMultiplexerOben(1, 1, 0, 0);}
-  if(minWert[13]>lesenMultiplexerOben(1, 1, 0, 1)){minWert[13]=lesenMultiplexerOben(1, 1, 0, 1);}
-  if(minWert[14]>lesenMultiplexerOben(1, 1, 1, 0)){minWert[14]=lesenMultiplexerOben(1, 1, 1, 0);}
-  if(minWert[15]>lesenMultiplexerOben(1, 1, 1, 1)){minWert[15]=lesenMultiplexerOben(1, 1, 1, 1);}
+void irAutoCal(int* minWert, bool& irAutoCalibration){
+  for(int i=0;i<16;i++){
+    minWert[i]=600;
+  }
+  irAutoCalibration=false;    //automatisch terminieren
 }

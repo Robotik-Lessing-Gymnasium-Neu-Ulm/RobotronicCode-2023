@@ -42,13 +42,15 @@
 #define HL 4 //m4
 
 //Control LEDs
-#define LEDboden 13
-#define LEDir    37
-#define LEDgyro  17
-#define LEDballcaught    20
+#define LEDIV 13
+#define LEDII    17
+#define LEDIII  37
+#define LEDI    20
 
 #define Nah 25
 #define Mittel 50
 #define Fern 70
+
+#define LichtSchranke A2
 
 #endif

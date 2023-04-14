@@ -12,46 +12,81 @@
 #endif
 
 //Control LEDs
-#ifndef LEDboden
-#define LEDboden 13
+#ifndef LEDIV
+#define LEDIV 13
 #endif
-#ifndef LEDir
-#define LEDir    17
+#ifndef LEDII
+#define LEDII    17
 #endif
-#ifndef LEDgyro
-#define LEDgyro  20
+#ifndef LEDIII
+#define LEDIII  20
 #endif
-#ifndef LEDballcaught
-#define LEDballcaught    37
+#ifndef LEDI
+#define LEDI    37
 #endif
 
-void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration) {
-  // Einzelne Variablen überprüfen und dann die Pins schreiben
+void blink(uint8_t pin[],size_t s, int time){
+  static unsigned long Tnext=time;
+  static bool Znext=true;
+  if(millis()>=Tnext){
+    for(size_t i=0;i<s;i++){
+      digitalWrite(pin[i],Znext);
+    }
+    Znext=!Znext;
+    Tnext=millis()+time;
+  }
+}
+void wave(uint8_t pin[],size_t s, int time){
+  static size_t count=0;
+  static unsigned long Tnext=time;
+  if(millis()>=Tnext){
+    count++;
+    Tnext=millis()+time;
+  }if(count>=s){count=0;}
+  for(size_t i=0;i<s;i++){
+    if(count==i){
+      digitalWrite(pin[i],HIGH);
+    }else{
+      digitalWrite(pin[i],LOW);
+    }
+  }
+}
+
+void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration, bool& IRsave) {
+  //Einzelne Variablen überprüfen und dann die Pins schreiben
+  // ausgerichtet
+  // Linie
+  // Ball
+  // Ballkuhle
+  digitalWrite(LEDI,HIGH);
   if (digitalRead(ButtonI) == LOW) {
     buttonGpressed = true;
   }
   if (digitalRead(ButtonIV) == LOW) {
-    irAutoCalibration=!irAutoCalibration;
-    Serial.println("IR-KALIBRATION");
+    irAutoCalibration=true;
+    Serial.println("IR-Reset");
+  }
+  if(digitalRead(ButtonIII) == LOW){
+    IRsave=true;
   }
   if (richtung >= 0) {
-    digitalWrite(LEDir, HIGH);
+    digitalWrite(LEDII, HIGH);
   } else {
-    digitalWrite(LEDir, LOW);
+    digitalWrite(LEDII, LOW);
   }
   if (minEinerDa) {
-    digitalWrite(LEDboden, HIGH);
+    digitalWrite(LEDIV, HIGH);
   } else {
-    digitalWrite(LEDboden, LOW);
+    digitalWrite(LEDIV, LOW);
   }
   if (hatBall() && IRbest <10&&( Icball == 0 || Icball == 15 || Icball == 1 )) {
-    digitalWrite(LEDballcaught, HIGH);
+    digitalWrite(LEDI, HIGH);
   } else {
-    digitalWrite(LEDballcaught, LOW);
+    digitalWrite(LEDI, LOW);
   }
   if (rotation <= 2.5 && rotation >= -2.5) {
-    digitalWrite(LEDgyro, HIGH);
+    digitalWrite(LEDIII, HIGH);
   } else {
-    digitalWrite(LEDgyro, LOW);
+    digitalWrite(LEDIII, LOW);
   }
 }
