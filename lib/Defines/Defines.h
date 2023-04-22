@@ -21,15 +21,15 @@
 #define laenge 200
 
 //Multiplexer Unten
-#define S0 17
-#define S1 16
-#define S2 15
-#define S3 14
+#define S0 33
+#define S1 34
+#define S2 35
+#define S3 36
 
-#define UAM1 A15 //analog Multiplexer Unten 1
-#define UAM2 A16 //analog Multplexer Unten 2
-#define UAM3 A14 // analog Multiplexer Unten 3
-#define AM1 A17 //analog Multiplexer Oben
+#define UAM1 A17 //analog Multiplexer Unten 1
+#define UAM2 A15 //analog Multplexer Unten 2
+#define UAM3 A16 // analog Multiplexer Unten 3
+#define AM1 A14 //analog Multiplexer Oben
 
 #define ButtonIV 2
 #define ButtonIII 3

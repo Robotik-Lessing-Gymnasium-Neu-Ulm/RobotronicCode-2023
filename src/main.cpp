@@ -34,6 +34,8 @@ bool minEinerDa = false;
 bool irAutoCalibration = false;                     //für IR-Kalibration
 int minWert[16];
 
+int PixyG;
+
 
 /*//Variablen US
 double vect;
@@ -150,10 +152,26 @@ void loop() {
   //Serial.println(analogRead(LichtSchranke));
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,IRsave); //Die grünen Kontroll-LEDs leuchten lassen
   IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
-  //Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
-  compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot);
+  Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
+  compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG);
   // bluetooth(torwart,IRbest);                                           //empfangen und senden
-  if (!torwart) {
+  if (true) {      //Ermitteln ob er den Ball hat  hatBall() && ( Icball == 0 || Icball == 15 || Icball == 1 )
+    if (bodenrichtung == -1) {
+      PixyG=Pixy(pixy,piread);
+      compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG);
+      if (piread) {                                                         //sieht die pixy etwas
+        motor(90, 120,rotation);                             //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
+      }
+      else {
+        compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,false,PixyG);
+        motor(90,90, rotation/3);                                               //nach vorne fahren
+      }
+    }else{                                                                //der Boden sieht etwas
+      motor(bodenrichtung, 200,rotation);                                 //sehr schnell von der Linie wegfahren
+    }
+  }
+  else if (!torwart) {
+    piread=false;
     if (bodenrichtung == -1) {                                            //der Boden sieht nichts
       if (richtung != -1) {                                               //der IR sieht etwas
         if(WinkelBall<115&&WinkelBall>65){                                //Ball Vor dem Roboter
@@ -195,15 +213,8 @@ void loop() {
     }
   }
   else {                                                                  //stehen bleiben, falls der Andere den Ball hat (torwart)
+    piread=false;
     motor(0, 0,rotation);
-  }
-  if (hatBall() && ( Icball == 0 || Icball == 15 || Icball == 1 )) {      //Ermitteln ob er den Ball hat
-    if (piread) {                                                         //sieht die pixy etwas
-      motor(Pixy(pixy,piread), 200,rotation);                             //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
-    }
-    else {
-      motor(0,0, rotation);                                               //nach vorne fahren
-    }
   }
   entfPID.Compute();
   wiPID.Compute();
