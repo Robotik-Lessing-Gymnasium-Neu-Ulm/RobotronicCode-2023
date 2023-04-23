@@ -13,6 +13,6 @@ void bodenverarbeiten(bool* gesehenSensor,bool& minEinerDa,bool* Photo, double& 
     Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, long& alteZeit, int& alterWinkel, double& rotation);
 void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation);
 double bodenrichtungszuweisung(int n);
-
+bool onLine(int* LED, int* Schwellwerte);
 
 #endif

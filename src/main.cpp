@@ -18,6 +18,7 @@
 #include<ControlLEDs.h>
 #include <Bluetooth.h>
 #include<Defines.h>
+#include<Torwart.h>
 
 Pixy2I2C pixy;                                      //pixi im i2c-kommunikations-modus initialisieren
 
@@ -35,6 +36,7 @@ bool irAutoCalibration = false;                     //für IR-Kalibration
 int minWert[16];
 
 int PixyG;
+int PixyG2;
 
 
 /*//Variablen US
@@ -85,7 +87,7 @@ double entfSet=5;                                                 //wird sich na
 PID entfPID(&IRbest,&entfVelo,&entfSet,5.2,0,0.35,REVERSE);          //PID-Regler über die Enfernung (5,0,0.3)
 double wiSet=0;                                                   //Setpoint des Winkelpids (vorne)
 double wiIn;                                                      //Inpunt des Winkelpids
-PID wiPID(&wiIn,&wiVelo,&wiSet,0.79,0,0.254,REVERSE);               //PID-Regler über den Winkel (0.8,0,0.22)->(0.8,0,0.23); last: (0.79,0,0.2517)
+PID wiPID(&wiIn,&wiVelo,&wiSet,0.79,0,0.32,REVERSE);               //PID-Regler über den Winkel (0.8,0,0.22)->(0.8,0,0.23); last: (0.79,0,0.2517)
 
 bool buttonGpressed = true;                           //other
 
@@ -149,13 +151,12 @@ void setup() {
 }
 
 void loop() {
-  //Serial.println(analogRead(LichtSchranke));
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,IRsave); //Die grünen Kontroll-LEDs leuchten lassen
-  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
-  Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
-  compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG);
-  // bluetooth(torwart,IRbest);                                           //empfangen und senden
-  if (true) {      //Ermitteln ob er den Ball hat  hatBall() && ( Icball == 0 || Icball == 15 || Icball == 1 )
+  bluetooth(torwart,IRbest);                                           //empfangen und senden
+  if (hatBall() && ( Icball == 0 || Icball == 15 || Icball == 1 )) {      //Ermitteln ob er den Ball hat  hatBall() && ( Icball == 0 || Icball == 15 || Icball == 1 )
+    IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
+    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
+    compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG);
     if (bodenrichtung == -1) {
       PixyG=Pixy(pixy,piread);
       compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG);
@@ -169,9 +170,15 @@ void loop() {
     }else{                                                                //der Boden sieht etwas
       motor(bodenrichtung, 200,rotation);                                 //sehr schnell von der Linie wegfahren
     }
-  }
-  else if (!torwart) {
+  }else if(torwart){
+    torwartProgramm(LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave);
+  }else{    //!torwart
+    IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
+    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
+    compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG);
     piread=false;
+    entfPID.Compute();
+    wiPID.Compute();
     if (bodenrichtung == -1) {                                            //der Boden sieht nichts
       if (richtung != -1) {                                               //der IR sieht etwas
         if(WinkelBall<115&&WinkelBall>65){                                //Ball Vor dem Roboter
@@ -190,7 +197,7 @@ void loop() {
               addRotTime=millis();
             }
           }
-          motor(90-0.85*addRot,100,rotation);
+          motor(90-0.7*addRot,95,rotation);
         }else{
           motor(richtung-addRot,((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo,rotation);
           //motor(richtung-addRot,entfVelo,rotation);
@@ -212,10 +219,4 @@ void loop() {
       motor(bodenrichtung, 200,rotation);                                 //sehr schnell von der Linie wegfahren
     }
   }
-  else {                                                                  //stehen bleiben, falls der Andere den Ball hat (torwart)
-    piread=false;
-    motor(0, 0,rotation);
-  }
-  entfPID.Compute();
-  wiPID.Compute();
 }

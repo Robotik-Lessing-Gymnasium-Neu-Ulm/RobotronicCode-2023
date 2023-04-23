@@ -316,3 +316,11 @@ void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehe
 double bodenrichtungszuweisung(int n) {
   return ((n * 11.25 + 90 ) / 180 * PI );
 }
+
+bool onLine(int* LED, int* Schwellwerte){
+  if(LED[0]>Schwellwerte[0]||LED[1]>Schwellwerte[1]||LED[47] > Schwellwerte[47] || LED[46] > Schwellwerte[46]){
+    return true;
+  }else{
+    return false;
+  }
+}

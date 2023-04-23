@@ -1,7 +1,7 @@
 #include <Bluetooth.h>
 #include<Wire.h>
 
-void bluetooth(bool& torwart, int& IRbest) {
+void bluetooth(bool& torwart, double& IRbest) {
   static int blueCount;
   static int torwartarr[10];
   for(int i=9;i>0;i--){
@@ -10,7 +10,7 @@ void bluetooth(bool& torwart, int& IRbest) {
   if (blueCount == 30) {
     if (Serial5.availableForWrite()) {
       if (IRbest > 0) {
-        Serial5.write(IRbest);
+        Serial5.write((int)IRbest);
       } else {
         Serial5.write(0);
       }
@@ -34,5 +34,5 @@ void bluetooth(bool& torwart, int& IRbest) {
   for(int i=0;i<10;i++){
     t+=torwartarr[i];
   }
-  torwart=(t>5);
+  torwart=(t>3);
 }

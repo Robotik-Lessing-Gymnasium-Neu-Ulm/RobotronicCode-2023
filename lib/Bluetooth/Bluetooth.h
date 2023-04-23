@@ -1,6 +1,6 @@
 #ifndef BLUETOOTH_H_
 #define BLUETOOTH_H_
 
-void bluetooth(bool& torwart, int& IRbest);
+void bluetooth(bool& torwart, double& IRbest);
 
 #endif
