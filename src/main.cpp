@@ -151,39 +151,38 @@ void setup() {
 }
 
 void loop() {
-  ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,IRsave); //Die grünen Kontroll-LEDs leuchten lassen
-  bluetooth(torwart,IRbest);                                           //empfangen und senden
-  if (hatBall() && ( Icball == 0 || Icball == 15 || Icball == 1 )) {      //Ermitteln ob er den Ball hat  hatBall() && ( Icball == 0 || Icball == 15 || Icball == 1 )
-    IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
+  ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,IRsave);                                  //Die grünen Kontroll-LEDs leuchten lassen& Knöpfe überprüfen
+  bluetooth(torwart,IRbest);                                                                                                        //empfangen und senden
+  if (hatBall() && ( Icball == 0 || Icball == 15 || Icball == 1 )) {                                                                //Ermitteln ob er den Ball hat
+    IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
     Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG);
     if (bodenrichtung == -1) {
-      PixyG=Pixy(pixy,piread);
-      compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG);
-      if (piread) {                                                         //sieht die pixy etwas
-        motor(90, 120,rotation);                             //mit 100 aufs Tor zufahren (später mit Ausrichtung zum Tor -> Ausrichtung auf Pixywinkel ändern)
+      PixyG=Pixy(pixy,piread);                                                                                                      //Pixy auslesen
+      compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG);                                                   //Ausrichtungs-Funktion aufrufen, wobei die Kamera beachtet werden soll
+      if (piread) {                                                                                                                 //sieht die pixy etwas
+        motor(90, 120,rotation);                                                                                                    //aufs Tor zufahren, mit Ausrichtung aufs Tor
+      }else {
+        compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,false,PixyG);                                                //Ausrichtungs-Funktion aufrufen, wobei die Kamera NICHT beachtet werden soll
+        motor(90,90, rotation/3);                                                                                                   //nach vorne fahren (abgeschwächte Ausrichtung)
       }
-      else {
-        compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,false,PixyG);
-        motor(90,90, rotation/3);                                               //nach vorne fahren
-      }
-    }else{                                                                //der Boden sieht etwas
-      motor(bodenrichtung, 200,rotation);                                 //sehr schnell von der Linie wegfahren
+    }else{                                                                                                                          //der Boden sieht etwas
+      motor(bodenrichtung, 200,rotation);                                                                                           //sehr schnell von der Linie wegfahren
     }
-  }else if(torwart){
+  }else if(torwart){                                                                                                                //Als Torwart verhalten
     torwartProgramm(LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave);
   }else{    //!torwart
-    IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);   //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
+    IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
     Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG);
-    piread=false;
-    entfPID.Compute();
+    piread=false;                                                                                                                   //Pixy soll nicht beachtet werden
+    entfPID.Compute();                                                                                                              //die PIDs (für Ballanfahrt) berechnen
     wiPID.Compute();
-    if (bodenrichtung == -1) {                                            //der Boden sieht nichts
-      if (richtung != -1) {                                               //der IR sieht etwas
-        if(WinkelBall<115&&WinkelBall>65){                                //Ball Vor dem Roboter
-          int delay=50;
-          if(addRot!=0){
+    if (bodenrichtung == -1) {                                                                                                      //der Boden sieht nichts
+      if (richtung != -1) {                                                                                                         //der IR sieht etwas
+        if(WinkelBall<115&&WinkelBall>65){                                                                                          //Ball Vor dem Roboter
+          int delay=50;                                                                                                             //Verzögerung der temporären Ballausrichtung, wenn er gerade ist
+          if(addRot!=0){                                                                                                            //wenn er schon gedreht ist, soll er sich die temporäre später ändern
             delay=1200;
           }
           if(WinkelBall>=90&&WinkelBall<270){
@@ -199,7 +198,7 @@ void loop() {
           }
           motor(90-0.7*addRot,95,rotation);
         }else{
-          motor(richtung-addRot,((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo,rotation);
+          motor(richtung-addRot,((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo,rotation);      //Konvexkombination über die beiden PID-Geschwindigkeiten; t ist normierte Entf. zum Ball
           //motor(richtung-addRot,entfVelo,rotation);
           int delay=50;
           if(addRot!=0){
@@ -211,7 +210,7 @@ void loop() {
           }
         }
       }
-      else {                                                              //der IR sieht nichts (später wahrscheinlich: auf neutralen Punkt fahren)
+      else {                                                              //der IR sieht nichts
         motor(0, 0,rotation);                                             //nur ausrichten
       }
     }

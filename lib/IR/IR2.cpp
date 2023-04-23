@@ -203,10 +203,10 @@ void IRsensTW(int* IR, double& IRbest, int& Icball, double& richtung, double &wi
       }
     }
     WinkelBall=90-22.5*Icball+rotation;                                   //Berechnen des Winkels zum Ball
-    if(WinkelBall<=0){                                                  //auf Wertebereich 0-360 verschieben
+    if(WinkelBall<=0){                                                    //auf Wertebereich 0-360 verschieben
       WinkelBall+=360;
     }
-    wiIn=WinkelBall-90;                                                 //Winkel berechnen, sodass der Vorzeichen-Wechsel hinten beim Roboter liegt
+    wiIn=WinkelBall-90;                                                   //Winkel berechnen, sodass der Vorzeichen-Wechsel hinten beim Roboter liegt
     if(wiIn>180){
       wiIn-=360;
     }
@@ -236,7 +236,7 @@ void IRsensTW(int* IR, double& IRbest, int& Icball, double& richtung, double &wi
       Serial.println("IR-save abgeschlossen");
       IRsave=false;
     }
-    if(IRbest>BallWegRadius){                                           //Wenn er den Ball nicht sieht
+    if(IRbest>BallWegRadius){                                             //Wenn er den Ball nicht sieht
       richtung=-1;
       addRot=0;
       WinkelBall=90;
@@ -246,8 +246,8 @@ void IRsensTW(int* IR, double& IRbest, int& Icball, double& richtung, double &wi
       WinkelBall+=360;
     }
   }else{
-    irAutoCal(minWert,irAutoCalibration);
-    for(int i=0;i<16;i++){
+    irAutoCal(minWert,irAutoCalibration);                                 //resetten der Werte
+    for(int i=0;i<16;i++){                                                //Ausgabe der resetteten Werte
       Serial.print(minWert[i]);
       Serial.print("|");
     }

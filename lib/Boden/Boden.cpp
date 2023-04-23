@@ -274,7 +274,7 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
       sensors_event_t angVelocityData;
       gyro.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
       gyro.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);           //holt neue Werte in Grad
-      double winkel = orientationData.orientation.x;         //variable winkel enthält Drehung auf der Ebene in Grad
+      double winkel = orientationData.orientation.x;                            //variable winkel enthält Drehung auf der Ebene in Grad
       double rotationSpeed = angVelocityData.orientation.z;
       if (buttonGpressed) {                                                     //wenn Button gedrückt speichern des Offsets
         minus = winkel;
@@ -289,10 +289,10 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
       if (winkel < -180) {
         winkel = winkel + 360;
       }
-      double p = 8;                                                          //korrekturfaktor
-      double d = 50;                                                           //korrekturfaktor
+      double p = 8;                                                             //korrekturfaktor
+      double d = 50;                                                            //korrekturfaktor
       long zeit = millis() - alteZeit;                                          //vergangene Zeit seit der letzten Berechnung von drehung
-      rotation = (p * winkel) - d * rotationSpeed;   //Berechnung der drehung
+      rotation = (p * winkel) - d * rotationSpeed;                              //Berechnung der drehung
       alterWinkel = winkel;
       alteZeit = zeit;
       rotation = -rotation / 4.5;
@@ -317,7 +317,7 @@ double bodenrichtungszuweisung(int n) {
   return ((n * 11.25 + 90 ) / 180 * PI );
 }
 
-bool onLine(int* LED, int* Schwellwerte){
+bool onLine(int* LED, int* Schwellwerte){   //für TW
   if(LED[0]>Schwellwerte[0]||LED[1]>Schwellwerte[1]||LED[47] > Schwellwerte[47] || LED[46] > Schwellwerte[46]){
     return true;
   }else{

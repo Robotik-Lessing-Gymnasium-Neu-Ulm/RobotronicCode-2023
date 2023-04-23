@@ -54,10 +54,6 @@ void wave(uint8_t pin[],size_t s, int time){
 
 void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration, bool& IRsave) {
   //Einzelne Variablen überprüfen und dann die Pins schreiben
-  // ausgerichtet
-  // Linie
-  // Ball
-  // Ballkuhle
   digitalWrite(LEDI,HIGH);
   if (digitalRead(ButtonI) == LOW) {
     buttonGpressed = true;
