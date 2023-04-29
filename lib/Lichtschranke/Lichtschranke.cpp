@@ -2,19 +2,26 @@
 #include<Arduino.h>
 #include<Defines.h>
 
-boolean hatBall() {
+boolean hatBall(int minWertLS) {
   // buffern der letzten 5 Werte
-  static int MittelwertLS[5];
-  MittelwertLS[4] = MittelwertLS[3];
-  MittelwertLS[3] = MittelwertLS[2];
-  MittelwertLS[2] = MittelwertLS[1];
-  MittelwertLS[1] = MittelwertLS[0];
+  constexpr size_t s =10;
+  static int MittelwertLS[s];
+  for(int i=s-1;i>0;i--){
+    MittelwertLS[i]=MittelwertLS[i-1];
+  }
   MittelwertLS[0] = analogRead(LichtSchranke);
+  double buf=0;
+  for(int i=0;i<s;i++){
+    buf+=(double)MittelwertLS[i]/s;
+  }
+  // Serial.println(buf);
   // Das arithmetische Mittel mit einer Schwelle überprüfen
-  if (((MittelwertLS[0] +  MittelwertLS[1] + MittelwertLS[2] + MittelwertLS[3]+MittelwertLS[4]) / 5)  < 25) {
+  //LILA: 29; black: 45
+  if (buf  < minWertLS) {
     return true;
   }
   else {
     return false;
   }
+  return false;
 }

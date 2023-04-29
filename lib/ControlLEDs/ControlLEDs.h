@@ -3,7 +3,7 @@
 
 #include<Arduino.h>
 
-void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration, bool& IRsave);
+void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration, bool& IRsave, bool hBall, bool torwart);
 void wave(uint8_t pin[],size_t s, int time);
 void blink(uint8_t pin[],size_t s, int time);
 

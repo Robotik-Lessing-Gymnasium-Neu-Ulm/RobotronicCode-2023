@@ -102,24 +102,24 @@ void AutoCalibration(int* LED, int* Schwellwerte) {
   }
 }
 int lesenMultiplexerUnten(int s0, int s1, int s2, int s3) {  //Verkürzung Auslesen
-  digitalWrite(S0, s0);
-  digitalWrite(S1, s1);
-  digitalWrite(S2, s2);
-  digitalWrite(S3, s3);
+  digitalWrite(S0, s3);
+  digitalWrite(S1, s2);
+  digitalWrite(S2, s1);
+  digitalWrite(S3, s0);
   return analogRead(UAM1);
 }
 int lesenMultiplexerUnten2(int s0, int s1, int s2, int s3) {  //Verkürzung Auslesen
-  digitalWrite(S0, s0);
-  digitalWrite(S1, s1);
-  digitalWrite(S2, s2);
-  digitalWrite(S3, s3);
+  digitalWrite(S0, s3);
+  digitalWrite(S1, s2);
+  digitalWrite(S2, s1);
+  digitalWrite(S3, s0);
   return analogRead(UAM2);
 }
 int lesenMultiplexerUnten3(int s0, int s1, int s2, int s3) {  //Verkürzung Auslesen
-  digitalWrite(S0, s0);
-  digitalWrite(S1, s1);
-  digitalWrite(S2, s2);
-  digitalWrite(S3, s3);
+  digitalWrite(S0, s3);
+  digitalWrite(S1, s2);
+  digitalWrite(S2, s1);
+  digitalWrite(S3, s0);
   return analogRead(UAM3);
 }
 void bodenlesen(bool& minEinerDa,int* LED, int* Schwellwerte, bool* Photo) {
@@ -207,6 +207,7 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
     long zeitlinieda = millis();
 
     while (millis() - zeitlinieda <= 75) {
+      Serial.println(LED[1]);
       for (int i = 0; i < 32; i++) {
         if (Photo[i] && AnzahlSens <= 30 && !gesehenSensor[i]) {
           gesehenSensor[i] = true;
@@ -297,7 +298,7 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
       alteZeit = zeit;
       rotation = -rotation / 4.5;
       motor(bodenrichtung, 150,rotation);
-      //Serial.println(compass());
+      //Serial.println(LED[1]);
       digitalWrite(LEDIV, HIGH);
       if (digitalRead(ButtonI) == LOW) {
         AutoCalibration(LED,Schwellwerte);

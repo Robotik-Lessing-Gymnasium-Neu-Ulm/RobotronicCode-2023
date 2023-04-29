@@ -33,7 +33,7 @@ int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzu
 //berechne den Winkel zum ball mit der aktuellen Rotation
 void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfSet, double &wiIn, PID &wiPID, int* minWert, bool& irAutoCalibration, double& addRot, double& WinkelBall, unsigned long& addRotTime, bool& torwart, bool& IRsave) {
   if(!irAutoCalibration){
-    static double AnfahrtsRadius=9;                                   //Achtung: auch bei der IR Kalibration ändern!
+    static double AnfahrtsRadius=20;                                   //Achtung: auch bei der IR Kalibration ändern!
     static double BallWegRadius=195;
     entfSet=AnfahrtsRadius+3;
     // static int min=1023;
@@ -59,6 +59,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1),minWert[13], 1023, 0, 200);
     IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0),minWert[14], 1023, 0, 200);
     IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1),minWert[15], 1023, 0, 200);
+    //Serial.println(lesenMultiplexerOben(0, 0, 1, 0));
     IRbest = 200;                                                        //bestimmen des niedrigsten, gemessenen Wertes und Speichern des Index in Icball
     for (int i = 0; i < 16; i++) {
       if (IR[i] < IRbest) {
@@ -71,18 +72,6 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
         minWert[i]--;
       }
     }
-    // if(!torwart){
-      for(int i=0;i<16;i++){
-        
-        //   if(IR[i]>10){
-        //     count[i]++;
-        //   }
-        //   if(count[i]>=2.1*minWert[i]){
-        //     minWert[i]+=2;
-        //     count[i]=0;
-        //   }
-      }
-    // }
     WinkelBall=90-22.5*Icball+addRot;                                   //Berechnen des Winkels zum Ball
     if(WinkelBall<=0){                                                  //auf Wertebereich 0-360 verschieben
       WinkelBall+=360;
@@ -133,12 +122,12 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
       }
       if(WinkelBall>=90&&WinkelBall<270){
         if(addRotTime+delay<millis()){
-          addRot=-25;
+          addRot=0; //-
           addRotTime=millis();
         }
       }else{
         if(addRotTime+delay<millis()){
-          addRot=25;
+          addRot=0; //+
           addRotTime=millis();
         }
       }

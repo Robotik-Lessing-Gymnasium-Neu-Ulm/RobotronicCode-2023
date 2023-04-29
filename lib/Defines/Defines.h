@@ -1,21 +1,23 @@
 #ifndef DEFINES_H_
 #define DEFINES_H_
 
-#define M1_FW 0 //richtig
-#define M1_RW 2
-#define M1_PWM 1
+#include <EEPROM.h>
 
-#define M2_FW 3 //richtig
-#define M2_RW 5
-#define M2_PWM 4
+#define M1_FW 26 //richtig
+#define M1_RW 28
+#define M1_PWM 29
 
-#define M3_FW  6  //richtig!
-#define M3_RW 8
-#define M3_PWM 7
+#define M2_FW 12 //richtig
+#define M2_RW 25
+#define M2_PWM 24
 
-#define M4_FW  9  //richtig!
-#define M4_RW 11
-#define M4_PWM 10
+#define M3_FW  9  //richtig!
+#define M3_RW 11
+#define M3_PWM 10
+
+#define M4_FW  6  //richtig!
+#define M4_RW 8
+#define M4_PWM 7
 
 #define breite 182
 #define laenge 200
@@ -52,5 +54,12 @@
 #define Fern 70
 
 #define LichtSchranke A2
+
+#define Roboter EEPROM.read(0)  //255: lila, sonst anderer
+#define LILA 255
+
+#define Schuss_FW 23
+#define Schuss_RW 21
+#define Schuss_PWM 22
 
 #endif

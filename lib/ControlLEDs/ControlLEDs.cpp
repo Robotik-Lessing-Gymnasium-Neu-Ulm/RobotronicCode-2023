@@ -52,9 +52,8 @@ void wave(uint8_t pin[],size_t s, int time){
   }
 }
 
-void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration, bool& IRsave) {
+void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icball, double& rotation,bool& minEinerDa, bool& irAutoCalibration, bool& IRsave, bool hBall, bool torwart) {
   //Einzelne Variablen überprüfen und dann die Pins schreiben
-  digitalWrite(LEDI,HIGH);
   if (digitalRead(ButtonI) == LOW) {
     buttonGpressed = true;
   }
@@ -64,8 +63,16 @@ void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icb
   }
   if(digitalRead(ButtonIII) == LOW){
     IRsave=true;
+  }if(digitalRead(ButtonII)==LOW){
+    digitalWrite(Schuss_FW,LOW);
+    digitalWrite(Schuss_RW,HIGH);
+    analogWrite(Schuss_PWM,255);
+    delay(20);
+    digitalWrite(Schuss_FW,HIGH);
+    digitalWrite(Schuss_RW,LOW);
+    analogWrite(Schuss_PWM,0);
   }
-  if (richtung >= 0) {
+  if (torwart) {
     digitalWrite(LEDII, HIGH);
   } else {
     digitalWrite(LEDII, LOW);
@@ -75,7 +82,7 @@ void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icb
   } else {
     digitalWrite(LEDIV, LOW);
   }
-  if (hatBall() && IRbest <10&&( Icball == 0 || Icball == 15 || Icball == 1 )) {
+  if (hBall) {
     digitalWrite(LEDI, HIGH);
   } else {
     digitalWrite(LEDI, LOW);
