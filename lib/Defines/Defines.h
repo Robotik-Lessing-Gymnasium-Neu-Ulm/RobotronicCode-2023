@@ -33,6 +33,7 @@
 
 #define gyroButton 31
 #define calibrationButton 32
+#define ButtonCalIR 26
 
 #define VR 1 //m1
 #define VL 2 //m2
