@@ -2,43 +2,42 @@
 #include<Wire.h>
 #include<Defines.h>
 
-// void bluetooth(bool& torwart, int IRbest) {
-//   static int blueCount;             //nur jeden 30. Aufruf senden
-//   static int torwartarr[10];        //(bool)torwart glätten
-//   for(int i=9;i>0;i--){
-//     torwartarr[i]=torwartarr[i-1];
-//   }
-//   if (blueCount == 100) {
-//     if (Serial1.availableForWrite()) {
-//       if (IRbest > 0) {             //senden
-//         Serial1.write(IRbest);
-//       } else {
-//         Serial1.write(200);           //ich glaube das ist nicht mit Absicht, besser wäre einen großen Wert zu senden, weil dieser Roboter sieht den Ball nicht (das ist aber eine Taktikfrage)
-//       }
-//     }
-//     if (Serial1.available()) {
-//       Serial.print(Serial1.read());Serial.print("    ");Serial.print
-//       if (Serial1.read() < IRbest) { //empfangen und mit eigenem Abstand zum Ball vergleichen
-//         Serial.println("Torwart");
-//         torwartarr[0] = 1;
-//       } else {
-//         Serial.println("Stuermer");
-//         torwartarr[0] = 0;
-//       }
-//       Serial1.read();
-//     }
-//     int t=0;
-//     for(int i=0;i<10;i++){            //glätten
-//       t+=torwartarr[i];
-//     }
-//     torwart=(t>3);                    //das kann noch genauer eingestellt werden
-//     blueCount = 0;
-//   }else {
-//     blueCount++;
-//   }
-// }
+void bluetooth(bool& torwart, int IRbest) {
+   static int blueCount;             //nur jeden 30. Aufruf senden
+   static int torwartarr[10];        //(bool)torwart glätten
+   if (blueCount == 50) {
+    for(int i=9;i>0;i--){
+     torwartarr[i]=torwartarr[i-1];
+    }
+     if (Serial1.availableForWrite()) {
+       if (IRbest > 0) {             //senden
+         Serial1.write(IRbest);
+       } else {
+         Serial1.write(200);           //ich glaube das ist nicht mit Absicht, besser wäre einen großen Wert zu senden, weil dieser Roboter sieht den Ball nicht (das ist aber eine Taktikfrage)
+       }
+     }
+     if (Serial1.available()) {
+       if (Serial1.read() < IRbest) { //empfangen und mit eigenem Abstand zum Ball vergleichen
+         Serial.println("Torwart");
+         torwartarr[0] = 1;
+       } else {
+         Serial.println("Stuermer");
+         torwartarr[0] = 0;
+       }
+       Serial1.read();
+     }
+     int t=0;
+     for(int i=0;i<10;i++){            //glätten
+       t+=torwartarr[i];
+     }
+     torwart=(t>5);                    //das kann noch genauer eingestellt werden
+     blueCount = 0;
+   }else {
+     blueCount++;
+   }
+ }
 
-#define Schwellwert 5  //Erst TW/Stürmer wechseln, wenn der andere um 'Schwellwert' besser ist
+/*#define Schwellwert 5  //Erst TW/Stürmer wechseln, wenn der andere um 'Schwellwert' besser ist
 
 void bluetooth(bool& torwart, int IRbest) {
   constexpr size_t si=10;
@@ -92,4 +91,4 @@ void bluetooth(bool& torwart, int IRbest) {
     }
     t=millis();
   }
-}
+}*/

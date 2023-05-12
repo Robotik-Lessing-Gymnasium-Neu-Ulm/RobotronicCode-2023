@@ -49,7 +49,7 @@ void torwartProgramm(int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055
         else {
             if(k==127){
                 //compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,pireads,PixyG,pixyG2,hatBall,torwart);
-                motor(90,0,10);
+                motor(90,10,0);
             }else{
                 if (LED[44] > Schwellwerte[44] || LED[45] > Schwellwerte[45] || LED[34] > Schwellwerte[34] || LED[35] > Schwellwerte[35]) {
                     if(ballUndLinie){

@@ -7,13 +7,18 @@ void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double&
   double p,d;
   sensors_event_t orientationData;                                          //momentane Aufnahmeder der Sensorwerte
   sensors_event_t angVelocityData;
+  sensors_event_t linearAccelData;
   gyro.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
   gyro.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);           //holt neue Werte in Grad
+  gyro.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+
   double winkel = orientationData.orientation.x;                            //variable winkel enthält Drehung auf der Ebene in Grad
   double rotationSpeed = angVelocityData.orientation.z;
+  double accel = linearAccelData.orientation.x;
+
   if (buttonGpressed) {                                                     //wenn Button gedrückt speichern des Offsets
     minus = winkel;
-    Serial.print("MINUS:");
+    Serial.print("MINUS:"); 
     Serial.println(minus);
     buttonGpressed = false;                                                 //automatisch terminieren
   }

@@ -169,24 +169,25 @@ void setup() {
   delay(100);
 }
 
-#define bt false
+#define bt true
 #define Schusswinkel 8
 
 void loop() {
-  torwart=false;
-  Serial.print(analogRead(LichtSchranke));Serial.print("   ");Serial.println(minWertLS);
+  //torwart=false;
+  //Serial.print(analogRead(LichtSchranke));Serial.print("   ");Serial.println(minWertLS);
   digitalWrite(Schuss_FW,HIGH);
   digitalWrite(Schuss_RW,LOW);
   analogWrite(Schuss_PWM,255);
   bool hBall= hatBall(minWertLS) && ( Icball == 0 || Icball == 15 || Icball == 1 );
-  //IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);//
-  // Serial.println(IRbest);delay(10);
-  // if(bt){
-  //   int bufBest=(int)IRbest;
-  //   bluetooth(torwart,bufBest);                                                                                                        //empfangen und senden
-  // }else{
-  //   torwart=false;
-  // }
+  IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);//
+   Serial.println(IRbest);//delay(10);
+   //if(bt){
+     int bufBest=(int)IRbest;
+     bluetooth(torwart,bufBest);                                                                                                        //empfangen und senden
+   //}else{
+   //  torwart=false;
+   //}
+   Serial.println(torwart);
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,IRsave, hBall, torwart);                                  //Die grünen Kontroll-LEDs leuchten lassen& Knöpfe überprüfen
 
   if (hBall) {                                                                //Ermitteln ob er den Ball hat  hBall
