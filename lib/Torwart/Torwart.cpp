@@ -3,23 +3,17 @@
 #include<Kompass.h>
 #include<IR2.h>
 #include<Boden.h>
+#include<myPixy.h>
 
 #define ballUndLinie false //Solle er, wenn er die linie sieht immernoch auf den Ball reagiern?
 #define Abweichung 10 //Wie schräg soll er fahren, wenn er auf den Ball und die Linie reagieren soll
 
-void torwartProgramm(int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055 &gyro, bool &buttonGpressed, double &minus, int &alterWinkel, double &addRot, bool pireads, int pixyG2, int& PixyG, int *IR, double &IRbest, int &Icball, double &richtung, double &wiIn, int *minWert, bool &irAutoCalibration, double &WinkelBall, bool &IRsave, bool hatBall, bool& torwart){
+void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055 &gyro, bool &buttonGpressed, double &minus, int &alterWinkel, double &addRot, bool piread2, int pixyG2, int& PixyG, int *IR, double &IRbest, int &Icball, double &richtung, double &wiIn, int *minWert, bool &irAutoCalibration, double &WinkelBall, bool &IRsave, bool hatBall, bool& torwart){
     //Serial.println(LED[1]);
     static int k=0;
-    Serial3.write(0);
-    if (Serial3.available()) {
-        k = (int)Serial3.read();
-    }
-    if (k > 128) {
-        k -= 256;
-    }
-    //Serial.println(k);
-    pixyG2 = k;
-    compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,pireads,PixyG,pixyG2,hatBall,true);
+    pixyG2 = Pixy2(pixy2,piread2);
+    Serial.println(pixyG2);
+    compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,piread2,PixyG,pixyG2,hatBall,true);
     IRsensTW(IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,rotation,addRot,WinkelBall,IRsave);
     //Serial.println(wiIn);
     if (LED[12] > Schwellwerte[12] || LED[13] > Schwellwerte[13]) {
@@ -47,7 +41,7 @@ void torwartProgramm(int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055
             Serial.println("onli");
         }
         else {
-            if(k==127){
+            if(piread2= false){
                 //compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,pireads,PixyG,pixyG2,hatBall,torwart);
                 motor(90,10,0);
             }else{
@@ -93,5 +87,4 @@ void torwartProgramm(int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055
         }
     }
     // Serial.println(LED[17]);
-    Serial3.flush();
 }

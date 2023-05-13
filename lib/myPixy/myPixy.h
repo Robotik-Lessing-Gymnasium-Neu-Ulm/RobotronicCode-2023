@@ -5,5 +5,5 @@
 
 
 double Pixy(Pixy2I2C& pixy,bool& piread);
-
+double Pixy2(Pixy2I2C& pixy2,bool& piread2);
 #endif

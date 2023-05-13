@@ -21,7 +21,7 @@
 #include<Torwart.h>
 
 
-Pixy2I2C pixy;                                      //pixi im i2c-kommunikations-modus initialisieren
+Pixy2I2C pixy, pixy2;                                      //pixi im i2c-kommunikations-modus initialisieren
 
 Adafruit_BNO055 gyro = Adafruit_BNO055(55, 0x28);   //Erstellen eines Obketes der Klasse Adafruit_BNO055 mit Namen gyro
 
@@ -52,6 +52,8 @@ int Wert[4];*/
 
 bool piread;                                          //Variablen für Kamera
 double TorRichtungKamera;
+
+bool piread2;
 
 long alteZeit;                                        //Variablen für Gyro
 int alterWinkel;
@@ -167,27 +169,27 @@ void setup() {
   }
   minWertLS=analogRead(LichtSchranke)-5;
   delay(100);
+  pixy.init(0x54);
+  pixy2.init(0x53);
 }
 
-#define bt true
+#define bt false
 #define Schusswinkel 8
 
 void loop() {
+  //Serial.println(Pixy(pixy,piread));
   //torwart=false;
-  //Serial.print(analogRead(LichtSchranke));Serial.print("   ");Serial.println(minWertLS);
+  //Serial.print(analogRead(LichtSchranke));
   digitalWrite(Schuss_FW,HIGH);
   digitalWrite(Schuss_RW,LOW);
   analogWrite(Schuss_PWM,255);
-  bool hBall= hatBall(minWertLS) && ( Icball == 0 || Icball == 15 || Icball == 1 );
+  bool hBall= hatBall(minWertLS) && ( Icball == 0 || Icball == 15 || Icball == 1);
   IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);//
-   Serial.println(IRbest);//delay(10);
-   //if(bt){
+   if(bt){
      int bufBest=(int)IRbest;
      bluetooth(torwart,bufBest);                                                                                                        //empfangen und senden
-   //}else{
-   //  torwart=false;
-   //}
-   Serial.println(torwart);
+   }
+   //Serial.println(torwart);
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,IRsave, hBall, torwart);                                  //Die grünen Kontroll-LEDs leuchten lassen& Knöpfe überprüfen
 
   if (hBall) {                                                                //Ermitteln ob er den Ball hat  hBall
@@ -195,7 +197,7 @@ void loop() {
     Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart);
     if (bodenrichtung == -1) {
-      PixyG=Pixy(pixy,piread);                                                                                                      //Pixy auslesen
+      PixyG=Pixy(pixy,piread);                                                                                                    //Pixy auslesen
       compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG,PixyG2,hBall,torwart);                                                   //Ausrichtungs-Funktion aufrufen, wobei die Kamera beachtet werden soll
       if (piread) {                                                                                                                 //sieht die pixy etwas
         if(PixyG<Schusswinkel&&PixyG>-Schusswinkel){
@@ -217,11 +219,11 @@ void loop() {
     }else{                                                                                                                          //der Boden sieht etwas
       motor(bodenrichtung, 200,rotation);                                                                                           //sehr schnell von der Linie wegfahren
     }
-  }else if(torwart){    //torwart                                                                                                            //Als Torwart verhalten
+  }else if(torwart){    //torwart                                                                                                          //Als Torwart verhalten
     //Serial.println("Torwart");
     bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
     // motor(90,0,10);
-    torwartProgramm(LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart);
+    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart);
   }else{    //!torwart
     piread=false;
     //Serial.println("Stuermer");

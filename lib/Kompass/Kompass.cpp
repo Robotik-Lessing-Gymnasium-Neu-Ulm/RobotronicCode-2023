@@ -25,7 +25,7 @@ void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double&
   if(piread&&hatBall){                                                      //wenn die vordere Kamera beachtet werden soll
     if(Roboter==LILA){
       //winkel=-pixyG/1.8;                                                   //die "schlechtere Drehung"
-      int buf=-pixyG;
+      /*int buf=-pixyG;
       int buf2=winkel-minus;
       if(pixyG<180){
         pixyG+=360;
@@ -43,7 +43,10 @@ void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double&
       Serial.print(buf);Serial.print("   ");Serial.print(buf2); Serial.print("    ");Serial.println(buf-buf2);
       winkel=winkel+buf-buf2;
       p = 4.8;                                                                  //korrekturfaktor (diese sind noch nicht perfekt)
-      d = 60;                                                                 //korrekturfaktor
+      d = 60;*/
+      winkel = -pixyG;
+      p = 11;                                                                 //korrekturfaktor
+    d = 50;                                                                 //korrekturfaktor
     }else{  //black
       int buf=-pixyG;
       int buf2=winkel-minus;
