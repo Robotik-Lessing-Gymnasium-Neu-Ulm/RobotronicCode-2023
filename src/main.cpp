@@ -155,7 +155,7 @@ void setup() {
   wiPID.SetMode(AUTOMATIC);
 
   if(Roboter==LILA){
-    torwart=true;
+    torwart=false;
     entfPID.SetTunings(3.9,0,0.8);
     wiPID.SetTunings(0.74,0,0.38);  //0.365
     offsetVorne=22; //26
