@@ -72,9 +72,9 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
         minWert[i]--;
       }
     }
-    WinkelBall=90-22.5*Icball+addRot;                                   //Berechnen des Winkels zum Ball
-    if(WinkelBall<=0){                                                  //auf Wertebereich 0-360 verschieben
-      WinkelBall+=360;
+    WinkelBall=90+22.5*Icball+addRot;                                   //Berechnen des Winkels zum Ball
+    if(WinkelBall>=360){                                                  //auf Wertebereich 0-360 verschieben
+      WinkelBall-=360;
     }
     wiIn=WinkelBall-90;                                                 //Winkel berechnen, sodass der Vorzeichen-Wechsel hinten beim Roboter liegt
     if(wiIn>180){
