@@ -46,7 +46,7 @@ void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double&
       d = 60;*/
       winkel = -pixyG;
       p = 11;                                                                 //korrekturfaktor
-    d = 50;                                                                 //korrekturfaktor
+      d = 50;                                                                 //korrekturfaktor
     }else{  //black
       int buf=-pixyG;
       int buf2=winkel-minus;
