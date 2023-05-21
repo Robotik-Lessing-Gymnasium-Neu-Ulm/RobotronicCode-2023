@@ -122,7 +122,7 @@ void setup() {
   myFile.close();
   
   Serial.begin(115200);                         //Seriellen Monitor initialisieren
-  Serial3.begin(115200);                        
+  Serial3.begin(115200);                        //kleines Teensy
   Serial1.begin(115200);                        //Bluetooth initialisieren
   pinMode(S0, OUTPUT);                          //Multiplexer Oben Pin Festlegung
   pinMode(S1, OUTPUT);
@@ -287,5 +287,9 @@ void setup() {
 // }
 
 void loop(){
+  ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,IRsave,false,torwart);
+  // sensors_event_t orientationData;                                          //momentane Aufnahme der der Sensorwerte (eigener Sensor: BNO055)
+  // gyro.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+  // Serial.print(orientationData.orientation.x);
   fahren(90,200,0,gyro,buttonGpressed);
 }
