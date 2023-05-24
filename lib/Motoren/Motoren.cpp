@@ -47,7 +47,7 @@
 #define M4_PWM 7
 #endif
 
-constexpr bool speichern=true; //else: offsetten
+constexpr bool speichern=false; //else: offsetten
 constexpr size_t STELLEN=2;               //Anzahl der Nachkommastellen, die gespeichert werdem sollen
 
 void motor (double dir, double velocity, double rotation) {
@@ -231,8 +231,7 @@ double getRotationSpeed(Adafruit_BNO055& gyro){
 //   // rotation = -rotation / 4.5;
 // }
 
-
-void fahren(double dir, double velocity, double rotation, Adafruit_BNO055& gyro,bool& buttonGpressed){
+void fahren(double direction, double velocity, double rotation, Adafruit_BNO055& gyro,bool& buttonGpressed){
   static std::vector<double> v_buf (0);                         //um die Geschwindigkeit zu speichern und später anzuzeigen
   static std::vector<double> ri_buf (0);                        //um die Bewegungsrichtung zu speichern und später anzuzeigen
   static std::vector<double> wi_buf (0);                        //um den Drehwinkel zu speichern und später anzuzeigen
@@ -241,8 +240,13 @@ void fahren(double dir, double velocity, double rotation, Adafruit_BNO055& gyro,
   static uint32_t lastMeasurement{0};
   static double winkel{0},rotationSpeed{0};
   winkel=getRotation(gyro)-minus;
-  winkel-=((winkel>=180)?360:0);
-  winkel+=((winkel<-180)?360:0);
+  while(winkel>rotation+180){                                  //unstetige Stelle genau auf der Anderen Seite des Rotation-Setpoints
+    winkel-=360;
+  }
+  while(winkel<rotation-180){
+    winkel+=360;
+  }
+  Serial.println(winkel);
   rotationSpeed=getRotationSpeed(gyro);
   static int16_t x{0},y{0};
   static bool surface{false},motion{false};
@@ -351,13 +355,11 @@ void fahren(double dir, double velocity, double rotation, Adafruit_BNO055& gyro,
     }
     buttonGpressed = false;                                                 //automatisch terminieren
   }
-  // int p{11},d{50};                                                                 //korrekturfaktor
-  // ro = (p * winkel) - d * rotationSpeed;                              //Berechnung der drehung
-  // alterWinkel = winkel;
-  // rotation = -rotation / 4.5;
+  int p{11},d{50};                                                                 //p(i)d Werte des Rotations-Reglers
+  double ro = -((p * (winkel-rotation)) - d * rotationSpeed)/4.5;                   //skalierter pd Regler
   static bool lastSurface{true};
   if(surface||lastSurface){       //minimale Glättung
-    motor(dir,velocity,rotation);
+    motor(direction,velocity,ro);
   }else{
     motor(0,0,0);
   }

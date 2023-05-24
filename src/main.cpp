@@ -291,5 +291,5 @@ void loop(){
   // sensors_event_t orientationData;                                          //momentane Aufnahme der der Sensorwerte (eigener Sensor: BNO055)
   // gyro.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
   // Serial.print(orientationData.orientation.x);
-  fahren(90,200,0,gyro,buttonGpressed);
+  fahren(0,0,0,gyro,buttonGpressed);
 }
