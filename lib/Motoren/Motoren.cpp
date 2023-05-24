@@ -241,8 +241,8 @@ void fahren(double dir, double velocity, double rotation, Adafruit_BNO055& gyro,
   static uint32_t lastMeasurement{0};
   static double winkel{0},rotationSpeed{0};
   winkel=getRotation(gyro)-minus;
-  winkel-=(winkel>=360)?360:0;
-  winkel+=(winkel<0)?360:0;
+  winkel-=((winkel>=180)?360:0);
+  winkel+=((winkel<-180)?360:0);
   rotationSpeed=getRotationSpeed(gyro);
   static int16_t x{0},y{0};
   static bool surface{false},motion{false};
@@ -289,7 +289,7 @@ void fahren(double dir, double velocity, double rotation, Adafruit_BNO055& gyro,
   double ri=atan2(x,y)*180/PI;
 //speichern
   static char count{0};
-  if(count>=50){
+  if(count>=10){
     v_buf.push_back(v);
     wi_buf.push_back(winkel);
     ri_buf.push_back(ri);
@@ -310,41 +310,56 @@ void fahren(double dir, double velocity, double rotation, Adafruit_BNO055& gyro,
       Serial.println(minus);
     }else{            //speichern
       Serial.println("Messwerte abspeichern.");
-      File myF=SD.open("Rotation.txt",FILE_WRITE); myF.seek(EOF);
-        myF.println("\n\nWinkel: ");
-        Serial.println("\n\nWinkel: ");
+      File myF=SD.open("Rotation.txt",FILE_WRITE); /* myF.seek(EOF); */
+        myF.truncate();
+        myF.println("Winkel: ");
+        Serial.println("Winkel: ");
         for(auto elem:wi_buf){
           myF.println(elem,STELLEN);
           Serial.println(elem,STELLEN);
         }
       myF.close();
-      myF=SD.open("Direction.txt",FILE_WRITE); myF.seek(EOF);
-        myF.println("\n\nRichtung: ");
-        Serial.println("\n\nRichtung: ");
+      myF=SD.open("Direction.txt",FILE_WRITE); /* myF.seek(EOF); */
+        myF.truncate();
+        myF.println("Richtung: ");
+        Serial.println("Richtung: ");
         for(auto elem:ri_buf){
           myF.println(elem,STELLEN);
           Serial.println(elem,STELLEN);
         }
       myF.close();
-      myF=SD.open("Velocity.txt",FILE_WRITE); myF.seek(EOF);
-        myF.println("\n\nGeschwindigkeit: ");
-        Serial.println("\n\nGeschwindigket: ");
+      myF=SD.open("Velocity.txt",FILE_WRITE); /* myF.seek(EOF); */
+        myF.truncate();
+        myF.println("Geschwindigkeit: ");
+        Serial.println("Geschwindigket: ");
         for(auto elem:v_buf){
           myF.println(elem,STELLEN);
           Serial.println(elem,STELLEN);
         }
       myF.close();
-      myF=SD.open("Time.txt",FILE_WRITE); myF.seek(EOF);
-        myF.println("\n\nZeit: ");
-        Serial.println("\n\nZeit: ");
+      myF=SD.open("Time.txt",FILE_WRITE); /* myF.seek(EOF); */
+        myF.truncate();
+        myF.println("Zeit: ");
+        Serial.println("Zeit: ");
         for(auto elem:measurementTime_buf){
           myF.println(elem,STELLEN);
           Serial.println(elem,STELLEN);
         }
       myF.close();
       Serial.println("abgeschlossen");
-      //delay(10);
+      delay(500);
     }
     buttonGpressed = false;                                                 //automatisch terminieren
   }
+  // int p{11},d{50};                                                                 //korrekturfaktor
+  // ro = (p * winkel) - d * rotationSpeed;                              //Berechnung der drehung
+  // alterWinkel = winkel;
+  // rotation = -rotation / 4.5;
+  static bool lastSurface{true};
+  if(surface||lastSurface){       //minimale Glättung
+    motor(dir,velocity,rotation);
+  }else{
+    motor(0,0,0);
+  }
+  lastSurface=surface;
 }
