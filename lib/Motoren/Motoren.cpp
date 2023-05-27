@@ -136,102 +136,16 @@ double getRotationSpeed(Adafruit_BNO055& gyro){
   return angVelocityData.orientation.z;
 }
 
-// void fahren(double dir, double velocity, double rotation, Adafruit_BNO055& gyro,bool& buttonGpressed){
-//   // static double minus{0};                                          //Offset des BNO055
-//   // static double winkel{0},rotationSpeed{0};
-//   // static std::vector<double> v_buf (0);                         //um die Geschwindigkeit zu speichern und später anzuzeigen
-//   // static std::vector<double> ri_buf (0);                        //um die Bewegungsrichtung zu speichern und später anzuzeigen
-//   // static std::vector<double> wi_buf (0);                        //um den Drehwinkel zu speichern und später anzuzeigen
-//   // static std::vector<unsigned long> measurementTime_buf (0);    //Um die x-Skalierung beim Speicher und Anzeigen zu beachten
-//   // winkel=getRotation(gyro);
-//   static int16_t x{0},y{0};
-//   static bool surface{false},motion{false};
-//   static char x_{0},y_{0},o_{0};
-//   static char* currentWrite=&x_;
-//   char readBuf{0};
-//   while(!Serial3.available());
-//   readBuf=Serial3.read();
-//   switch(readBuf){                                            //Auslesen des Teensy 4.0
-//     case 255:
-//       currentWrite=&x_;break;
-//     case 254:
-//       currentWrite=&y_;break;
-//     case 253:
-//       currentWrite=&o_;break;
-//     default:
-//       *currentWrite=readBuf;break;
-//   }
-//   char o{o_};
-//   if(o>=8){
-//     o-=8;
-//     y=y_;
-//   }else{
-//     y=-y_;
-//   }
-//   if(o>=4){
-//     o-=4;
-//     x=x_;
-//   }else{
-//     x=-x_;
-//   }
-//   if(o>=2){
-//     o-=2;
-//     motion=true;
-//   }else{
-//     motion=false;
-//   }
-//   surface=(o_>=1);
-//   Serial.print("  (");Serial.print(x);Serial.print(",");Serial.print(y);Serial.println(")");
-//   // Serial.println(getRotation(gyro));
-
-//   // x-=1*(winkel-wi_buf.back());                                              //Manipulation der Sensorwerte (bzgl. der Drehung->Maus-Sensor ist nicht mittig), Gewichtungen noch einstellen!!!
-//   // y-=1*(winkel-wi_buf.back());
-//   // wi_buf.push_back(winkel - minus);                                         //speichern (im Arbeitsspeicher)
-//   // v_buf.push_back(hypot((double)x,(double)y)/(measurementTime_buf[measurementTime_buf.size()-1]-(measurementTime_buf[measurementTime_buf.size()-2])));
-//   // ri_buf.push_back(atan2(x,y)*180/PI);
-
-//   // //speichern (auf der SD-Karte) und Offsetten
-//   // if (buttonGpressed) {
-//   //   minus = winkel;                                                           //offsetten
-//   //   Serial.print("MINUS:");
-//   //   Serial.println(minus);
-
-//   //   Serial.println("Messwerte abspeichern.");
-//   //   File myF=SD.open("Rotation.txt",FILE_WRITE); myF.seek(EOF);
-//   //     myF.println("\n\nWinkel: ");
-//   //     Serial.println("\n\nWinkel: ");
-//   //     for(auto elem:wi_buf){
-//   //       myF.println(elem,STELLEN);
-//   //       Serial.println(elem,STELLEN);
-//   //     }
-//   //   myF.close();
-//   //   myF=SD.open("Direction.txt",FILE_WRITE); myF.seek(EOF);
-//   //     myF.println("\n\nRichtung: ");
-//   //     Serial.println("\n\nRichtung: ");
-//   //     for(auto elem:ri_buf){
-//   //       myF.println(elem,STELLEN);
-//   //       Serial.println(elem,STELLEN);
-//   //     }
-//   //   myF.close();
-//   //   myF=SD.open("Velocity.txt",FILE_WRITE); myF.seek(EOF);
-//   //     myF.println("\n\nGeschwindigkeit: ");
-//   //     Serial.println("\n\nGeschwindigket: ");
-//   //     for(auto elem:v_buf){
-//   //       myF.println(elem,STELLEN);
-//   //       Serial.println(elem,STELLEN);
-//   //     }
-//   //   myF.close();
-//   //   Serial.println("abgeschlossen");
-//   //   //delay(10);
-//   //   buttonGpressed = false;                                                 //automatisch terminieren
-//   // }
-//   //PID über die Rotation
-//   // double p{11},d{50};                                                       //korrekturfaktor(rotation)
-//   // rotation = (p * winkel) - d * rotationSpeed;                              //Berechnung der drehung
-//   // rotation = -rotation / 4.5;
-// }
-
 void fahren(double direction, double velocity, double rotation, Adafruit_BNO055& gyro,bool& buttonGpressed){
+  static bool setup=true;
+  static double InpidWi;
+  static double SetpidWi;
+  static double OutpidWi;
+  static PID pidWi(&InpidWi,&OutpidWi,&SetpidWi,3,0,0.15,DIRECT);  //35,12,14
+  if(setup){
+    pidWi.SetOutputLimits(-40,40);                              //Notlösung, denn er gleicht sich auch der Unstetigkeitsstelle an
+    pidWi.SetMode(AUTOMATIC);
+  }
   static std::vector<double> v_buf (0);                         //um die Geschwindigkeit zu speichern und später anzuzeigen
   static std::vector<double> ri_buf (0);                        //um die Bewegungsrichtung zu speichern und später anzuzeigen
   static std::vector<double> wi_buf (0);                        //um den Drehwinkel zu speichern und später anzuzeigen
@@ -246,7 +160,6 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   while(winkel<rotation-180){
     winkel+=360;
   }
-  Serial.println(winkel);
   rotationSpeed=getRotationSpeed(gyro);
   static int16_t x{0},y{0};
   static bool surface{false},motion{false};
@@ -290,7 +203,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   x+=1*rotationSpeed;
   y+=3.4*rotationSpeed;
   double v=hypot((double)x,(double)y)/(millis()-lastMeasurement);
-  double ri=atan2(x,y)*180/PI;
+  double ri=atan2(x,y)*180/PI+8;
 //speichern
   static char count{0};
   if(count>=10){
@@ -299,14 +212,23 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
     ri_buf.push_back(ri);
     measurementTime_buf.push_back(millis());
     count=0;
-    Serial.print(".");
+    // Serial.print(".");
+    Serial.println(OutpidWi);
   }else{
     count++;
   }
-
   lastMeasurement=millis();
-  // Serial.print("  (");Serial.print(x);Serial.print(",");Serial.print(y);Serial.println(")");
-  // Serial.println(winkel);
+
+  InpidWi=ri-winkel+90;
+  while(InpidWi<direction-180){
+    InpidWi+=360;
+  }while(InpidWi>direction+180){
+    InpidWi-=360;
+  }
+  SetpidWi=direction;
+  if(motion){
+    pidWi.Compute();
+  }
   if (buttonGpressed) {
     if(!speichern){   //offsetten
       minus = getRotation(gyro);                                                           //offsetten
@@ -359,9 +281,10 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   double ro = -((p * (winkel-rotation)) - d * rotationSpeed)/4.5;                   //skalierter pd Regler
   static bool lastSurface{true};
   if(surface||lastSurface){       //minimale Glättung
-    motor(direction,velocity,ro);
+    motor(OutpidWi+direction,velocity,ro);
   }else{
     motor(0,0,0);
   }
   lastSurface=surface;
+  setup=false;
 }
