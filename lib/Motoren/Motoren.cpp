@@ -46,8 +46,8 @@ void motor (double dir, double velocity, double rotation) {
   double phi = (dir / 180) * PI;
   // Aufteilen des damit aufgespannten Vektors auf die 4 Motoren
   double m4 = sin(phi - 5 * PI / 4) * velocity + rotation; //VR
-  double m1 = sin(phi - 7 * PI / 4) * velocity + rotation; //VL
-  double m2 = sin(phi - PI / 4) * velocity + rotation;     //HL
+  double m2 = sin(phi - 7 * PI / 4) * velocity + rotation; //VL     //LILA ist so m2 Black anders
+  double m1 = sin(phi - PI / 4) * velocity + rotation;     //HL
   double m3 = sin(phi - 3 * PI / 4) * velocity + rotation; //HR
   //Aufteilen in Drehrichtungen
   //VL

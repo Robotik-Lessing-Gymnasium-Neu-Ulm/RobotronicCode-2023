@@ -8,12 +8,12 @@
 #define ballUndLinie false //Solle er, wenn er die linie sieht immernoch auf den Ball reagiern?
 #define Abweichung 10 //Wie schräg soll er fahren, wenn er auf den Ball und die Linie reagieren soll
 
-void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055 &gyro, bool &buttonGpressed, double &minus, int &alterWinkel, double &addRot, bool piread2, int pixyG2, int& PixyG, int *IR, double &IRbest, int &Icball, double &richtung, double &wiIn, int *minWert, bool &irAutoCalibration, double &WinkelBall, bool &IRsave, bool hatBall, bool& torwart){
+void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055 &gyro, bool &buttonGpressed, double &minus, int &alterWinkel, double &addRot, bool piread2, int pixyG2, int& PixyG, int *IR, double &IRbest, int &Icball, double &richtung, double &wiIn, int *minWert, bool &irAutoCalibration, double &WinkelBall, bool &IRsave, bool hatBall, bool& torwart,double accel){
     //Serial.println(LED[1]);
     static int k=0;
     pixyG2 = Pixy2(pixy2,piread2);
     Serial.println(pixyG2);
-    compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,piread2,PixyG,pixyG2,hatBall,true);
+    compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread2,PixyG,pixyG2,hatBall,false,accel);
     IRsensTW(IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,rotation,addRot,WinkelBall,IRsave);
     //Serial.println(wiIn);
     if (LED[12] > Schwellwerte[12] || LED[13] > Schwellwerte[13]) {
@@ -41,8 +41,8 @@ void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation
             Serial.println("onli");
         }
         else {
-            if(piread2= false){
-                //compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,pireads,PixyG,pixyG2,hatBall,torwart);
+            if(piread2 == false){
+                //compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,pireads,PixyG,pixyG2,hatBall,torwart,accel);
                 motor(90,10,0);
             }else{
                 if (LED[44] > Schwellwerte[44] || LED[45] > Schwellwerte[45] || LED[34] > Schwellwerte[34] || LED[35] > Schwellwerte[35]) {

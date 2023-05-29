@@ -51,7 +51,8 @@ int US[4];
 int Wert[4];*/
 
 bool piread;                                          //Variablen für Kamera
-double TorRichtungKamera;
+double AbstandX;
+double AbstandY;
 
 bool piread2;
 
@@ -59,6 +60,8 @@ long alteZeit;                                        //Variablen für Gyro
 int alterWinkel;
 double minus;
 double rotation;
+double accel;
+int counter;
 
 int IR[16];                                           //Variablen für IR
 double IRbest = 100;    //0
@@ -179,7 +182,8 @@ void setup() {
 void loop() {
   //Serial.println(Pixy(pixy,piread));
   //torwart=false;
-  //Serial.print(analogRead(LichtSchranke));
+  Serial.println(Icball);
+  position(AbstandX,AbstandY,pixy2,piread2,pixy,piread);
   digitalWrite(Schuss_FW,HIGH);
   digitalWrite(Schuss_RW,LOW);
   analogWrite(Schuss_PWM,255);
@@ -189,22 +193,50 @@ void loop() {
      int bufBest=(int)IRbest;
      bluetooth(torwart,bufBest);                                                                                                        //empfangen und senden
    }
-   //Serial.println(torwart);
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,IRsave, hBall, torwart);                                  //Die grünen Kontroll-LEDs leuchten lassen& Knöpfe überprüfen
 
   if (hBall) {                                                                //Ermitteln ob er den Ball hat  hBall
     IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
     Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
-    compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart);
-    if (bodenrichtung == -1) {
-      PixyG=Pixy(pixy,piread);                                                                                                    //Pixy auslesen
-      compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG,PixyG2,hBall,torwart);                                                   //Ausrichtungs-Funktion aufrufen, wobei die Kamera beachtet werden soll
+    compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
+    if((accel >=-10)&&(accel<=5)&&counter==250){
+      if (bodenrichtung == -1) {
+        PixyG=Pixy(pixy,piread);
+        PixyG2 = Pixy2(pixy2,piread2);                                                                                                    //Pixy auslesen
+        compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG,PixyG2,hBall,torwart,accel);                                                   //Ausrichtungs-Funktion aufrufen, wobei die Kamera beachtet werden soll
+        Serial.println("toranfahrt");
+        if((abs(PixyG)+abs(PixyG2))>30&&PixyG<0){
+          addRot = 160;
+          compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
+          motor(0,1000,rotation);
+          Serial.println("links");
+        }else if((abs(PixyG)+abs(PixyG2))>30&&PixyG>0){
+          Serial.println("rechts");
+          motor(180,1000,(rotation-100));
+        }else{
+          Serial.println("Mitte");
+          Serial.println(PixyG);
+          Serial.println(PixyG2);
+        
+        }
+        counter = 0;
+      }
+      else{                                                                                                                          //der Boden sieht etwas
+      motor(bodenrichtung, 200,rotation);                                                                                           //sehr schnell von der Linie wegfahren
+      }
+    }
+    else if((accel >=-10)&&(accel<=5)){
+      counter++;
+    }else{
+      counter=0;
+    }
       if (piread) {                                                                                                                 //sieht die pixy etwas
         if(PixyG<Schusswinkel&&PixyG>-Schusswinkel){
           digitalWrite(Schuss_FW,LOW);
           digitalWrite(Schuss_RW,HIGH);
           analogWrite(Schuss_PWM,255);
           delay(20);
+
           digitalWrite(Schuss_FW,HIGH);
           digitalWrite(Schuss_RW,LOW);
           analogWrite(Schuss_PWM,0);
@@ -212,30 +244,29 @@ void loop() {
         motor(90-PixyG, 100,rotation);                                                                                                    //aufs Tor zufahren, mit Ausrichtung aufs Tor
         // motor(0,0,rotation);
       }else {
-        compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,false,PixyG,PixyG2,hBall,torwart);                                                //Ausrichtungs-Funktion aufrufen, wobei die Kamera NICHT beachtet werden soll
+        compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,false,PixyG,PixyG2,hBall,torwart,accel);                                                //Ausrichtungs-Funktion aufrufen, wobei die Kamera NICHT beachtet werden soll
         motor(90,90, rotation/3);                                                                                                   //nach vorne fahren (abgeschwächte Ausrichtung)
         // motor(0,0,rotation);
       }
-    }else{                                                                                                                          //der Boden sieht etwas
-      motor(bodenrichtung, 200,rotation);                                                                                           //sehr schnell von der Linie wegfahren
+  
     }
-  }else if(torwart){    //torwart                                                                                                          //Als Torwart verhalten
+  else if(torwart){    //torwart                                                                                                          //Als Torwart verhalten
     //Serial.println("Torwart");
     bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
     // motor(90,0,10);
-    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart);
+    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart,accel);
   }else{    //!torwart
     piread=false;
     //Serial.println("Stuermer");
     Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
-    compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,false); 
+    compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,false,accel); 
     IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen                                                                                                                 //Pixy soll nicht beachtet werden
     //Serial.println(WinkelBall);
     entfPID.Compute();                                                                                                              //die PIDs (für Ballanfahrt) berechnen
     wiPID.Compute();
     if (bodenrichtung == -1) {                                                                                                      //der Boden sieht nichts
       if (richtung != -1) {                                                                                                         //der IR sieht etwas
-      //Serial.println(Icball);
+      Serial.println(Icball);
         if(Icball == 0){                                                                                          //Ball Vor dem Roboter
           int delay=50;                                                                                                             //Verzögerung der temporären Ballausrichtung, wenn er gerade ist
           if(addRot!=0){                                                                                                            //wenn er schon gedreht ist, soll er sich die temporäre später ändern
