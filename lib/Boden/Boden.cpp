@@ -207,12 +207,13 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
     long zeitlinieda = millis();
 
     while (millis() - zeitlinieda <= 75) {
-      Serial.println(LED[1]);
+      //Serial.println(LED[1]);
       for (int i = 0; i < 32; i++) {
-        if (Photo[i] && AnzahlSens <= 30 && !gesehenSensor[i]) {
+        if (Photo[i] && (AnzahlSens <= 30) && !gesehenSensor[i]) {
           gesehenSensor[i] = true;
           Serial.println(i);
           AnzahlSens++;
+          //zeitlinieda = millis()+100;
         }
       }
 
@@ -267,7 +268,9 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
           //Serial.println(i);
           zeitlinieda = millis();
         }
-        else {
+        else if(Photo[i]){
+          Photo[i] = true;
+        }else{
           Photo[i] = false;
         }
       }
@@ -296,8 +299,8 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
       rotation = (p * winkel) - d * rotationSpeed;                              //Berechnung der drehung
       alterWinkel = winkel;
       alteZeit = zeit;
-      rotation = -rotation / 4.5;
-      motor(bodenrichtung, 150,rotation);
+      rotation = -rotation / 4.5;       
+      motor(bodenrichtung, 200,rotation);
       //Serial.println(LED[1]);
       digitalWrite(LEDIV, HIGH);
       if (digitalRead(ButtonI) == LOW) {

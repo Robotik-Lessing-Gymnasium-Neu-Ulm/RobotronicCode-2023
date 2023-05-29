@@ -103,3 +103,17 @@ double Pixy2(Pixy2I2C& pixy2,bool& piread2) {
   }
   return 90-pixywinkel;
 }
+void position(double AbstandX,double AbstandY,Pixy2I2C& pixy2,bool& piread2,Pixy2I2C& pixy,bool& piread){
+ 
+  double WinkelToreGes;
+  WinkelToreGes = abs(Pixy(pixy,piread)) + abs(Pixy2(pixy2,piread2));
+  AbstandX = WinkelToreGes * 1;
+  AbstandY = Pixy(pixy,piread)/Pixy2(pixy2,piread2) * 1;
+  if(Pixy2(pixy2,piread2) <0){
+    AbstandX -= AbstandX;
+    AbstandY -= AbstandY;
+  }
+  Serial.println(AbstandX);
+  Serial.println(AbstandY);
+  Serial.println(WinkelToreGes); 
+}

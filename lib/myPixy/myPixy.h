@@ -6,4 +6,5 @@
 
 double Pixy(Pixy2I2C& pixy,bool& piread);
 double Pixy2(Pixy2I2C& pixy2,bool& piread2);
+void position(double AbstandX, double AbstandY,Pixy2I2C& pixy2,bool& piread2,Pixy2I2C& pixy,bool& piread);
 #endif
