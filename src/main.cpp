@@ -183,7 +183,7 @@ void loop() {
   //Serial.println(Pixy(pixy,piread));
   //torwart=false;
   Serial.println(Icball);
-  position(AbstandX,AbstandY,pixy2,piread2,pixy,piread);
+  position(AbstandX,AbstandY,pixy2,piread2,pixy,piread); //aufrufen der Postionsbestimmungsfunktion
   digitalWrite(Schuss_FW,HIGH);
   digitalWrite(Schuss_RW,LOW);
   analogWrite(Schuss_PWM,255);

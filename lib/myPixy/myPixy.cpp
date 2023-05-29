@@ -106,14 +106,14 @@ double Pixy2(Pixy2I2C& pixy2,bool& piread2) {
 void position(double AbstandX,double AbstandY,Pixy2I2C& pixy2,bool& piread2,Pixy2I2C& pixy,bool& piread){
  
   double WinkelToreGes;
-  WinkelToreGes = abs(Pixy(pixy,piread)) + abs(Pixy2(pixy2,piread2));
-  AbstandX = WinkelToreGes * 1;
-  AbstandY = Pixy(pixy,piread)/Pixy2(pixy2,piread2) * 1;
-  if(Pixy2(pixy2,piread2) <0){
+  WinkelToreGes = abs(Pixy(pixy,piread)) + abs(Pixy2(pixy2,piread2));  //Beträge der Winkel zu den beiden Toren werden addiert
+  AbstandX = WinkelToreGes * 1;                                        //Ausrechnen des Abstands zum Mittelpunkt in X-Richtung mit durch ausbrobieren bestimmten Faktor
+  AbstandY = Pixy(pixy,piread)/Pixy2(pixy2,piread2) * 1;               //Ausrechnen des Abstands zum Mittelpunkt in Y-Richtung mit durch ausbrobieren bestimmten Faktor
+  if(Pixy2(pixy2,piread2) <0){                                         //Untrscheidung Rechts-links
     AbstandX -= AbstandX;
     AbstandY -= AbstandY;
   }
-  Serial.println(AbstandX);
+  Serial.println(AbstandX);                                            //Ausgabe der ermittelten Werte
   Serial.println(AbstandY);
   Serial.println(WinkelToreGes); 
 }
