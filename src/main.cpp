@@ -53,6 +53,9 @@ int Wert[4];*/
 bool piread;                                          //Variablen für Kamera
 double AbstandX;
 double AbstandY;
+double WinkelToreGes;
+int TorHoehe;
+int TorHoehe2;
 
 bool piread2;
 
@@ -180,10 +183,9 @@ void setup() {
 #define Schusswinkel 8
 
 void loop() {
-  //Serial.println(Pixy(pixy,piread));
+  //Serial.println(Icball);
   //torwart=false;
-  Serial.println(Icball);
-  position(AbstandX,AbstandY,pixy2,piread2,pixy,piread); //aufrufen der Postionsbestimmungsfunktion
+  position(WinkelToreGes,AbstandX,AbstandY,pixy2,piread2,pixy,piread,TorHoehe,TorHoehe2); //aufrufen der Postionsbestimmungsfunktion
   digitalWrite(Schuss_FW,HIGH);
   digitalWrite(Schuss_RW,LOW);
   analogWrite(Schuss_PWM,255);
@@ -201,8 +203,8 @@ void loop() {
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
     if((accel >=-10)&&(accel<=5)&&counter==250){
       if (bodenrichtung == -1) {
-        PixyG=Pixy(pixy,piread);
-        PixyG2 = Pixy2(pixy2,piread2);                                                                                                    //Pixy auslesen
+        PixyG=Pixy(pixy,piread,TorHoehe);
+        PixyG2 = Pixy2(pixy2,piread2,TorHoehe2);                                                                                                    //Pixy auslesen
         compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG,PixyG2,hBall,torwart,accel);                                                   //Ausrichtungs-Funktion aufrufen, wobei die Kamera beachtet werden soll
         Serial.println("toranfahrt");
         if((abs(PixyG)+abs(PixyG2))>30&&PixyG<0){
@@ -254,7 +256,7 @@ void loop() {
     //Serial.println("Torwart");
     bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
     // motor(90,0,10);
-    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart,accel);
+    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart,accel,TorHoehe,TorHoehe2);
   }else{    //!torwart
     piread=false;
     //Serial.println("Stuermer");
