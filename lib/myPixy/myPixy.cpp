@@ -107,15 +107,15 @@ void position(double WinkelToreGes,double AbstandX,double AbstandY,Pixy2I2C& pix
   Pixy(pixy,piread,TorHoehe);
   Pixy2(pixy2,piread2,TorHoehe2);
   if(piread&&piread2){
-  WinkelToreGes = abs(Pixy(pixy,piread,TorHoehe)) + abs(Pixy2(pixy2,piread2,TorHoehe2));  //Beträge der Winkel zu den beiden Toren werden addiert
-  AbstandX = WinkelToreGes * 1;                                        //Ausrechnen des Abstands zum Mittelpunkt in X-Richtung mit durch ausbrobieren bestimmten Faktor
-  AbstandY = double(double(TorHoehe)/double(TorHoehe2))*100;                          //Ausrechnen des Abstands zum Mittelpunkt in Y-Richtung mit durch ausbrobieren bestimmten Faktor
+  WinkelToreGes = abs(Pixy(pixy,piread,TorHoehe)) + abs(Pixy2(pixy2,piread2,TorHoehe2));          //Beträge der Winkel zu den beiden Toren werden addiert
+  AbstandX = WinkelToreGes * 1;                                                                   //Ausrechnen des Abstands zum Mittelpunkt in X-Richtung mit durch ausbrobieren bestimmten Faktor
+  AbstandY = double(double(TorHoehe)/double(TorHoehe2))*100;                                      //Ausrechnen des Abstands zum Mittelpunkt in Y-Richtung mit durch ausbrobieren bestimmten Faktor
   }else{
-    Serial.println("Lachs");
+    //Serial.println("Lachs");
   }
-  if(Pixy2(pixy2,piread2,TorHoehe2) >0){                                         //Untrscheidung Rechts-links
+  if(Pixy2(pixy2,piread2,TorHoehe2) >0){                                                          //Untrscheidung Rechts-links
     AbstandX = -AbstandX;
   }
-  //Serial.println(AbstandX);                                            //Ausgabe der ermittelten Werte
-  Serial.println(AbstandY);
+  //Serial.println(AbstandX);                                                                     //Ausgabe der ermittelten Werte
+  //Serial.println(AbstandY);
 }

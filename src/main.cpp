@@ -149,7 +149,7 @@ void setup() {
   pinMode(LEDIV, OUTPUT);
   pinMode(LEDII, OUTPUT);
   pinMode(LEDIII, OUTPUT);
-  pinMode(LEDI, OUTPUT);               //Die Button-Pins an einen Pullup-Widerstand hängen
+  pinMode(LEDI, OUTPUT);                        //Die Button-Pins an einen Pullup-Widerstand hängen
   pinMode(ButtonI, INPUT_PULLUP);
   pinMode(ButtonII, INPUT_PULLUP);
   pinMode(ButtonIII, INPUT_PULLUP);
@@ -161,7 +161,7 @@ void setup() {
   wiPID.SetMode(AUTOMATIC);
 
   if(Roboter==LILA){
-    torwart=false;
+    torwart=true;
     entfPID.SetTunings(3.9,0,0.8);
     wiPID.SetTunings(0.74,0,0.38);  //0.365
     offsetVorne=22; //26
@@ -183,7 +183,6 @@ void setup() {
 #define Schusswinkel 8
 
 void loop() {
-  //Serial.println(Icball);
   //torwart=false;
   position(WinkelToreGes,AbstandX,AbstandY,pixy2,piread2,pixy,piread,TorHoehe,TorHoehe2); //aufrufen der Postionsbestimmungsfunktion
   digitalWrite(Schuss_FW,HIGH);
@@ -199,22 +198,24 @@ void loop() {
 
   if (hBall) {                                                                //Ermitteln ob er den Ball hat  hBall
     IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
-    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
+    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
-    if((accel >=-10)&&(accel<=5)&&counter==250){
+    if((accel >=-10)&&(accel<=5)&&counter==75){
       if (bodenrichtung == -1) {
         PixyG=Pixy(pixy,piread,TorHoehe);
         PixyG2 = Pixy2(pixy2,piread2,TorHoehe2);                                                                                                    //Pixy auslesen
         compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG,PixyG2,hBall,torwart,accel);                                                   //Ausrichtungs-Funktion aufrufen, wobei die Kamera beachtet werden soll
         Serial.println("toranfahrt");
         if((abs(PixyG)+abs(PixyG2))>30&&PixyG<0){
-          addRot = 160;
+          addRot = 90;
           compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
-          motor(0,1000,rotation);
+          motor(0,180,rotation);
           Serial.println("links");
         }else if((abs(PixyG)+abs(PixyG2))>30&&PixyG>0){
+          addRot = -90;
+          compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
           Serial.println("rechts");
-          motor(180,1000,(rotation-100));
+          motor(180,180,(rotation));
         }else{
           Serial.println("Mitte");
           Serial.println(PixyG);
@@ -260,7 +261,7 @@ void loop() {
   }else{    //!torwart
     piread=false;
     //Serial.println("Stuermer");
-    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
+    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,false,accel); 
     IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen                                                                                                                 //Pixy soll nicht beachtet werden
     //Serial.println(WinkelBall);

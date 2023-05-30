@@ -3,6 +3,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <Motoren.h>
+#include <Kompass.h>
 
 //Multiplexer Unten
 #ifndef S0
@@ -196,7 +197,7 @@ void bodenlesen(bool& minEinerDa,int* LED, int* Schwellwerte, bool* Photo) {
     }*/
 }
 void bodenverarbeiten(bool* gesehenSensor,bool& minEinerDa,bool* Photo, double& bodenrichtung, int* LED, 
-Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, long& alteZeit, int& alterWinkel, double& rotation) {
+Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, long& alteZeit, double& rotation, int& alterWinkel, double& addRot,bool piread,int PixyG,int PixyG2,bool hBall,bool torwart,double accel) {
   int AnzahlSens = 0;
   for (int i = 0; i < 32; i++) {
     gesehenSensor[i] = false;
@@ -274,7 +275,7 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
           Photo[i] = false;
         }
       }
-      sensors_event_t orientationData;                                          //momentane Aufnahmeder der Sensorwerte
+      /*sensors_event_t orientationData;                                          //momentane Aufnahmeder der Sensorwerte
       sensors_event_t angVelocityData;
       gyro.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
       gyro.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);           //holt neue Werte in Grad
@@ -299,7 +300,8 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
       rotation = (p * winkel) - d * rotationSpeed;                              //Berechnung der drehung
       alterWinkel = winkel;
       alteZeit = zeit;
-      rotation = -rotation / 4.5;       
+      rotation = -rotation / 4.5;*/
+      compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart,accel);      
       motor(bodenrichtung, 200,rotation);
       //Serial.println(LED[1]);
       digitalWrite(LEDIV, HIGH);
@@ -313,9 +315,9 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
     bodenrichtung = -1;
   }
 }
-void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation) {
+void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit,double& rotation, int& alterWinkel, double& addRot,bool piread,int PixyG,int PixyG2,bool hBall,bool torwart,double accel) {
   bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
-  bodenverarbeiten(gesehenSensor,minEinerDa,Photo,bodenrichtung,LED,gyro,buttonGpressed,Schwellwerte,minus,alteZeit,alterWinkel,rotation);
+  bodenverarbeiten(gesehenSensor,minEinerDa,Photo,bodenrichtung,LED,gyro,buttonGpressed,Schwellwerte,minus,alteZeit,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
 }
 double bodenrichtungszuweisung(int n) {
   return ((n * 11.25 + 90 ) / 180 * PI );

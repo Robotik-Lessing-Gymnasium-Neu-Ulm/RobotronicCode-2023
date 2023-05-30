@@ -12,8 +12,8 @@ void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation
     //Serial.println(LED[1]);
     static int k=0;
     pixyG2 = Pixy2(pixy2,piread2,TorHoehe2);
-    Serial.println(pixyG2);
-    compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread2,PixyG,pixyG2,hatBall,false,accel);
+    //Serial.println(pixyG2);
+    compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread2,PixyG,pixyG2,hatBall,torwart,accel);
     IRsensTW(IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,rotation,addRot,WinkelBall,IRsave);
     //Serial.println(wiIn);
     if (LED[12] > Schwellwerte[12] || LED[13] > Schwellwerte[13]) {
