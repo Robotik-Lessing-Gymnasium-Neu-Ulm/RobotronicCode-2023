@@ -50,7 +50,7 @@
 constexpr bool speichern=false; //else: offsetten
 constexpr size_t STELLEN=2;               //Anzahl der Nachkommastellen, die gespeichert werdem sollen
 
-void motor (double dir, double velocity, double rotation) {
+unsigned int motor (double dir, double velocity, double rotation) {
   // dir Umrechnen ins Bogenmaß
   double phi = (dir / 180) * PI;
   // Aufteilen des damit aufgespannten Vektors auf die 4 Motoren
@@ -123,6 +123,7 @@ void motor (double dir, double velocity, double rotation) {
     digitalWrite(M4_RW, HIGH);
     analogWrite(M4_PWM, 255);
   }
+  return (unsigned int)(max(max(abs(m1),abs(m2)),max(abs(m3),abs(m4))));
 }
 
 double getRotation(Adafruit_BNO055& gyro){
@@ -139,12 +140,25 @@ double getRotationSpeed(Adafruit_BNO055& gyro){
 void fahren(double direction, double velocity, double rotation, Adafruit_BNO055& gyro,bool& buttonGpressed){
   static bool setup=true;
   static double InpidWi;
-  static double SetpidWi;
+  static double SetpidWi{90};
   static double OutpidWi;
-  static PID pidWi(&InpidWi,&OutpidWi,&SetpidWi,3,0,0.15,DIRECT);  //35,12,14
-  if(setup){
-    pidWi.SetOutputLimits(-40,40);                              //Notlösung, denn er gleicht sich auch der Unstetigkeitsstelle an
+  static PID pidWi(&InpidWi,&OutpidWi,&SetpidWi,1.3,0.23,0.005,DIRECT);
+  static double InpidV;
+  static double SetpidV;
+  static double OutpidV;
+  static double dobuf{7};
+  static PID pidV(&InpidV,&OutpidV,&SetpidV,6,0,0,DIRECT);   //2,0.5,0.12;7,0,0.23
+  if(digitalRead(4)==LOW){
+    dobuf+=0.008;
+    Serial.println(dobuf);
+    pidV.SetTunings(dobuf,0,0);
+    delay(10);
+  }
+  if(setup){                                                    //nur beim ersten Funktionsaufruf ausführen (effizienz)
+    pidWi.SetOutputLimits(-60,60);                              //Notlösung, denn er gleicht sich auch der Unstetigkeitsstelle an
     pidWi.SetMode(AUTOMATIC);
+    pidV.SetOutputLimits(20,1023);
+    pidV.SetMode(AUTOMATIC);
   }
   static std::vector<double> v_buf (0);                         //um die Geschwindigkeit zu speichern und später anzuzeigen
   static std::vector<double> ri_buf (0);                        //um die Bewegungsrichtung zu speichern und später anzuzeigen
@@ -203,31 +217,40 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   x+=1*rotationSpeed;
   y+=3.4*rotationSpeed;
   double v=hypot((double)x,(double)y)/(millis()-lastMeasurement);
-  double ri=atan2(x,y)*180/PI+8;
+  double ri=atan2(x,y)*180/PI-5;
 //speichern
-  static char count{0};
-  if(count>=10){
-    v_buf.push_back(v);
-    wi_buf.push_back(winkel);
-    ri_buf.push_back(ri);
-    measurementTime_buf.push_back(millis());
-    count=0;
-    // Serial.print(".");
-    Serial.println(OutpidWi);
-  }else{
-    count++;
+  if(speichern){
+    static char count{0};
+    if(count>=3){
+      v_buf.push_back(v);
+      wi_buf.push_back(winkel);
+      ri_buf.push_back(ri);
+      measurementTime_buf.push_back(millis());
+      count=0;
+      // Serial.print(".");
+      Serial.print(v);Serial.print("  |  ");Serial.println(OutpidV);
+        digitalWrite(37,v>velocity-3&&v<velocity+3);
+    }else{
+      count++;
+    }
   }
   lastMeasurement=millis();
-
-  InpidWi=ri-winkel+90;
+  InpidWi=ri-winkel;
+  if(!motion||!surface){
+    InpidWi=direction;
+  }
   while(InpidWi<direction-180){
     InpidWi+=360;
   }while(InpidWi>direction+180){
     InpidWi-=360;
   }
+  Serial.println(InpidWi);
   SetpidWi=direction;
-  if(motion){
-    pidWi.Compute();
+  pidWi.Compute();
+  InpidV=v;
+  SetpidV=velocity;
+  if(surface){
+    pidV.Compute();
   }
   if (buttonGpressed) {
     if(!speichern){   //offsetten
@@ -275,13 +298,17 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
       Serial.println("abgeschlossen");
       delay(500);
     }
-    buttonGpressed = false;                                                 //automatisch terminieren
+    buttonGpressed = false;                                                         //automatisch terminieren
   }
-  int p{11},d{50};                                                                 //p(i)d Werte des Rotations-Reglers
+  int p{11},d{50};                                                                  //p(i)d Werte des Rotations-Reglers
   double ro = -((p * (winkel-rotation)) - d * rotationSpeed)/4.5;                   //skalierter pd Regler
   static bool lastSurface{true};
   if(surface||lastSurface){       //minimale Glättung
-    motor(OutpidWi+direction,velocity,ro);
+    if(motion){
+      motor(OutpidWi+direction,70,ro);
+    }else{
+      motor(direction,200,ro);
+    }
   }else{
     motor(0,0,0);
   }

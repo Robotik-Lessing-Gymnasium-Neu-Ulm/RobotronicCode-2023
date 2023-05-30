@@ -72,24 +72,24 @@ void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icb
     digitalWrite(Schuss_RW,LOW);
     analogWrite(Schuss_PWM,0);
   }
-  if (torwart) {
-    digitalWrite(LEDII, HIGH);
-  } else {
-    digitalWrite(LEDII, LOW);
-  }
-  if (minEinerDa) {
-    digitalWrite(LEDIV, HIGH);
-  } else {
-    digitalWrite(LEDIV, LOW);
-  }
-  if (hBall) {
-    digitalWrite(LEDI, HIGH);
-  } else {
-    digitalWrite(LEDI, LOW);
-  }
-  if (rotation <= 2.5 && rotation >= -2.5) {
-    digitalWrite(LEDIII, HIGH);
-  } else {
-    digitalWrite(LEDIII, LOW);
-  }
+  // if (torwart) {
+  //   digitalWrite(LEDII, HIGH);
+  // } else {
+  //   digitalWrite(LEDII, LOW);
+  // }
+  // if (minEinerDa) {
+  //   digitalWrite(LEDIV, HIGH);
+  // } else {
+  //   digitalWrite(LEDIV, LOW);
+  // }
+  // if (hBall) {
+  //   digitalWrite(LEDI, HIGH);
+  // } else {
+  //   digitalWrite(LEDI, LOW);
+  // }
+  // if (rotation <= 2.5 && rotation >= -2.5) {
+  //   digitalWrite(LEDIII, HIGH);
+  // } else {
+  //   digitalWrite(LEDIII, LOW);
+  // }
 }
