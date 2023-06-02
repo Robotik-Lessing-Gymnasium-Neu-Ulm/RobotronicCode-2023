@@ -22,6 +22,8 @@
 #define AM1 A14     //analog Multiplexer Oben
 #endif
 
+constexpr bool IRoben=false;            //Die IR-Sensoren schauen nach unten
+
 
 int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzung Auslesen
   digitalWrite(S0, s3);
@@ -72,9 +74,16 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
         minWert[i]--;
       }
     }
-    WinkelBall=90-22.5*Icball+addRot;                                   //Berechnen des Winkels zum Ball
-    if(WinkelBall<=0){                                                  //auf Wertebereich 0-360 verschieben
-      WinkelBall+=360;
+    if(IRoben){
+      WinkelBall=90-22.5*Icball+addRot;                                 //Berechnen des Winkels zum Ball
+      if(WinkelBall<=0){                                                  //auf Wertebereich 0-360 verschieben
+        WinkelBall+=360;
+      }
+    }else{    //!IRoben
+      WinkelBall=90+22.5*Icball+addRot;
+      if(WinkelBall>360){                                                  //auf Wertebereich 0-360 verschieben
+        WinkelBall-=360;
+      }
     }
     wiIn=WinkelBall-90;                                                 //Winkel berechnen, sodass der Vorzeichen-Wechsel hinten beim Roboter liegt
     if(wiIn>180){
@@ -106,7 +115,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
       Serial.println("IR-save abgeschlossen");
       IRsave=false;
     }
-    if(IRbest>BallWegRadius){                                           //Wenn er den Ball nicht sieht
+    if(IRbest>BallWegRadius){                                             //Wenn er den Ball nicht sieht
       richtung=-1;
       addRot=0;
       WinkelBall=90;
@@ -134,7 +143,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     }
     // Serial.print(addRot);Serial.print("|");
     if(IRbest<AnfahrtsRadius){                                          //Wenn der Roboter im Anfahrtskreis steht
-      richtung=270-addRot;                                                     //nach hinten fahren
+      richtung=270-addRot;                                              //nach hinten fahren
       return;
     }
     if(WinkelBall<=90||WinkelBall>=270){                                //Ball rechts vom Roboter
@@ -150,6 +159,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     if(richtung>360){
       richtung-=360;
     }
+    Serial.println(WinkelBall);
   }else{
     irAutoCal(minWert,irAutoCalibration);
     for(int i=0;i<16;i++){
