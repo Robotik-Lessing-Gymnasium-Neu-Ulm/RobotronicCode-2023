@@ -288,5 +288,5 @@ void setup() {
 
 void loop(){
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,IRsave,false,torwart);
-  fahren(90,4,0,gyro,buttonGpressed);
+  fahren(90,6,0,gyro,buttonGpressed);
 }

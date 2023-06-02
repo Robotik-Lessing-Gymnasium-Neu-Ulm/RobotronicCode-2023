@@ -142,12 +142,12 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   static double InpidWi;
   static double SetpidWi{0};
   static double OutpidWi;
-  static PID pidWi(&InpidWi,&OutpidWi,&SetpidWi,0.9,0,0,REVERSE);
+  static PID pidWi(&InpidWi,&OutpidWi,&SetpidWi,0.8,0,0,REVERSE);   //ein reiner P-regler ist wirklich die beste Einstellung!
   static double InpidV;
   static double SetpidV;
   static double OutpidV;
   static double dobuf{7};
-  static PID pidV(&InpidV,&OutpidV,&SetpidV,12,0,0,DIRECT);   //2,0.5,0.12;7,0,0.23
+  static PID pidV(&InpidV,&OutpidV,&SetpidV,11.4,0.08,0.65,DIRECT);     //11.4,0.08,0
   if(digitalRead(4)==LOW){
     dobuf+=0.008;
     Serial.println(dobuf);
@@ -155,7 +155,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
     delay(10);
   }
   if(setup){                                                    //nur beim ersten Funktionsaufruf ausführen (effizienz)
-    pidWi.SetOutputLimits(-75,75);                              //Notlösung, denn er gleicht sich auch der Unstetigkeitsstelle an
+    pidWi.SetOutputLimits(-65,65);                              //Notlösung, denn er gleicht sich auch der Unstetigkeitsstelle an
     pidWi.SetMode(AUTOMATIC);
     pidV.SetOutputLimits(-360,360);                             //experimentell bestimmte Grenzen (lustig, dass es so wie ein Winkel wirkt…)
     pidV.SetMode(AUTOMATIC);
@@ -164,7 +164,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   static std::vector<double> ri_buf (0);                        //um die Bewegungsrichtung zu speichern und später anzuzeigen
   static std::vector<double> wi_buf (0);                        //um den Drehwinkel zu speichern und später anzuzeigen
   static std::vector<unsigned long> measurementTime_buf (0);    //Um die x-Skalierung beim Speicher und Anzeigen zu beachten
-  static double minus{0};                                          //Offset des BNO055
+  static double minus{0};                                       //Offset des BNO055
   static uint32_t lastMeasurement{0};
   static double winkel{0},rotationSpeed{0};
   winkel=getRotation(gyro)-minus;
@@ -218,6 +218,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   y+=3.4*rotationSpeed;
   double v=hypot((double)x,(double)y)/(millis()-lastMeasurement);
   double ri=atan2(x,y)*180/PI+8;
+  v*=cos(ri-direction);                               //Geschwindigkeit in die angestrebten Richtung
 //speichern
   if(speichern){
     static char count{0};
@@ -229,16 +230,16 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
       count=0;
       // Serial.print(".");
       Serial.print(v);Serial.print("  |  ");Serial.println(OutpidV);
-        digitalWrite(37,v>velocity-3&&v<velocity+3);
+      digitalWrite(37,v>velocity-3&&v<velocity+3);
     }else{
       count++;
     }
   }
   lastMeasurement=millis();
   InpidWi=direction-(ri-winkel);
-  while(InpidWi<direction-180){
+  while(InpidWi<-180){
     InpidWi+=360;
-  }while(InpidWi>direction+180){
+  }while(InpidWi>+180){
     InpidWi-=360;
   }
   static double OutpidWiclean{0};
@@ -269,15 +270,15 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
       OutpidWiclean+=(double)bufwi[i]/swi;
     }
   }else{  //!surface
-    for(auto e:bufwi){
-      e=direction;
+    for(size_t i=0;i<swi;i++){
+      bufwi[i]=direction;
     }
-    for(auto e:bufv){
-      e=0;
+    for(size_t i=0;i<sv;i++){
+      bufv[i]=0;
     }
+    Serial.println("RESET");
   }
-  Serial.print(InpidWi);Serial.print("  ;  ");
-  Serial.println(OutpidWiclean);
+  Serial.println(OutpidVclean);
   if (buttonGpressed) {
     if(!speichern){   //offsetten
       minus = getRotation(gyro);                                                           //offsetten
@@ -330,6 +331,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   double ro = -((p * (winkel-rotation)) - d * rotationSpeed)/4.5;                   //skalierter pd Regler
   static bool lastSurface{true};
   if(surface||lastSurface){       //minimale Glättung
+    // Serial.print(motor(OutpidWiclean+direction,OutpidVclean,ro));Serial.print("  |  ");Serial.println(OutpidVclean);
     motor(OutpidWiclean+direction,OutpidVclean,ro);
   }else{
     motor(0,0,0);
