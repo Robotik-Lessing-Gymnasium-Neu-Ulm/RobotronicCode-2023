@@ -8,7 +8,7 @@
 #define ballUndLinie false //Solle er, wenn er die linie sieht immernoch auf den Ball reagiern?
 #define Abweichung 10 //Wie schräg soll er fahren, wenn er auf den Ball und die Linie reagieren soll
 
-void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055 &gyro, bool &buttonGpressed, double &minus, int &alterWinkel, double &addRot, bool piread2, int pixyG2, int& PixyG, int *IR, double &IRbest, int &Icball, double &richtung, double &wiIn, int *minWert, bool &irAutoCalibration, double &WinkelBall, bool &IRsave, bool hatBall, bool& torwart,double accel,int&  TorHoehe,int&  TorHoehe2){
+void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055 &gyro, bool &buttonGpressed, double &minus, int &alterWinkel, double &addRot, bool piread2, int pixyG2, int& PixyG, int *IR, double &IRbest, int &Icball, double &richtung, double &wiIn, int *minWert, bool &irAutoCalibration, double &WinkelBall, bool &IRsave, bool hatBall, bool& torwart,double accel,int&  TorHoehe,int&  TorHoehe2,double &entfSet,PID &wiPID,unsigned long& addRotTime){
     //Serial.println(LED[1]);
     static int k=0;
     pixyG2 = Pixy2(pixy2,piread2,TorHoehe2);
@@ -41,6 +41,10 @@ void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation
             Serial.println("onli");
         }
         else {
+            if(IRbest < 50){
+                IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);
+                motor(richtung, 90,rotation);
+            }else{
             if(piread2 == false){
                 //compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,pireads,PixyG,pixyG2,hatBall,torwart,accel);
                 motor(90,10,0);
@@ -83,6 +87,7 @@ void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation
                         motor(270, 60,rotation);
                     }
                 }
+            }
             }
         }
     }
