@@ -159,7 +159,6 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     if(richtung>360){
       richtung-=360;
     }
-    Serial.println(WinkelBall);
   }else{
     irAutoCal(minWert,irAutoCalibration);
     for(int i=0;i<16;i++){

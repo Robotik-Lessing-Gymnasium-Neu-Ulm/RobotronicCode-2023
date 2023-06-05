@@ -138,6 +138,7 @@ double getRotationSpeed(Adafruit_BNO055& gyro){
 }
 
 void fahren(double direction, double velocity, double rotation, Adafruit_BNO055& gyro,bool& buttonGpressed){
+  static bool lastSurface{true};
   static bool setup=true;
   static double InpidWi;
   static double SetpidWi{0};
@@ -148,12 +149,6 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   static double OutpidV;
   static double dobuf{7};
   static PID pidV(&InpidV,&OutpidV,&SetpidV,11.4,0.08,0.65,DIRECT);     //11.4,0.08,0
-  if(digitalRead(4)==LOW){
-    dobuf+=0.008;
-    Serial.println(dobuf);
-    pidV.SetTunings(dobuf,0,0);
-    delay(10);
-  }
   if(setup){                                                    //nur beim ersten Funktionsaufruf ausführen (effizienz)
     pidWi.SetOutputLimits(-65,65);                              //Notlösung, denn er gleicht sich auch der Unstetigkeitsstelle an
     pidWi.SetMode(AUTOMATIC);
@@ -214,8 +209,10 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
     motion=false;
   }
   surface=(o_>=1);
-  x+=1*rotationSpeed;
-  y+=3.4*rotationSpeed;
+  x+=0.6*rotationSpeed;
+  // Serial.println((double)y/rotationSpeed);
+  y-=0.27*rotationSpeed;
+  Serial.println(y);
   double v=hypot((double)x,(double)y)/(millis()-lastMeasurement);
   double ri=atan2(x,y)*180/PI+8;
   v*=cos(ri-direction);                               //Geschwindigkeit in die angestrebten Richtung
@@ -243,14 +240,14 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
     InpidWi-=360;
   }
   static double OutpidWiclean{0};
-  constexpr size_t swi=50;
+  constexpr size_t swi=800;
   static double bufwi[swi];
   InpidV=v;
   SetpidV=velocity;
   static double OutpidVclean{0};
-  constexpr size_t sv=100;
+  constexpr size_t sv=130;
   static double bufv[sv];
-  if(surface){
+  if(surface||lastSurface){
     pidV.Compute();
     for(size_t i{1};i<sv;i++){
       bufv[i]=bufv[i-1];
@@ -278,7 +275,6 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
     }
     Serial.println("RESET");
   }
-  Serial.println(OutpidVclean);
   if (buttonGpressed) {
     if(!speichern){   //offsetten
       minus = getRotation(gyro);                                                           //offsetten
@@ -329,7 +325,6 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   }
   int p{11},d{50};                                                                  //p(i)d Werte des Rotations-Reglers
   double ro = -((p * (winkel-rotation)) - d * rotationSpeed)/4.5;                   //skalierter pd Regler
-  static bool lastSurface{true};
   if(surface||lastSurface){       //minimale Glättung
     // Serial.print(motor(OutpidWiclean+direction,OutpidVclean,ro));Serial.print("  |  ");Serial.println(OutpidVclean);
     motor(OutpidWiclean+direction,OutpidVclean,ro);
