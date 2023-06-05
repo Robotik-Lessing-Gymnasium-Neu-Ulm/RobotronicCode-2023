@@ -102,7 +102,7 @@ double offsetVorne=11;                                  //LILA: 10; Schwarz: 10
 bool buttonGpressed = true;                           //other
 
 void setup() {
-  while (!SD.begin(BUILTIN_SDCARD)) {                     //SD-Karte initialisieren
+  /*while (!SD.begin(BUILTIN_SDCARD)) {                     //SD-Karte initialisieren
     Serial.println("Karte einstecken!");
   }
   Serial.println("Karte initialisiert.");
@@ -125,7 +125,7 @@ void setup() {
     Serial.print("LS: ");
     Serial.println(minWertLS);
     Serial.println("(MinWerte)<<<<<<<<<<<<<<");
-  myFile.close();
+  myFile.close();*/
   
   Serial.begin(115200);                         //Seriellen Monitor initialisieren
   Serial3.begin(115200);                        
@@ -179,7 +179,7 @@ void setup() {
   pixy2.init(0x53);
 }
 
-#define bt false
+#define bt true
 #define Schusswinkel 8
 
 void loop() {
@@ -254,13 +254,13 @@ void loop() {
   
     }
   else if(torwart){    //torwart                                                                                                          //Als Torwart verhalten
-    //Serial.println("Torwart");
+    //Serial.println(IRbest);
     bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
     // motor(90,0,10);
-    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart,accel,TorHoehe,TorHoehe2);
+    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart,accel,TorHoehe,TorHoehe2,entfSet,wiPID,addRotTime);
   }else{    //!torwart
     piread=false;
-    //Serial.println("Stuermer");
+    //Serial.println(IRbest);
     Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,false,accel); 
     IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen                                                                                                                 //Pixy soll nicht beachtet werden

@@ -5,7 +5,7 @@
 void bluetooth(bool& torwart, int IRbest) {
    static int blueCount;             //nur jeden 30. Aufruf senden
    static int torwartarr[10];        //(bool)torwart glätten
-   if (blueCount == 50) {
+   if (blueCount == 25) {
     for(int i=9;i>0;i--){
      torwartarr[i]=torwartarr[i-1];
     }
@@ -24,7 +24,7 @@ void bluetooth(bool& torwart, int IRbest) {
          Serial.println("Stuermer");
          torwartarr[0] = 0;
        }
-       Serial1.read();
+       Serial1.flush();
      }
      int t=0;
      for(int i=0;i<10;i++){            //glätten
@@ -35,7 +35,8 @@ void bluetooth(bool& torwart, int IRbest) {
    }else {
      blueCount++;
    }
- }
+   }
+    
 
 /*#define Schwellwert 5  //Erst TW/Stürmer wechseln, wenn der andere um 'Schwellwert' besser ist
 
