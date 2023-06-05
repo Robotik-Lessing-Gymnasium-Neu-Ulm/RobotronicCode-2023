@@ -128,6 +128,4 @@ void position(double WinkelToreGes,double AbstandX,double AbstandY,Pixy2I2C& pix
   if(Pixy2(pixy2,piread2,TorHoehe2)<0){
     AbstandX = -AbstandX;
   }
-  Serial.println(AbstandY);
-  delay(100);
 }

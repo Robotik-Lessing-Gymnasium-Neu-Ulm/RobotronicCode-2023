@@ -161,13 +161,13 @@ void setup() {
   wiPID.SetMode(AUTOMATIC);
 
   if(Roboter==LILA){
-    torwart=true;
+    torwart=false;
     entfPID.SetTunings(3.9,0,0.8);
     wiPID.SetTunings(0.74,0,0.38);  //0.365
     offsetVorne=22; //26
     Serial.print("LILA:    ");Serial.println(wiPID.GetKd());
   }else{ //black
-    torwart=false;
+    torwart=true;
     entfPID.SetTunings(3.9,0,0.8);
     wiPID.SetTunings(0.74,0,0.38); //25
     offsetVorne=22;
@@ -184,6 +184,7 @@ void setup() {
 
 void loop() {
   //torwart=false;
+  Serial.println(torwart);
   position(WinkelToreGes,AbstandX,AbstandY,pixy2,piread2,pixy,piread,TorHoehe,TorHoehe2); //aufrufen der Postionsbestimmungsfunktion
   digitalWrite(Schuss_FW,HIGH);
   digitalWrite(Schuss_RW,LOW);
@@ -192,7 +193,7 @@ void loop() {
   IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);//
    if(bt){
      int bufBest=(int)IRbest;
-     bluetooth(torwart,bufBest);                                                                                                        //empfangen und senden
+     bluetooth(torwart,hBall);                                                                                                        //empfangen und senden
    }
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,IRsave, hBall, torwart);                                  //Die grünen Kontroll-LEDs leuchten lassen& Knöpfe überprüfen
 

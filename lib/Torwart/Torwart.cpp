@@ -23,25 +23,24 @@ void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation
         motor(180, 150,rotation);
         //Serial.println("salkd2");
     } else {
-        richtung=0;
         if (onLine(LED,Schwellwerte)) {
-            if (wiIn == 0) {
+            if (Icball == 0) {
                 Serial.println("vorne");
                 motor(90, 50,rotation);
             }  else if (richtung == -1) {
                 motor(0, 0,rotation);
                 Serial.println("nicht");
             } else if (wiIn < 0) {
-                Serial.println("rechts");
-                motor(0, 70,rotation);
-            } else {
                 Serial.println("links");
                 motor(180, 70,rotation);
+            } else {
+                Serial.println("rechts");
+                motor(0, 70,rotation);
             }
             Serial.println("onli");
         }
         else {
-            if(IRbest < 50&&Icball == 0){
+            if(IRbest < 80&&Icball == 0){
                 motor(90,100,rotation);
             }else{
             if(piread2 == false){

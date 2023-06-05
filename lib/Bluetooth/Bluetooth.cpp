@@ -2,7 +2,7 @@
 #include<Wire.h>
 #include<Defines.h>
 
-void bluetooth(bool& torwart, int IRbest) {
+/*void bluetooth(bool& torwart, int IRbest) {
    static int blueCount;             //nur jeden 30. Aufruf senden
    static int torwartarr[10];        //(bool)torwart glätten
    if (blueCount == 25) {
@@ -35,7 +35,7 @@ void bluetooth(bool& torwart, int IRbest) {
    }else {
      blueCount++;
    }
-   }
+   }*/
     
 
 /*#define Schwellwert 5  //Erst TW/Stürmer wechseln, wenn der andere um 'Schwellwert' besser ist
@@ -93,7 +93,7 @@ void bluetooth(bool& torwart, int IRbest) {
     t=millis();
   }
 }*/
-/*
+
 void bluetooth(bool& torwart,bool& hBall){
   if(torwart && hBall){
     Serial1.write(1);
@@ -106,4 +106,3 @@ void bluetooth(bool& torwart,bool& hBall){
     }
   }
 }
-*/
