@@ -103,7 +103,7 @@ double Pixy2(Pixy2I2C& pixy2,bool& piread2,int&  TorHoehe2) {
   }
   return 90-pixywinkel;
 }
-void position(double WinkelToreGes,double AbstandX,double AbstandY,Pixy2I2C& pixy2,bool& piread2,Pixy2I2C& pixy,bool& piread,int&  TorHoehe,int&  TorHoehe2){
+/*void position(double WinkelToreGes,double AbstandX,double AbstandY,Pixy2I2C& pixy2,bool& piread2,Pixy2I2C& pixy,bool& piread,int&  TorHoehe,int&  TorHoehe2){
   Pixy(pixy,piread,TorHoehe);
   Pixy2(pixy2,piread2,TorHoehe2);
   if(piread&&piread2){
@@ -118,13 +118,16 @@ void position(double WinkelToreGes,double AbstandX,double AbstandY,Pixy2I2C& pix
   }
   //Serial.println(AbstandX);                                                                     //Ausgabe der ermittelten Werte
   //Serial.println(AbstandY);
-}
-
-
-/*void position(double WinkelToreGes,double AbstandX,double AbstandY,Pixy2I2C& pixy2,bool& piread2,Pixy2I2C& pixy,bool& piread,int&  TorHoehe,int&  TorHoehe2){
-  int a = 220*sin(Pixy(pixy,piread,TorHoehe)*PI/180)/sin(180-abs(Pixy2(pixy2,piread2,TorHoehe2))-abs(Pixy(pixy,piread,TorHoehe)));
-  AbstandX = sin(abs(Pixy2(pixy2,piread2,TorHoehe2))*PI/180)*a;
-  //AbstandY = sqrt(a*a-AbstandX*AbstandX);
-  Serial.println(AbstandX);
-  delay(100);
 }*/
+
+
+void position(double WinkelToreGes,double AbstandX,double AbstandY,Pixy2I2C& pixy2,bool& piread2,Pixy2I2C& pixy,bool& piread,int&  TorHoehe,int&  TorHoehe2){
+  int a = 220*sin(abs(Pixy(pixy,piread,TorHoehe))*PI/180)/sin((180-abs(Pixy2(pixy2,piread2,TorHoehe2))-abs(Pixy(pixy,piread,TorHoehe)))*PI/180);
+  AbstandX = sin(abs(Pixy2(pixy2,piread2,TorHoehe2))*PI/180)*a;
+  AbstandY = sqrt((a*a)-(AbstandX*AbstandX));
+  if(Pixy2(pixy2,piread2,TorHoehe2)<0){
+    AbstandX = -AbstandX;
+  }
+  Serial.println(AbstandY);
+  delay(100);
+}

@@ -269,7 +269,7 @@ void loop() {
     wiPID.Compute();
     if (bodenrichtung == -1) {                                                                                                      //der Boden sieht nichts
       if (richtung != -1) {                                                                                                         //der IR sieht etwas
-      Serial.println(Icball);
+      //Serial.println(Icball);
         if(Icball == 0){                                                                                          //Ball Vor dem Roboter
           int delay=50;                                                                                                             //Verzögerung der temporären Ballausrichtung, wenn er gerade ist
           if(addRot!=0){                                                                                                            //wenn er schon gedreht ist, soll er sich die temporäre später ändern

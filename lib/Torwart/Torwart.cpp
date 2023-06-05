@@ -41,9 +41,8 @@ void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation
             Serial.println("onli");
         }
         else {
-            if(IRbest < 50){
-                IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);
-                motor(richtung, 90,rotation);
+            if(IRbest < 50&&Icball == 0){
+                motor(90,100,rotation);
             }else{
             if(piread2 == false){
                 //compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,pireads,PixyG,pixyG2,hatBall,torwart,accel);

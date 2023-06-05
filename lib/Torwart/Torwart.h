@@ -4,6 +4,7 @@
 #include<Arduino.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
+#include<PID_v1.h>
 #include <EEPROM.h>
 #include <myPixy.h>
 

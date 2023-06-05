@@ -93,3 +93,17 @@ void bluetooth(bool& torwart, int IRbest) {
     t=millis();
   }
 }*/
+/*
+void bluetooth(bool& torwart,bool& hBall){
+  if(torwart && hBall){
+    Serial1.write(1);
+    torwart = false;
+  }if(!torwart){
+    if(Serial1.available()){
+      if(Serial1.read() == 1){
+        torwart = true;
+      }
+    }
+  }
+}
+*/

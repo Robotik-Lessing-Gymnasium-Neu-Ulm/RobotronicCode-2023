@@ -56,7 +56,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0),minWert[10], 1023, 0, 200);
     IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1),minWert[11], 1023, 0, 200);
     IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0),minWert[12], 1023, 0, 200);
-    IR[13] = 200;//map(lesenMultiplexerOben(1, 1, 0, 1),minWert[13], 1023, 0, 200);
+    IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1),minWert[13], 1023, 0, 200);
     IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0),minWert[14], 1023, 0, 200);
     IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1),minWert[15], 1023, 0, 200);
     IRbest = 200;                                                        //bestimmen des niedrigsten, gemessenen Wertes und Speichern des Index in Icball
@@ -72,13 +72,9 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
         minWert[i]--;
       }
     }
-    /*WinkelBall=90+22.5*Icball+addRot;                                   //Berechnen des Winkels zum Ball
+    WinkelBall=90+22.5*Icball+addRot;                                   //Berechnen des Winkels zum Ball
     if(WinkelBall>=360){                                                  //auf Wertebereich 0-360 verschieben
       WinkelBall-=360;
-    }*/
-    WinkelBall =90-22.5*Icball+addRot;
-    if(WinkelBall<0){
-      WinkelBall += 360;
     }
     wiIn=WinkelBall-90;                                                 //Winkel berechnen, sodass der Vorzeichen-Wechsel hinten beim Roboter liegt
     if(wiIn>180){
