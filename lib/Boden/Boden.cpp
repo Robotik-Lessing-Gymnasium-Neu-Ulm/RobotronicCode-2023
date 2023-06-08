@@ -281,7 +281,7 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
         minus = winkel;
         Serial.print("MINUS:");
         Serial.println(minus);
-        buttonGpressed = false;
+        // buttonGpressed = false;
       }
       winkel = winkel - minus;
       if (winkel > 180) {                                                       //Werte umrechnen von 0-359 auf Werte von -180 - +180 => für Formel

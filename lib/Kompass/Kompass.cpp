@@ -20,7 +20,7 @@ void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double&
     minus = winkel;
     Serial.print("MINUS:"); 
     Serial.println(minus);
-    buttonGpressed = false;                                                 //automatisch terminieren
+    // buttonGpressed = false;                                                 //automatisch terminieren
   }
   if(piread&&hatBall){                                                      //wenn die vordere Kamera beachtet werden soll
     if(Roboter==LILA){

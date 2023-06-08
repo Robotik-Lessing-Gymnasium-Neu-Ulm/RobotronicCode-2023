@@ -212,7 +212,6 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   x+=0.6*rotationSpeed;
   // Serial.println((double)y/rotationSpeed);
   y-=0.27*rotationSpeed;
-  Serial.println(y);
   double v=hypot((double)x,(double)y)/(millis()-lastMeasurement);
   double ri=atan2(x,y)*180/PI+8;
   v*=cos(ri-direction);                               //Geschwindigkeit in die angestrebten Richtung
@@ -321,7 +320,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
       Serial.println("abgeschlossen");
       delay(500);
     }
-    buttonGpressed = false;                                                         //automatisch terminieren
+    // buttonGpressed = false;                                                         //automatisch terminieren
   }
   int p{11},d{50};                                                                  //p(i)d Werte des Rotations-Reglers
   double ro = -((p * (winkel-rotation)) - d * rotationSpeed)/4.5;                   //skalierter pd Regler
