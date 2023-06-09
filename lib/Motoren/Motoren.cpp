@@ -137,7 +137,7 @@ double getRotationSpeed(Adafruit_BNO055& gyro){
   return angVelocityData.orientation.z;
 }
 
-void fahren(double direction, double velocity, double rotation, Adafruit_BNO055& gyro,bool& buttonGpressed){
+void fahren(double direction, double velocity, double rotation, Adafruit_BNO055& gyro,bool& buttonGpressed, bool& RetSurface){
   static bool lastSurface{true};
   static bool setup=true;
   static double InpidWi;
@@ -330,6 +330,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   }else{
     motor(0,0,0);
   }
+  RetSurface=(surface||lastSurface);
   lastSurface=surface;
   setup=false;
 }

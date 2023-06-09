@@ -3,6 +3,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <Motoren.h>
+#include <Kompass.h>
 
 //Multiplexer Unten
 #ifndef S0
@@ -196,7 +197,7 @@ void bodenlesen(bool& minEinerDa,int* LED, int* Schwellwerte, bool* Photo) {
     }*/
 }
 void bodenverarbeiten(bool* gesehenSensor,bool& minEinerDa,bool* Photo, double& bodenrichtung, int* LED, 
-Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, long& alteZeit, int& alterWinkel, double& rotation) {
+Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, long& alteZeit, int& alterWinkel, double& rotation, double &addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart) {
   int AnzahlSens = 0;
   for (int i = 0; i < 32; i++) {
     gesehenSensor[i] = false;
@@ -266,37 +267,14 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
           minEinerDa = true;
           //Serial.println(i);
           zeitlinieda = millis();
+        }else if(Photo[i]){
+          Photo[i]=true;
         }
         else {
           Photo[i] = false;
         }
       }
-      sensors_event_t orientationData;                                          //momentane Aufnahmeder der Sensorwerte
-      sensors_event_t angVelocityData;
-      gyro.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
-      gyro.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);           //holt neue Werte in Grad
-      double winkel = orientationData.orientation.x;                            //variable winkel enthält Drehung auf der Ebene in Grad
-      double rotationSpeed = angVelocityData.orientation.z;
-      if (buttonGpressed) {                                                     //wenn Button gedrückt speichern des Offsets
-        minus = winkel;
-        Serial.print("MINUS:");
-        Serial.println(minus);
-        // buttonGpressed = false;
-      }
-      winkel = winkel - minus;
-      if (winkel > 180) {                                                       //Werte umrechnen von 0-359 auf Werte von -180 - +180 => für Formel
-        winkel = winkel - 360;
-      }
-      if (winkel < -180) {
-        winkel = winkel + 360;
-      }
-      double p = 8;                                                             //korrekturfaktor
-      double d = 50;                                                            //korrekturfaktor
-      long zeit = millis() - alteZeit;                                          //vergangene Zeit seit der letzten Berechnung von drehung
-      rotation = (p * winkel) - d * rotationSpeed;                              //Berechnung der drehung
-      alterWinkel = winkel;
-      alteZeit = zeit;
-      rotation = -rotation / 4.5;
+      compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,piread,pixyG,pixyG2,hatBall,torwart);
       motor(bodenrichtung, 150,rotation);
       //Serial.println(LED[1]);
       digitalWrite(LEDIV, HIGH);
@@ -310,9 +288,9 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
     bodenrichtung = -1;
   }
 }
-void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation) {
+void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation,double &addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart) {
   bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
-  bodenverarbeiten(gesehenSensor,minEinerDa,Photo,bodenrichtung,LED,gyro,buttonGpressed,Schwellwerte,minus,alteZeit,alterWinkel,rotation);
+  bodenverarbeiten(gesehenSensor,minEinerDa,Photo,bodenrichtung,LED,gyro,buttonGpressed,Schwellwerte,minus,alteZeit,alterWinkel,rotation,addRot,piread,pixyG,pixyG2,hatBall,torwart);
 }
 double bodenrichtungszuweisung(int n) {
   return ((n * 11.25 + 90 ) / 180 * PI );

@@ -75,6 +75,7 @@ double Pixy(Pixy2I2C& pixy,bool& piread) {
   }
   return 90-pixywinkel;
 }
+
 double Pixy2(Pixy2I2C& pixy2,bool& piread2) {
   static double pixywinkel = -1;
   pixy2.ccc.getBlocks();       //pixy auslesen

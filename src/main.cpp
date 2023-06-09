@@ -19,6 +19,7 @@
 #include <Bluetooth.h>
 #include<Defines.h>
 #include<Torwart.h>
+#include<Ballverfolgung.h>
 
 
 Pixy2I2C pixy, pixy2;                                      //pixi im i2c-kommunikations-modus initialisieren
@@ -55,6 +56,8 @@ double TorRichtungKamera;
 
 bool piread2;
 
+bool surface{false};
+
 long alteZeit;                                        //Variablen für Gyro
 int alterWinkel;
 double minus;
@@ -64,8 +67,6 @@ int IR[16];                                           //Variablen für IR
 double IRbest = 100;    //0
 double richtung = -1;
 int Icball = -1;
-double entfVelo = 0;                                 //Geschwindigkeit vom PID gesteuert bei der Ballanfahrt (Entfernungs-PID)
-double wiVelo = 0;                                   //Gesch.-Output des Winkelpids
 double addRot = 0;                                    //temporäre Drehung, wenn er nah am Ball ist
 unsigned long addRotTime=0;
 double WinkelBall=90;
@@ -86,6 +87,10 @@ bool IRsave;
 
 int minWertLS;
 
+bool buttonGpressed = true;                                         //other
+
+double entfVelo = 0;                                 //Geschwindigkeit vom PID gesteuert bei der Ballanfahrt (Entfernungs-PID)
+double wiVelo = 0;                                   //Gesch.-Output des Winkelpids
 double entfSet=5;                                                   //wird sich nach dem Anfahrtsradius richten
 PID entfPID(&IRbest,&entfVelo,&entfSet,0,0,0,REVERSE);              //LILA:4.1,0,0.8; Schwarz: 3.9,0,0.7
 // PID entfPID(&IRbest,&entfVelo,&entfSet,4.1,0,0.8,REVERSE);       //LILA:4.1,0,0.8; Schwarz: 3.9,0,0.7
@@ -94,8 +99,6 @@ double wiIn;                                                        //Inpunt des
 PID wiPID(&wiIn,&wiVelo,&wiSet,0,0,0/* ,P_ON_M*/,REVERSE);          //LILA:0.8,0,0.28; Schwarz: …
 // PID wiPID(&wiIn,&wiVelo,&wiSet,0.8,0,0.28,REVERSE);              //LILA:0.8,0,0.28; Schwarz: …
 double offsetVorne=8;                                               //LILA: 10; Schwarz: 10
-
-bool buttonGpressed = true;                                         //other
 
 void setup() {
   while (!SD.begin(BUILTIN_SDCARD)) {                     //SD-Karte initialisieren
@@ -153,6 +156,7 @@ void setup() {
   pinMode(LichtSchranke,INPUT);
   AutoCalibration(LED,Schwellwerte);
   gyro.begin(/*8*/);                            //den gyro losmessen lassen (ich musste die 8 auskommentieren, es funktioniert trotzdem)
+
   entfPID.SetMode(AUTOMATIC);
   wiPID.SetMode(AUTOMATIC);
 
@@ -175,6 +179,7 @@ void setup() {
     offsetVorne=24;
     Serial.println("BLACK:    ");Serial.println(wiPID.GetKd());
   }
+
   minWertLS=analogRead(LichtSchranke)-5;
   delay(100);
   pixy.init(0x54);
@@ -186,7 +191,7 @@ void setup() {
 
 void loop() {
   // Serial.println(Pixy(pixy,piread));
-  torwart=false;
+  torwart=true;
   // Serial.print(analogRead(LichtSchranke));
   digitalWrite(Schuss_FW,HIGH);
   digitalWrite(Schuss_RW,LOW);
@@ -194,15 +199,14 @@ void loop() {
   bool hBall= hatBall(minWertLS) && ( Icball == 0 || Icball == 15 || Icball == 1);
   IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);//
    if(bt){
-     int bufBest=(int)IRbest;
-     bluetooth(torwart,bufBest);                                                                                                        //empfangen und senden
+     bluetooth(torwart,hBall,surface);                                                                                                        //empfangen und senden
    }
    //Serial.println(torwart);
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,IRsave, hBall, torwart);                      //Die grünen Kontroll-LEDs leuchten lassen& Knöpfe überprüfen
 
   if (hBall) {                                                                //Ermitteln ob er den Ball hat  hBall
     IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
-    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
+    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hBall,torwart);
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart);
     if (bodenrichtung == -1) {
       PixyG=Pixy(pixy,piread);                                                                                                    //Pixy auslesen
@@ -231,70 +235,11 @@ void loop() {
     //Serial.println("Torwart");
     bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
     // motor(90,0,10);
-    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart);
+    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread2,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,Photo,gesehenSensor,bodenrichtung,alteZeit,entfSet,addRotTime,surface);
   }else{    //!torwart
     piread=false;
     //Serial.println("Stuermer");
-    // Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation);
-    compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,false); 
-    IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen                                                                                                                 //Pixy soll nicht beachtet werden
-    //Serial.println(WinkelBall);
-    entfPID.Compute();                                                                                                              //die PIDs (für Ballanfahrt) berechnen
-    wiPID.Compute();
-    if (bodenrichtung == -1) {                                                                                                      //der Boden sieht nichts
-      if (richtung != -1) {                                                                                                         //der IR sieht etwas
-        if(Icball == 0){                                                                                                            //Ball Vor dem Roboter
-          int delay=50;                                                                                                             //Verzögerung der temporären Ballausrichtung, wenn er gerade ist
-          if(addRot!=0){                                                                                                            //wenn er schon gedreht ist, soll er sich die temporäre später ändern
-            delay=1200;
-          }
-          if(WinkelBall>=90&&WinkelBall<270){
-            if(addRotTime+delay<millis()){
-              addRot=0;
-              addRotTime=millis();
-            }
-          }else{
-            if(addRotTime+delay<millis()){
-              addRot=0;
-              addRotTime=millis();
-            }
-          }
-          // motor(90,95,rotation);
-          fahren(90,5.5,0,gyro,buttonGpressed);
-          Serial.println("front");
-        }else if(Icball == 15){
-          fahren(90-35,4.7,0,gyro,buttonGpressed);
-          // motor(90-offsetVorne,90,rotation);
-          Serial.println("slightly right");
-        }else if(Icball == 1){
-          fahren(90+35,4.7,0,gyro,buttonGpressed);
-          // motor(90+offsetVorne,90,rotation);
-          Serial.println("slightly left");
-        }else{
-          Serial.print(entfVelo);Serial.print(" | ");
-          Serial.print(wiVelo);Serial.print(" | ");
-          Serial.println(((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo);
-          // fahren(richtung-addRot,entfVelo,0,gyro,buttonGpressed);        //aus Testzwecken nur Entfernung/Winkel reglen
-          fahren(richtung-addRot,((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo,0,gyro,buttonGpressed);      //Konvexkombination über die beiden PID-Geschwindigkeiten; t ist normierte Entf. zum Ball
-          // motor(richtung-addRot,((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo,rotation);      //Konvexkombination über die beiden PID-Geschwindigkeiten; t ist normierte Entf. zum Ball
-          //motor(richtung-addRot,entfVelo,rotation);
-          int delay=50;
-          if(addRot!=0){
-            delay=700; 
-          }
-          if(addRotTime+delay<millis()){
-            addRot=0;
-            addRotTime=millis();
-          }
-        }
-      }
-      else {                                                              //der IR sieht nichts
-        motor(0, 0,rotation);                                             //nur ausrichten
-      }
-    }
-    else {                                                                //der Boden sieht etwas
-      motor(bodenrichtung, 200,rotation);                                 //sehr schnell von der Linie wegfahren
-    }
+    verfolgeBall(IRbest,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hBall,torwart,IR,Icball,richtung,entfSet,wiIn,minWert,irAutoCalibration,WinkelBall,addRotTime,IRsave,surface);
   }
   buttonGpressed=false;
 }

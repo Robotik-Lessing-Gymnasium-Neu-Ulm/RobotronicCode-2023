@@ -3,7 +3,7 @@
 #include <Adafruit_BNO055.h>
 #include<Defines.h>
 
-void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double& rotation, int& alterWinkel, double& addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart) {
+double compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double& rotation, int& alterWinkel, double& addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart) {
   double p,d;
   sensors_event_t orientationData;                                          //momentane Aufnahmeder der Sensorwerte
   sensors_event_t angVelocityData;
@@ -15,13 +15,13 @@ void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double&
   double winkel = orientationData.orientation.x;                            //variable winkel enthält Drehung auf der Ebene in Grad
   double rotationSpeed = angVelocityData.orientation.z;
   double accel = linearAccelData.orientation.x;
-
   if (buttonGpressed) {                                                     //wenn Button gedrückt speichern des Offsets
     minus = winkel;
     Serial.print("MINUS:"); 
     Serial.println(minus);
     // buttonGpressed = false;                                                 //automatisch terminieren
   }
+  double ret=winkel-minus;
   if(piread&&hatBall){                                                      //wenn die vordere Kamera beachtet werden soll
     if(Roboter==LILA){
       //winkel=-pixyG/1.8;                                                   //die "schlechtere Drehung"
@@ -103,4 +103,10 @@ void compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double&
   rotation = (p * winkel) - d * rotationSpeed;                              //Berechnung der drehung
   alterWinkel = winkel;
   rotation = -rotation / 4.5;
+  while(ret<-180){
+    ret+=360;
+  }while(ret>180){
+    ret-=360;
+  }
+  return ret;
 }
