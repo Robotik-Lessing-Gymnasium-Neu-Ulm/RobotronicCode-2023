@@ -88,6 +88,7 @@ double m4;
 double phi;*/
 
 bool torwart;                                         //bluetooth
+bool surface;
 bool IRsave;
 
 int minWertLS;
@@ -102,7 +103,7 @@ double offsetVorne=11;                                  //LILA: 10; Schwarz: 10
 bool buttonGpressed = true;                           //other
 
 void setup() {
-  /*while (!SD.begin(BUILTIN_SDCARD)) {                     //SD-Karte initialisieren
+  while (!SD.begin(BUILTIN_SDCARD)) {                     //SD-Karte initialisieren
     Serial.println("Karte einstecken!");
   }
   Serial.println("Karte initialisiert.");
@@ -125,7 +126,7 @@ void setup() {
     Serial.print("LS: ");
     Serial.println(minWertLS);
     Serial.println("(MinWerte)<<<<<<<<<<<<<<");
-  myFile.close();*/
+  myFile.close();
   
   Serial.begin(115200);                         //Seriellen Monitor initialisieren
   Serial3.begin(115200);                        
@@ -179,21 +180,20 @@ void setup() {
   pixy2.init(0x53);
 }
 
-#define bt true
+#define bt false
 #define Schusswinkel 8
 
 void loop() {
-  //torwart=false;
-  Serial.println(torwart);
-  position(WinkelToreGes,AbstandX,AbstandY,pixy2,piread2,pixy,piread,TorHoehe,TorHoehe2); //aufrufen der Postionsbestimmungsfunktion
+  //torwart=true;
+  Serial.println(WinkelBall);
+  position(WinkelToreGes,AbstandX,AbstandY,pixy2,piread2,pixy,piread,TorHoehe,TorHoehe2);                                                       //aufrufen der Postionsbestimmungsfunktion
   digitalWrite(Schuss_FW,HIGH);
   digitalWrite(Schuss_RW,LOW);
   analogWrite(Schuss_PWM,255);
   bool hBall= hatBall(minWertLS) && ( Icball == 0 || Icball == 15 || Icball == 1);
   IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);//
    if(bt){
-     int bufBest=(int)IRbest;
-     bluetooth(torwart,hBall);                                                                                                        //empfangen und senden
+     bluetooth(torwart,hBall,surface);                                                                                                        //empfangen und senden
    }
   ControlLEDs(buttonGpressed,richtung,IRbest,Icball,rotation,minEinerDa,irAutoCalibration,IRsave, hBall, torwart);                                  //Die grünen Kontroll-LEDs leuchten lassen& Knöpfe überprüfen
 
@@ -207,23 +207,14 @@ void loop() {
         PixyG2 = Pixy2(pixy2,piread2,TorHoehe2);                                                                                                    //Pixy auslesen
         compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG,PixyG2,hBall,torwart,accel);                                                   //Ausrichtungs-Funktion aufrufen, wobei die Kamera beachtet werden soll
         Serial.println("toranfahrt");
-        if((abs(PixyG)+abs(PixyG2))>30&&PixyG<0){
-          addRot = 90;
-          compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
-          motor(0,180,rotation);
-          Serial.println("links");
+        /*if((abs(PixyG)+abs(PixyG2))>30&&PixyG<0){
+          motor(0,0,50);
         }else if((abs(PixyG)+abs(PixyG2))>30&&PixyG>0){
-          addRot = -90;
-          compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
-          Serial.println("rechts");
-          motor(180,180,(rotation));
+          motor(0,0,-50);
         }else{
-          Serial.println("Mitte");
-          Serial.println(PixyG);
-          Serial.println(PixyG2);
-        
+          motor(0,0,50);
         }
-        counter = 0;
+        counter = 0;*/
       }
       else{                                                                                                                          //der Boden sieht etwas
       motor(bodenrichtung, 200,rotation);                                                                                           //sehr schnell von der Linie wegfahren
@@ -233,7 +224,7 @@ void loop() {
       counter++;
     }else{
       counter=0;
-    }
+    
       if (piread) {                                                                                                                 //sieht die pixy etwas
         if(PixyG<Schusswinkel&&PixyG>-Schusswinkel){
           digitalWrite(Schuss_FW,LOW);
@@ -252,7 +243,9 @@ void loop() {
         motor(90,90, rotation/3);                                                                                                   //nach vorne fahren (abgeschwächte Ausrichtung)
         // motor(0,0,rotation);
       }
+      counter = 0;
   
+    }
     }
   else if(torwart){    //torwart                                                                                                          //Als Torwart verhalten
     //Serial.println(IRbest);
@@ -297,7 +290,7 @@ void loop() {
           //Serial.println("slightly left");
         }else{
           if(((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo>170){
-            motor(richtung,170,rotation);
+            motor(richtung,100,rotation);
           }
           motor(richtung-addRot,((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo,rotation);      //Konvexkombination über die beiden PID-Geschwindigkeiten; t ist normierte Entf. zum Ball
           //motor(richtung-addRot,entfVelo,rotation);

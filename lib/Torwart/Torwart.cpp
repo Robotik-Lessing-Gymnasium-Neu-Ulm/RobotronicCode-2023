@@ -10,7 +10,7 @@
 
 void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055 &gyro, bool &buttonGpressed, double &minus, int &alterWinkel, double &addRot, bool piread2, int pixyG2, int& PixyG, int *IR, double &IRbest, int &Icball, double &richtung, double &wiIn, int *minWert, bool &irAutoCalibration, double &WinkelBall, bool &IRsave, bool hatBall, bool& torwart,double accel,int&  TorHoehe,int&  TorHoehe2,double &entfSet,PID &wiPID,unsigned long& addRotTime){
     //Serial.println(LED[1]);
-    static int k=0;
+    constexpr int Grenze = 40;
     pixyG2 = Pixy2(pixy2,piread2,TorHoehe2);
     //Serial.println(pixyG2);
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread2,PixyG,pixyG2,hatBall,torwart,accel);
@@ -24,10 +24,14 @@ void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation
         //Serial.println("salkd2");
     } else {
         if (onLine(LED,Schwellwerte)) {
-            if (Icball == 0) {
+            if (IRbest < Grenze&&Icball == 0) {
                 Serial.println("vorne");
-                motor(90, 50,rotation);
-            }  else if (richtung == -1) {
+                motor(90, 100,rotation);
+            } else if (IRbest < Grenze&&Icball == 1){
+                motor(67,100,rotation);
+            } else if(IRbest < Grenze&&Icball == 15){
+                motor(112,100,rotation);    
+            } else if (richtung == -1) {
                 motor(0, 0,rotation);
                 Serial.println("nicht");
             } else if (wiIn < 0) {
@@ -40,12 +44,16 @@ void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation
             Serial.println("onli");
         }
         else {
-            if(IRbest < 80&&Icball == 0){
+            if(IRbest < Grenze&&Icball == 0){                           //hier Ballverfolgung rein basically
                 motor(90,100,rotation);
+            }else if(IRbest < Grenze&&Icball == 1){
+                motor(112,100,rotation);
+            }else if(IRbest < Grenze&&Icball == 15){
+                motor(67,100,rotation);
             }else{
             if(piread2 == false){
                 //compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,pireads,PixyG,pixyG2,hatBall,torwart,accel);
-                motor(90,10,0);
+                motor(0,0,10);
             }else{
                 if (LED[44] > Schwellwerte[44] || LED[45] > Schwellwerte[45] || LED[34] > Schwellwerte[34] || LED[35] > Schwellwerte[35]) {
                     if(ballUndLinie){
@@ -63,26 +71,26 @@ void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation
                             motor(90+Abweichung, 70,rotation);
                         }
                     }else{
-                        motor(90, 250,rotation);
+                        motor(90, 170,rotation);
                     }
                 }
                 else {
                     if(ballUndLinie){
                         if (wiIn == 0) {
                             // Serial.println("no vorne");
-                            motor(270, 60,rotation);
+                            motor(270, 40,rotation);
                         }  else if (richtung == -1) {
                             // Serial.println("no nicht");
-                            motor(270, 60,rotation);
+                            motor(270, 40,rotation);
                         } else if (wiIn < 0) {
                             // Serial.println("no rechts");
-                            motor(270+Abweichung, 60,rotation);
+                            motor(270+Abweichung, 40,rotation);
                         } else {
                             // Serial.println("no links");
-                            motor(270-Abweichung, 60,rotation);
+                            motor(270-Abweichung, 40,rotation);
                         }
                     }else{
-                        motor(270, 60,rotation);
+                        motor(270, 40,rotation);
                     }
                 }
             }
