@@ -191,8 +191,8 @@ void setup() {
 
 void loop() {
   // Serial.println(Pixy(pixy,piread));
-  torwart=true;
-  // Serial.print(analogRead(LichtSchranke));
+  torwart=false;
+  Serial.println(analogRead(LichtSchranke));
   digitalWrite(Schuss_FW,HIGH);
   digitalWrite(Schuss_RW,LOW);
   analogWrite(Schuss_PWM,255);
@@ -224,7 +224,7 @@ void loop() {
         motor(90-PixyG, 100,rotation);                                                                                                    //aufs Tor zufahren, mit Ausrichtung aufs Tor
         // motor(0,0,rotation);
       }else {
-        compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,false,PixyG,PixyG2,hBall,torwart);                                                //Ausrichtungs-Funktion aufrufen, wobei die Kamera NICHT beachtet werden soll
+        compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,false,PixyG,PixyG2,hBall,torwart);                           //Ausrichtungs-Funktion aufrufen, wobei die Kamera NICHT beachtet werden soll
         motor(90,90, rotation/3);                                                                                                   //nach vorne fahren (abgeschwächte Ausrichtung)
         // motor(0,0,rotation);
       }
