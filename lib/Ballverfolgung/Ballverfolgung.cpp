@@ -8,6 +8,8 @@
 #include<Motoren.h>
 
 void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, double& entfVelo,double& wiVelo,bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation,double &addRot, bool piread, int PixyG, int PixyG2, bool hBall, bool torwart, int* IR, int& Icball, double& richtung,double &entfSet, double &wiIn, int* minWert, bool& irAutoCalibration, double& WinkelBall, unsigned long& addRotTime, bool& IRsave, bool& RetSurface,double& accel){
+    // Serial.print(Icball);Serial.print(" ");
+    // Serial.println(IRbest);
     static bool setup{true};
     if(setup){
         entfPID.SetMode(AUTOMATIC);
@@ -59,11 +61,11 @@ void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, d
           fahren(90,5.5,0,gyro,buttonGpressed,RetSurface);
           // Serial.println("front");
         }else if(Icball == 15){
-          fahren(90-35,4.7,0,gyro,buttonGpressed,RetSurface);
+          fahren(90-min(IRbest*1.1,45),4.7,0,gyro,buttonGpressed,RetSurface); //90-35
           // motor(90-offsetVorne,90,rotation);
           // Serial.println("slightly right");
         }else if(Icball == 1){
-          fahren(90+35,4.7,0,gyro,buttonGpressed,RetSurface);
+          fahren(90+min(IRbest*1.1,45),4.7,0,gyro,buttonGpressed,RetSurface); //90+35
           // motor(90+offsetVorne,90,rotation);
           // Serial.println("slightly left");
         }else{

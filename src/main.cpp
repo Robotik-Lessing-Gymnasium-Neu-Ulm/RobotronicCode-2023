@@ -193,8 +193,8 @@ void setup() {
 
 void loop() {
   // Serial.println(Pixy(pixy,piread));
-  //torwart=true;
-  // Serial.print(analogRead(LichtSchranke));
+  //torwart=false;
+  Serial.println(analogRead(LichtSchranke));
   digitalWrite(Schuss_FW,HIGH);
   digitalWrite(Schuss_RW,LOW);
   analogWrite(Schuss_PWM,255);
