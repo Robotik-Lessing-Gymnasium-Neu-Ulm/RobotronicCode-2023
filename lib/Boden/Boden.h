@@ -10,8 +10,8 @@ int lesenMultiplexerUnten2(int s0, int s1, int s2, int s3);
 int lesenMultiplexerUnten3(int s0, int s1, int s2, int s3);
 void bodenlesen(bool& minEinerDa,int* LED, int* Schwellwerte, bool* Photo);
 void bodenverarbeiten(bool* gesehenSensor,bool& minEinerDa,bool* Photo, double& bodenrichtung, int* LED, 
-    Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, long& alteZeit, int& alterWinkel, double& rotation, double &addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart);
-void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation,double &addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart);
+    Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, long& alteZeit, int& alterWinkel, double& rotation, double &addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart,  double& accel);
+void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation,double &addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart,double& accel);
 double bodenrichtungszuweisung(int n);
 bool onLine(int* LED, int* Schwellwerte);
 

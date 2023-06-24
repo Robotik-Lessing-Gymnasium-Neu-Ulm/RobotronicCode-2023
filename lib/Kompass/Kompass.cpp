@@ -3,7 +3,7 @@
 #include <Adafruit_BNO055.h>
 #include<Defines.h>
 
-double compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double& rotation, int& alterWinkel, double& addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart) {
+double compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, double& rotation, int& alterWinkel, double& addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart,double& accel) {
   double p,d;
   sensors_event_t orientationData;                                          //momentane Aufnahmeder der Sensorwerte
   sensors_event_t angVelocityData;
@@ -14,7 +14,7 @@ double compass(Adafruit_BNO055& gyro, bool& buttonGpressed, double& minus, doubl
 
   double winkel = orientationData.orientation.x;                            //variable winkel enthält Drehung auf der Ebene in Grad
   double rotationSpeed = angVelocityData.orientation.z;
-  double accel = linearAccelData.orientation.x;
+  accel = linearAccelData.orientation.x;
   if (buttonGpressed) {                                                     //wenn Button gedrückt speichern des Offsets
     minus = winkel;
     Serial.print("MINUS:"); 
