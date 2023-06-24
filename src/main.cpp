@@ -215,13 +215,14 @@ void loop() {
       PixyG=Pixy(pixy,piread);
       PixyG2=Pixy2(pixy2,piread2);                                                                                                    //Pixy auslesen
       compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG,PixyG2,hBall,torwart,accel);                                                   //Ausrichtungs-Funktion aufrufen, wobei die Kamera beachtet werden soll
-      if(accel>-10&&accel<5&&rausdreh == 40){
+      if(accel>-10&&accel<3&&rausdreh == 70){
         if(PixyG2<0){
         motor(0,0,500);
         }else{
           motor(0,0,-500);
-        }
-      }else if(accel>-10&&accel<5){
+        }       
+         rausdreh = 0;
+      }else if(accel>-10&&accel<3){
         rausdreh++;
       }else{
         rausdreh = 0;
