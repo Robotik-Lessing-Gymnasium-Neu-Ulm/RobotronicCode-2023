@@ -289,9 +289,9 @@ void bodenverarbeiten(bool* gesehenSensor,bool& minEinerDa,bool* Photo, double& 
     bodenrichtung = -1;
   }
 }
-void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation,double &addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart) {
+void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation,double &addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart,bool& hBall,bool& surface, double& accel) {
   bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
-  bodenverarbeiten(gesehenSensor,minEinerDa,Photo,bodenrichtung,LED,gyro,buttonGpressed,Schwellwerte,minus,alteZeit,alterWinkel,rotation,addRot,piread,pixyG,pixyG2,hatBall,torwart);
+  bodenverarbeiten(gesehenSensor,minEinerDa,Photo,bodenrichtung,LED,gyro,buttonGpressed,Schwellwerte,minus,alteZeit,alterWinkel,rotation,addRot,piread,pixyG,pixyG2,hatBall,torwart,hBall,surface,accel);
 }
 double bodenrichtungszuweisung(int n) {
   return ((n * 11.25 + 90 ) / 180 * PI );
