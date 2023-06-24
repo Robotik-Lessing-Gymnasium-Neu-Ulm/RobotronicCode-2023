@@ -190,9 +190,10 @@ void setup() {
 #define Schusswinkel 8
 
 void loop() {
-  // Serial.println(Pixy(pixy,piread));
   torwart=false;
-  Serial.println(analogRead(LichtSchranke));
+  Serial.println(torwart);
+  // Serial.println(Pixy(pixy,piread));
+  // Serial.println(analogRead(LichtSchranke));
   digitalWrite(Schuss_FW,HIGH);
   digitalWrite(Schuss_RW,LOW);
   analogWrite(Schuss_PWM,255);
@@ -206,7 +207,7 @@ void loop() {
 
   if (hBall) {                                                                //Ermitteln ob er den Ball hat  hBall
     IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
-    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hBall,torwart);
+    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hBall,torwart,hBall,surface);
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart);
     if (bodenrichtung == -1) {
       PixyG=Pixy(pixy,piread);                                                                                                    //Pixy auslesen

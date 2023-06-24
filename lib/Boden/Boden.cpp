@@ -4,6 +4,7 @@
 #include <Adafruit_BNO055.h>
 #include <Motoren.h>
 #include <Kompass.h>
+#include<Bluetooth.h>
 
 //Multiplexer Unten
 #ifndef S0
@@ -196,8 +197,7 @@ void bodenlesen(bool& minEinerDa,int* LED, int* Schwellwerte, bool* Photo) {
     }
     }*/
 }
-void bodenverarbeiten(bool* gesehenSensor,bool& minEinerDa,bool* Photo, double& bodenrichtung, int* LED, 
-Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, long& alteZeit, int& alterWinkel, double& rotation, double &addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart) {
+void bodenverarbeiten(bool* gesehenSensor,bool& minEinerDa,bool* Photo, double& bodenrichtung, int* LED, Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, long& alteZeit, int& alterWinkel, double& rotation, double &addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart, bool& hBall, bool& surface) {
   int AnzahlSens = 0;
   for (int i = 0; i < 32; i++) {
     gesehenSensor[i] = false;
@@ -208,6 +208,7 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
     long zeitlinieda = millis();
 
     while (millis() - zeitlinieda <= 75) {
+      bluetooth(torwart,hBall,surface);
       Serial.println(LED[1]);
       for (int i = 0; i < 32; i++) {
         if (Photo[i] && AnzahlSens <= 30 && !gesehenSensor[i]) {
@@ -288,9 +289,9 @@ Adafruit_BNO055& gyro,bool& buttonGpressed, int* Schwellwerte, double& minus, lo
     bodenrichtung = -1;
   }
 }
-void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation,double &addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart) {
+void Boden(bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation,double &addRot, bool piread, int pixyG, int pixyG2, bool hatBall, bool torwart, bool& hBall, bool& surface) {
   bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
-  bodenverarbeiten(gesehenSensor,minEinerDa,Photo,bodenrichtung,LED,gyro,buttonGpressed,Schwellwerte,minus,alteZeit,alterWinkel,rotation,addRot,piread,pixyG,pixyG2,hatBall,torwart);
+  bodenverarbeiten(gesehenSensor,minEinerDa,Photo,bodenrichtung,LED,gyro,buttonGpressed,Schwellwerte,minus,alteZeit,alterWinkel,rotation,addRot,piread,pixyG,pixyG2,hatBall,torwart,hBall,surface);
 }
 double bodenrichtungszuweisung(int n) {
   return ((n * 11.25 + 90 ) / 180 * PI );

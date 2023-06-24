@@ -108,8 +108,8 @@ void bluetooth(bool& torwart, bool& hBall, bool& surface){
       }
     }
   }
-  if(!surface){
-    torwart=true;
-    Serial1.write(0);
-  }
+  // if(!surface){
+  //   torwart=true;
+  //   Serial1.write(0);
+  // }
 }
