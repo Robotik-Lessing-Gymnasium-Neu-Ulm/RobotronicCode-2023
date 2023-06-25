@@ -175,9 +175,9 @@ void setup() {
     // entfPID.SetTunings(0.271,0.001,0.02);
     // wiPID.SetTunings(0.102,0.001,0.03); //0.102,0.001,0.04
     entfPID.SetTunings(0.47,0,0.16);   //0.4,0,0.23;0.5,0,0.39;0.47,0,0.16
-    entfPID.SetOutputLimits(0,11);
+    // entfPID.SetOutputLimits(0,11);
     wiPID.SetTunings(0.21,0,0.05);  //0.1247,0,0.08;0.126,0,0.09;0.19,0,0.1;0.21,0.07,0
-    wiPID.SetOutputLimits(0,9);
+    // wiPID.SetOutputLimits(0,9);
     offsetVorne=24;
     Serial.println("BLACK:    ");Serial.println(wiPID.GetKd());
   }
@@ -193,10 +193,10 @@ void setup() {
 
 void loop() {
   torwart=false;
-  Serial.println(torwart);
+  // Serial.println(torwart);
   // Serial.println(Pixy(pixy,piread));
   //// Serial.println(analogRead(LichtSchranke));
-  digitalWrite(Schuss_FW,HIGH);
+  digitalWrite(Schuss_FW,LOW);
   digitalWrite(Schuss_RW,LOW);
   analogWrite(Schuss_PWM,255);
   bool hBall= hatBall(minWertLS) && ( Icball == 0 || Icball == 15 || Icball == 1);
@@ -215,14 +215,14 @@ void loop() {
       PixyG=Pixy(pixy,piread);
       PixyG2=Pixy2(pixy2,piread2);                                                                                                    //Pixy auslesen
       compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG,PixyG2,hBall,torwart,accel);                                                   //Ausrichtungs-Funktion aufrufen, wobei die Kamera beachtet werden soll
-      if(accel>-10&&accel<3&&rausdreh == 70){
+      if(accel>-10&&accel<0&&rausdreh == 70){
         if(PixyG2<0){
           motor(0,0,500);
         }else{
           motor(0,0,-500);
         }       
          rausdreh = 0;
-      }else if(accel>-10&&accel<3){
+      }else if(accel>-10&&accel<0){
         rausdreh++;
       }else{
         rausdreh = 0;
@@ -258,4 +258,5 @@ void loop() {
     verfolgeBall(IRbest,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hBall,torwart,IR,Icball,richtung,entfSet,wiIn,minWert,irAutoCalibration,WinkelBall,addRotTime,IRsave,surface,accel);
   }
   buttonGpressed=false;
+  Serial3.flush();
 }
