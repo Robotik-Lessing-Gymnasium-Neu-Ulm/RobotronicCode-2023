@@ -148,7 +148,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   static double SetpidV;
   static double OutpidV;
   static double dobuf{7};
-  static PID pidV(&InpidV,&OutpidV,&SetpidV,11.4,0.08,0.65,DIRECT);     //11.4,0.08,0
+  static PID pidV(&InpidV,&OutpidV,&SetpidV,11.4,0.008,0.65,DIRECT);     //11.4,0.08,0.65
   if(setup){                                                    //nur beim ersten Funktionsaufruf ausführen (effizienz)
     pidWi.SetOutputLimits(-65,65);                              //Notlösung, denn er gleicht sich auch der Unstetigkeitsstelle an
     pidWi.SetMode(AUTOMATIC);
@@ -326,7 +326,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   double ro = -((p * (winkel-rotation)) - d * rotationSpeed)/4.5;                   //skalierter pd Regler
   if(surface||lastSurface){       //minimale Glättung
     // Serial.print(motor(OutpidWiclean+direction,OutpidVclean,ro));Serial.print("  |  ");Serial.println(OutpidVclean);
-    motor(OutpidWiclean+direction,OutpidVclean,ro);
+    Serial.println(motor(OutpidWiclean+direction,OutpidVclean,ro));
   }else{
     motor(0,0,0);
   }
