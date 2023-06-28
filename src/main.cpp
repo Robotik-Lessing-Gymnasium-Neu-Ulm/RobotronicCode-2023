@@ -217,7 +217,7 @@ void loop() {
       compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG,PixyG2,hBall,torwart,accel);                                                   //Ausrichtungs-Funktion aufrufen, wobei die Kamera beachtet werden soll
       if(accel>-10&&accel<0&&rausdreh == 70){
         if(PixyG2<0){
-        motor(0,0,500);
+          motor(0,0,500);
         }else{
           motor(0,0,-500);
         }       

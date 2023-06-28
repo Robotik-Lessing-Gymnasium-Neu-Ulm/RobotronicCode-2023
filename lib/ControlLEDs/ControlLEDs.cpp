@@ -46,6 +46,7 @@ void wave(uint8_t pin[],size_t s, int time){
   for(size_t i=0;i<s;i++){
     if(count==i){
       digitalWrite(pin[i],HIGH);
+      
     }else{
       digitalWrite(pin[i],LOW);
     }
