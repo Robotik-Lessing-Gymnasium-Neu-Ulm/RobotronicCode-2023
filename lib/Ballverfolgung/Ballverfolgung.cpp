@@ -9,9 +9,11 @@
 
 void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, double& entfVelo,double& wiVelo,bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation,double &addRot, bool piread, int PixyG, int PixyG2, bool hBall, bool torwart, int* IR, int& Icball, double& richtung,double &entfSet, double &wiIn, int* minWert, bool& irAutoCalibration, double& WinkelBall, unsigned long& addRotTime, bool& IRsave, bool& RetSurface,double& accel){
   // static const bool useMaus=(Roboter!=LILA);
-  static const bool useMaus=false;
-  static int naheAnfahrt=useMaus?0.49:0.85;
-  static int naheOffAnf=7;
+  static const bool useMaus=true;
+  static int naheAnfahrt=useMaus?0.49:0.85;     //erster Wert: wenn die Maus aktiviert ist, zweiter wenn nicht; für den Winkel, wenn der Ball vorne fährt (gewichtung des Abstands)
+  static int naheOffAnf=7;                      //für den Winkel, wenn der Ball vorne fährt
+  static double GeschNahSlightly=useMaus?4.7:68;        //die Geschw., wenn der Ball vorne liegt (Sensor 15 oder 1), aber nicht exakt (nicht 0)
+  static double GeschNah=useMaus?5.5:63;                //Geschwindigkeit wenn der Ball bei Sensor 0 ist
     // Serial.print(Icball);Serial.print(" ");
     // Serial.println(IRbest);
     static bool setup{true};
@@ -54,7 +56,7 @@ void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, d
             Serial.println("BLACK:    ");Serial.println(wiPID.GetKd());
         }
     }
-    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hBall,torwart,hBall,RetSurface,accel);
+    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hBall,torwart,hBall,RetSurface,accel); //HIER
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,false,accel); 
     IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen                                                                                                                 //Pixy soll nicht beachtet werden
     //Serial.println(WinkelBall);
@@ -79,23 +81,23 @@ void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, d
             }
           }
           if(useMaus){
-            fahren(90,5.5,0,gyro,buttonGpressed,RetSurface);
+            fahren(90,GeschNah,0,gyro,buttonGpressed,RetSurface);
           }else{
-            motor(90,63,rotation);
+            motor(90,GeschNah,rotation);
           }
           // Serial.println("front");
         }else if(Icball == 15){
           if(useMaus){
-            fahren(90-min(IRbest*naheAnfahrt+naheOffAnf,52),4.7,0,gyro,buttonGpressed,RetSurface); //90-35
+            fahren(90-min(IRbest*naheAnfahrt+naheOffAnf,52),GeschNahSlightly,0,gyro,buttonGpressed,RetSurface); //90-35
           }else{
-            motor(90-min(IRbest*naheAnfahrt+naheOffAnf,52),68,rotation);
+            motor(90-min(IRbest*naheAnfahrt+naheOffAnf,52),GeschNahSlightly,rotation);
           }
           // Serial.println("slightly right");
         }else if(Icball == 1){
           if(useMaus){
-            fahren(90+min(IRbest*naheAnfahrt+naheOffAnf,52),4.7,0,gyro,buttonGpressed,RetSurface); //90+35
+            fahren(90+min(IRbest*naheAnfahrt+naheOffAnf,52),GeschNahSlightly,0,gyro,buttonGpressed,RetSurface); //90+35
           }else{
-            motor(90+min(IRbest*naheAnfahrt+naheOffAnf,52),68,rotation);
+            motor(90+min(IRbest*naheAnfahrt+naheOffAnf,52),GeschNahSlightly,rotation);
           }
           // Serial.println("slightly left");
         }else{

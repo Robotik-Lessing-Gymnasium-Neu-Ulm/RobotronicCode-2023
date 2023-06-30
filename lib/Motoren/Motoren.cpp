@@ -148,7 +148,8 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   static double SetpidV;
   static double OutpidV;
   static double dobuf{7};
-  static PID pidV(&InpidV,&OutpidV,&SetpidV,11.4,0.008,0.65,DIRECT);     //11.4,0.08,0.65
+  static PID pidV(&InpidV,&OutpidV,&SetpidV,9,0.1,0.5,DIRECT);     //11.4,0.08,0.65
+  // static PID pidV(&InpidV,&OutpidV,&SetpidV,11.4,0.008,0.65,DIRECT);     //11.4,0.08,0.65
   if(setup){                                                    //nur beim ersten Funktionsaufruf ausführen (effizienz)
     pidWi.SetOutputLimits(-65,65);                              //Notlösung, denn er gleicht sich auch der Unstetigkeitsstelle an
     pidWi.SetMode(AUTOMATIC);
