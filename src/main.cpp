@@ -231,10 +231,10 @@ void loop() {
           digitalWrite(Schuss_FW,LOW);
           digitalWrite(Schuss_RW,HIGH);
           analogWrite(Schuss_PWM,255);
-          delay(20);
-          digitalWrite(Schuss_FW,HIGH);
-          digitalWrite(Schuss_RW,LOW);
-          analogWrite(Schuss_PWM,0);
+          // delay(30);
+          // digitalWrite(Schuss_FW,HIGH);
+          // digitalWrite(Schuss_RW,LOW);
+          // analogWrite(Schuss_PWM,0);
         }
         motor(90-PixyG, 100,rotation);                                                                                                    //aufs Tor zufahren, mit Ausrichtung aufs Tor
         // motor(0,0,rotation);

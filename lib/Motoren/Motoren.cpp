@@ -148,7 +148,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   static double SetpidV;
   static double OutpidV;
   static double dobuf{7};
-  static PID pidV(&InpidV,&OutpidV,&SetpidV,9,0.1,0.5,DIRECT);     //11.4,0.08,0.65
+  static PID pidV(&InpidV,&OutpidV,&SetpidV,9,0,0.5,DIRECT);     //11.4,0.08,0.65;9,0.1,0.5
   // static PID pidV(&InpidV,&OutpidV,&SetpidV,11.4,0.008,0.65,DIRECT);     //11.4,0.08,0.65
   if(setup){                                                    //nur beim ersten Funktionsaufruf ausführen (effizienz)
     pidWi.SetOutputLimits(-65,65);                              //Notlösung, denn er gleicht sich auch der Unstetigkeitsstelle an
@@ -240,41 +240,11 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   }while(InpidWi>+180){
     InpidWi-=360;
   }
-  static double OutpidWiclean{0};
-  constexpr size_t swi=800;
-  static double bufwi[swi];
   InpidV=v;
   SetpidV=velocity;
-  static double OutpidVclean{0};                            //rechteckiges Glätten der Geschwindigkeit
-  constexpr size_t sv=130;
-  static double bufv[sv];
   if(surface||lastSurface){
     pidV.Compute();
-    for(size_t i{1};i<sv;i++){
-      bufv[i]=bufv[i-1];
-    }
-    bufv[0]=OutpidV;
-    OutpidVclean=0;
-    for(size_t i{0};i<sv;i++){
-      OutpidVclean+=(double)bufv[i]/sv;
-    }
     pidWi.Compute();
-    for(size_t i{1};i<swi;i++){
-      bufwi[i]=bufwi[i-1];
-    }
-    bufwi[0]=OutpidWi;
-    OutpidWiclean=0;
-    for(size_t i{0};i<swi;i++){
-      OutpidWiclean+=(double)bufwi[i]/swi;
-    }
-  }else{  //!surface
-    for(size_t i=0;i<swi;i++){
-      bufwi[i]=direction;
-    }
-    for(size_t i=0;i<sv;i++){
-      bufv[i]=0;
-    }
-    Serial.println("RESET");
   }
   if (buttonGpressed) {                                                               //Wenn Knopf auf Roboter gedrückt
     if(!speichern){   //offsetten
@@ -328,7 +298,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   double ro = -((p * (winkel-rotation)) - d * rotationSpeed)/4.5;                   //skalierter pd Regler
   if(surface||lastSurface){       //minimale Glättung
     // Serial.print(motor(OutpidWiclean+direction,OutpidVclean,ro));Serial.print("  |  ");Serial.println(OutpidVclean);
-    Serial.println(motor(OutpidWiclean+direction,OutpidVclean,ro));
+    Serial.println(motor(OutpidWi+direction,OutpidV,ro));
   }else{
     motor(0,0,0);
   }
