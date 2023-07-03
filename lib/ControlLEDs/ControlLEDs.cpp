@@ -57,6 +57,7 @@ void ControlLEDs(bool& buttonGpressed, double &richtung,double& IRbest, int& Icb
   //Einzelne Variablen überprüfen und dann die Pins schreiben
   if (digitalRead(ButtonI) == LOW) {
     buttonGpressed = true;
+    Serial.println("hil");
   }
   if (digitalRead(ButtonIV) == LOW) {
     irAutoCalibration=true;

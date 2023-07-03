@@ -210,7 +210,7 @@ void loop() {
 
   if (hBall) {                                                                //Ermitteln ob er den Ball hat  hBall
     IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);  //die IR/Boden/Kompass-Sensoren messen und abspeichern lassen
-    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hBall,torwart,hBall,surface,accel);
+    Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hBall,torwart,hBall,surface,accel);  //HIER
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
     if (bodenrichtung == -1) {
       PixyG=Pixy(pixy,piread);
@@ -232,10 +232,10 @@ void loop() {
           digitalWrite(Schuss_FW,LOW);
           digitalWrite(Schuss_RW,HIGH);
           analogWrite(Schuss_PWM,255);
-          delay(20);
-          digitalWrite(Schuss_FW,HIGH);
-          digitalWrite(Schuss_RW,LOW);
-          analogWrite(Schuss_PWM,0);
+          // delay(30);
+          // digitalWrite(Schuss_FW,HIGH);
+          // digitalWrite(Schuss_RW,LOW);
+          // analogWrite(Schuss_PWM,0);
         }
         motor(90-PixyG, 100,rotation);                                                                                                    //aufs Tor zufahren, mit Ausrichtung aufs Tor
         // motor(0,0,rotation);

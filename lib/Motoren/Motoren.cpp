@@ -148,17 +148,18 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   static double SetpidV;
   static double OutpidV;
   static double dobuf{7};
-  static PID pidV(&InpidV,&OutpidV,&SetpidV,11.4,0.008,0.65,DIRECT);     //11.4,0.08,0.65
+  static PID pidV(&InpidV,&OutpidV,&SetpidV,9,0,0.5,DIRECT);     //11.4,0.08,0.65;9,0.1,0.5
+  // static PID pidV(&InpidV,&OutpidV,&SetpidV,11.4,0.008,0.65,DIRECT);     //11.4,0.08,0.65
   if(setup){                                                    //nur beim ersten Funktionsaufruf ausführen (effizienz)
     pidWi.SetOutputLimits(-65,65);                              //Notlösung, denn er gleicht sich auch der Unstetigkeitsstelle an
     pidWi.SetMode(AUTOMATIC);
     pidV.SetOutputLimits(-360,360);                             //experimentell bestimmte Grenzen (lustig, dass es so wie ein Winkel wirkt…)
     pidV.SetMode(AUTOMATIC);
   }
-  static std::vector<double> v_buf (0);                         //um die Geschwindigkeit zu speichern und später anzuzeigen
-  static std::vector<double> ri_buf (0);                        //um die Bewegungsrichtung zu speichern und später anzuzeigen
-  static std::vector<double> wi_buf (0);                        //um den Drehwinkel zu speichern und später anzuzeigen
-  static std::vector<unsigned long> measurementTime_buf (0);    //Um die x-Skalierung beim Speicher und Anzeigen zu beachten
+  static std::vector<double> v_buf (0);                         //um die Geschwindigkeit zu speichern und später anzuzeigen (Liste)
+  static std::vector<double> ri_buf (0);                        //um die Bewegungsrichtung zu speichern und später anzuzeigen (Liste)
+  static std::vector<double> wi_buf (0);                        //um den Drehwinkel zu speichern und später anzuzeigen  (Liste)
+  static std::vector<unsigned long> measurementTime_buf (0);    //Um die x-Skalierung beim Speicher und Anzeigen zu beachten (Liste)
   static double minus{0};                                       //Offset des BNO055
   static uint32_t lastMeasurement{0};
   static double winkel{0},rotationSpeed{0};
@@ -169,8 +170,9 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   while(winkel<rotation-180){
     winkel+=360;
   }
-  rotationSpeed=getRotationSpeed(gyro);
-  static int16_t x{0},y{0};
+  rotationSpeed=getRotationSpeed(gyro);                         //d-Glied messen (rotationsregler)
+
+  static int16_t x{0},y{0};                                     //Serielles Empfangen und Aufteilen auf die Adressen
   static bool surface{false},motion{false};
   static char x_{0},y_{0},o_{0};
   static char* currentWrite=&x_;
@@ -189,7 +191,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
         *currentWrite=readBuf;break;
     }
   }
-  char o{o_};
+  char o{o_};                                                   //aufsplitten dieses Bytes in seine bits
   if(o>=8){
     o-=8;
     y=y_;
@@ -209,15 +211,15 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
     motion=false;
   }
   surface=(o_>=1);
-  x+=0.6*rotationSpeed;
+  x+=0.6*rotationSpeed;                                         //Herausrechnen, dass der Maussensor nicht mittig ist
   // Serial.println((double)y/rotationSpeed);
   y-=0.27*rotationSpeed;
-  double v=hypot((double)x,(double)y)/(millis()-lastMeasurement);
+  double v=hypot((double)x,(double)y)/(millis()-lastMeasurement);//Bewegungsgeschwindigkeit und -richtung berechnen (sozusagen euklid->polar)
   double ri=atan2(x,y)*180/PI+8;
-  v*=cos(ri-direction);                               //Geschwindigkeit in die angestrebten Richtung
-//speichern
-  if(speichern){
-    static char count{0};
+  v*=cos(ri-direction);                               //Geschwindigkeit in die angestrebten Richtung isolieren
+
+  if(speichern){                                        //speichern
+    static char count{0};                                   //nur alle 3 Durchläufe buffern
     if(count>=3){
       v_buf.push_back(v);
       wi_buf.push_back(winkel);
@@ -232,54 +234,24 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
     }
   }
   lastMeasurement=millis();
-  InpidWi=direction-(ri-winkel);
+  InpidWi=direction-(ri-winkel);                                  //Input des Winkel-PIDs berechnen und auf den richtigen Wertebereich schieben
   while(InpidWi<-180){
     InpidWi+=360;
   }while(InpidWi>+180){
     InpidWi-=360;
   }
-  static double OutpidWiclean{0};
-  constexpr size_t swi=800;
-  static double bufwi[swi];
   InpidV=v;
   SetpidV=velocity;
-  static double OutpidVclean{0};
-  constexpr size_t sv=130;
-  static double bufv[sv];
   if(surface||lastSurface){
     pidV.Compute();
-    for(size_t i{1};i<sv;i++){
-      bufv[i]=bufv[i-1];
-    }
-    bufv[0]=OutpidV;
-    OutpidVclean=0;
-    for(size_t i{0};i<sv;i++){
-      OutpidVclean+=(double)bufv[i]/sv;
-    }
     pidWi.Compute();
-    for(size_t i{1};i<swi;i++){
-      bufwi[i]=bufwi[i-1];
-    }
-    bufwi[0]=OutpidWi;
-    OutpidWiclean=0;
-    for(size_t i{0};i<swi;i++){
-      OutpidWiclean+=(double)bufwi[i]/swi;
-    }
-  }else{  //!surface
-    for(size_t i=0;i<swi;i++){
-      bufwi[i]=direction;
-    }
-    for(size_t i=0;i<sv;i++){
-      bufv[i]=0;
-    }
-    Serial.println("RESET");
   }
-  if (buttonGpressed) {
+  if (buttonGpressed) {                                                               //Wenn Knopf auf Roboter gedrückt
     if(!speichern){   //offsetten
-      minus = getRotation(gyro);                                                           //offsetten
+      minus = getRotation(gyro);
       Serial.print("MINUS:");
       Serial.println(minus);
-    }else{            //speichern
+    }else{            //speichern (in textdateien auf SD-Karte)
       Serial.println("Messwerte abspeichern.");
       File myF=SD.open("Rotation.txt",FILE_WRITE); /* myF.seek(EOF); */
         myF.truncate();
@@ -326,7 +298,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   double ro = -((p * (winkel-rotation)) - d * rotationSpeed)/4.5;                   //skalierter pd Regler
   if(surface||lastSurface){       //minimale Glättung
     // Serial.print(motor(OutpidWiclean+direction,OutpidVclean,ro));Serial.print("  |  ");Serial.println(OutpidVclean);
-    Serial.println(motor(OutpidWiclean+direction,OutpidVclean,ro));
+    Serial.println(motor(OutpidWi+direction,OutpidV,ro));
   }else{
     motor(0,0,0);
   }
