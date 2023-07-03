@@ -22,6 +22,7 @@
 #include<Ballverfolgung.h>
 
 
+
 Pixy2I2C pixy, pixy2;                                      //pixi im i2c-kommunikations-modus initialisieren
 
 Adafruit_BNO055 gyro = Adafruit_BNO055(55, 0x28);   //Erstellen eines Obketes der Klasse Adafruit_BNO055 mit Namen gyro
@@ -92,7 +93,7 @@ int minWertLS;
 bool buttonGpressed = true;                                         //other
 
 double entfVelo = 0;                                 //Geschwindigkeit vom PID gesteuert bei der Ballanfahrt (Entfernungs-PID)
-double wiVelo = 0;                                   //Gesch.-Output des Winkelpids
+double wiVelo = 0;                                   //Geschw.-Output des Winkelpids
 double entfSet=5;                                                   //wird sich nach dem Anfahrtsradius richten
 PID entfPID(&IRbest,&entfVelo,&entfSet,0,0,0,REVERSE);              //LILA:4.1,0,0.8; Schwarz: 3.9,0,0.7
 // PID entfPID(&IRbest,&entfVelo,&entfSet,4.1,0,0.8,REVERSE);       //LILA:4.1,0,0.8; Schwarz: 3.9,0,0.7
@@ -188,11 +189,11 @@ void setup() {
   pixy2.init(0x53);
 }
 
-#define bt false
+#define bt true
 #define Schusswinkel 8
 
 void loop() {
-  torwart=false;
+  //torwart=false;
   // Serial.println(torwart);
   // Serial.println(Pixy(pixy,piread));
   //// Serial.println(analogRead(LichtSchranke));
@@ -201,7 +202,7 @@ void loop() {
   analogWrite(Schuss_PWM,255);
   bool hBall= hatBall(minWertLS) && ( Icball == 0 || Icball == 15 || Icball == 1);
   IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);//
-   if(bt){
+   if(bt){  
      bluetooth(torwart,hBall,surface);                                                                                                        //empfangen und senden
    }
    //Serial.println(torwart);
