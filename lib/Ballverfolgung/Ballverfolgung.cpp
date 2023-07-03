@@ -21,10 +21,10 @@ void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, d
 
         if(Roboter==LILA){
             if(!useMaus){
-              entfPID.SetTunings(3.9,0,0.8);
-              wiPID.SetTunings(0.74,0,0.38);
-              naheAnfahrt=0.93;
-              naheOffAnf=17;
+              entfPID.SetTunings(3.9,0,0.8);      //3.9,0,0.8
+              wiPID.SetTunings(0.74,0,0.38);      //0.74,0,0.38
+              naheAnfahrt=0.93;                   //0.93
+              naheOffAnf=17;                      //17
             }else{
               entfPID.SetTunings(0.47,0,0.16);   //0.4,0,0.23;0.5,0,0.39;0.47,0,0.16
               entfPID.SetOutputLimits(0,11);
@@ -41,7 +41,7 @@ void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, d
               // wiPID.SetTunings(0.74,0,0.38);
               // entfPID.SetOutputLimits(0,300);
               naheAnfahrt=0.99;
-              naheOffAnf=15;
+              naheOffAnf=20;
             }else{
               entfPID.SetTunings(0.47,0,0.16);   //0.4,0,0.23;0.5,0,0.39;0.47,0,0.16
               entfPID.SetOutputLimits(0,11);
