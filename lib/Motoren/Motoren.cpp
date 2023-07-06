@@ -298,7 +298,7 @@ void fahren(double direction, double velocity, double rotation, Adafruit_BNO055&
   double ro = -((p * (winkel-rotation)) - d * rotationSpeed)/4.5;                   //skalierter pd Regler
   if(surface||lastSurface){       //minimale Glättung
     // Serial.print(motor(OutpidWiclean+direction,OutpidVclean,ro));Serial.print("  |  ");Serial.println(OutpidVclean);
-    Serial.println(motor(OutpidWi+direction,OutpidV,ro));
+    motor(OutpidWi+direction,OutpidV,ro);
   }else{
     motor(0,0,0);
   }

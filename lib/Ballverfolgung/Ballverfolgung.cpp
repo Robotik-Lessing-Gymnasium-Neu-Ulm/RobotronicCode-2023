@@ -12,8 +12,9 @@ void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, d
   // static const bool useMaus=false;
   static int naheAnfahrt=useMaus?0.8:0.82;     //erster Wert: wenn die Maus aktiviert ist, zweiter wenn nicht; für den Winkel, wenn der Ball vorne fährt (gewichtung des Abstands)
   static int naheOffAnf=17;                      //für den Winkel, wenn der Ball vorne fährt
-  static double GeschNahOff=useMaus?5.5:55;        //die Geschw., wenn der Ball vorne liegt (Sensor 15 oder 1), aber nicht exakt (nicht 0)
-  static double GeschNahFakt=useMaus?0.11:0.5;                //Geschwindigkeit wenn der Ball bei Sensor 0 ist
+  static double GeschNahOff=useMaus?8.5:55;        //die Geschw., wenn der Ball vorne liegt (Sensor 15 oder 1), aber nicht exakt (nicht 0)
+  static double GeschNahFakt=useMaus?0.1:0.5;                //Geschwindigkeit wenn der Ball bei Sensor 0 ist
+  constexpr double torTeiler{1.5};
     // Serial.print(Icball);Serial.print(" ");
     // Serial.println(IRbest);
     static bool setup{true};
@@ -21,50 +22,81 @@ void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, d
         entfPID.SetMode(AUTOMATIC);
         wiPID.SetMode(AUTOMATIC);
 
-        if(Roboter==LILA){
-            if(!useMaus){
-              // entfPID.SetTunings(3.9,0,0.8);
-              // wiPID.SetTunings(0.74,0,0.38);
-              entfPID.SetTunings(2.1,0,2);
-              wiPID.SetTunings(1.7,0,0.32);
-              entfPID.SetOutputLimits(-200,300);
-              wiPID.SetOutputLimits(-200,300);
-              naheAnfahrt=0.82;
-              naheOffAnf=17;
-            }else{
-              entfPID.SetTunings(0.47,0,0.16);   //0.4,0,0.23;0.5,0,0.39;0.47,0,0.16
-              entfPID.SetOutputLimits(0,11);
-              wiPID.SetTunings(0.21,0,0.09);  //0.1247,0,0.08;0.126,0,0.09;0.19,0,0.1;0.21,0.07,0
-              wiPID.SetOutputLimits(0,9);
-            }
-            Serial.print("LILA:    ");Serial.println(wiPID.GetKd());
-        }else{ //black
-            if(!useMaus){
-              // entfPID.SetTunings(3.9,0,0.8);
-              // wiPID.SetTunings(0.74,0,0.38);//2.5,0,1.5
-              entfPID.SetTunings(2.1,0,2);
-              wiPID.SetTunings(1.7,0,0.32);
-              entfPID.SetOutputLimits(-200,300);
-              wiPID.SetOutputLimits(-200,300);
-              naheAnfahrt=0.82;
-              naheOffAnf=17;
-            }else{
-              // entfPID.SetTunings(0.47,0,0.16);   //0.4,0,0.23;0.5,0,0.39;0.47,0,0.16
-              // entfPID.SetOutputLimits(0,11);
-              // wiPID.SetTunings(0.21,0,0.05);  //0.1247,0,0.08;0.126,0,0.09;0.19,0,0.1;0.21,0.07,0
-              // wiPID.SetOutputLimits(0,9);
-              // naheAnfahrt=0.63;
-              // naheOffAnf=24;
-              entfPID.SetTunings(0.24,0,0.037);
-              entfPID.SetOutputLimits(-10,16);
-              wiPID.SetTunings(0.25,0,0.05);
-              wiPID.SetOutputLimits(-10,16);
-              naheAnfahrt=1;
-              naheOffAnf=17;
-            }
-            offsetVorne=24;
-            Serial.println("BLACK:    ");Serial.println(wiPID.GetKd());
+        if(useMaus){
+          entfPID.SetTunings(0.4,0,0.09);
+          entfPID.SetOutputLimits(-14,19);
+          wiPID.SetTunings(1,0,0.095);
+          wiPID.SetOutputLimits(-24,24);
+          naheAnfahrt=0.2;
+          naheOffAnf=15;
+        }else{//!useMaus
+          entfPID.SetTunings(2.5,0,2);
+          wiPID.SetTunings(2.5,0,0.98);
+          entfPID.SetOutputLimits(-200,300);
+          wiPID.SetOutputLimits(-200,300);
+          naheAnfahrt=0.7;
+          naheOffAnf=16;
         }
+
+        // if(Roboter==LILA){
+        //     if(!useMaus){
+        //       // entfPID.SetTunings(3.9,0,0.8);
+        //       // wiPID.SetTunings(0.74,0,0.38);
+        //       entfPID.SetTunings(2.5,0,2);
+        //       wiPID.SetTunings(2.5,0,0.98);
+        //       entfPID.SetOutputLimits(-200,300);
+        //       wiPID.SetOutputLimits(-200,300);
+        //       naheAnfahrt=0.7;
+        //       naheOffAnf=16;
+        //     }else{
+        //       entfPID.SetTunings(0.47,0,0.16);   //0.4,0,0.23;0.5,0,0.39;0.47,0,0.16
+        //       entfPID.SetOutputLimits(0,11);
+        //       wiPID.SetTunings(0.21,0,0.09);  //0.1247,0,0.08;0.126,0,0.09;0.19,0,0.1;0.21,0.07,0
+        //       wiPID.SetOutputLimits(0,9);
+        //     }
+        //     Serial.print("LILA:    ");Serial.println(wiPID.GetKd());
+        // }else{ //black
+        //     if(!useMaus){
+        //       // entfPID.SetTunings(3.9,0,0.8);
+        //       // wiPID.SetTunings(0.74,0,0.38);//2.5,0,1.5
+
+        //       // entfPID.SetTunings(2.1,0,2);
+        //       // wiPID.SetTunings(1.7,0,0.32);
+        //       // entfPID.SetOutputLimits(-200,300);
+        //       // wiPID.SetOutputLimits(-200,300);
+        //       // naheAnfahrt=0.82;
+        //       // naheOffAnf=17;
+        //       entfPID.SetTunings(2.5,0,2);
+        //       wiPID.SetTunings(2.5,0,0.98);
+        //       entfPID.SetOutputLimits(-200,300);
+        //       wiPID.SetOutputLimits(-200,300);
+        //       naheAnfahrt=0.7;
+        //       naheOffAnf=16;
+        //     }else{
+        //       // entfPID.SetTunings(0.47,0,0.16);   //0.4,0,0.23;0.5,0,0.39;0.47,0,0.16
+        //       // entfPID.SetOutputLimits(0,11);
+        //       // wiPID.SetTunings(0.21,0,0.05);  //0.1247,0,0.08;0.126,0,0.09;0.19,0,0.1;0.21,0.07,0
+        //       // wiPID.SetOutputLimits(0,9);
+        //       // naheAnfahrt=0.63;
+        //       // naheOffAnf=24;
+
+        //       // entfPID.SetTunings(0.25,0,0.0372);
+        //       // entfPID.SetOutputLimits(-14,16);
+        //       // wiPID.SetTunings(2.8,0,0.6);//0.285,0,0.06;0.38,0,0.088;0.455,0,0.1;0.84,0,0.25;2.8,0,0.593
+        //       // wiPID.SetOutputLimits(-14,19);
+        //       // naheAnfahrt=1;
+        //       // naheOffAnf=23.5;
+
+        //       entfPID.SetTunings(0.4,0,0.09);
+        //       entfPID.SetOutputLimits(-14,19);
+        //       wiPID.SetTunings(1,0,0.095);
+        //       wiPID.SetOutputLimits(-24,24);
+        //       naheAnfahrt=0.2;
+        //       naheOffAnf=15;
+        //     }
+        //     offsetVorne=24;
+        //     Serial.println("BLACK:    ");Serial.println(wiPID.GetKd());
+        // }
     }
     Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hBall,torwart,hBall,RetSurface,accel); //HIER
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,false,accel); 
@@ -91,32 +123,34 @@ void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, d
             }
           }
           if(useMaus){
-            fahren(90,GeschNahFakt*IRbest+GeschNahOff,0,gyro,buttonGpressed,RetSurface);
+            fahren(90,torwart?(GeschNahFakt*IRbest+GeschNahOff)/torTeiler:(GeschNahFakt*IRbest+GeschNahOff),0,gyro,buttonGpressed,RetSurface);
           }else{
-            motor(90,GeschNahFakt*IRbest+GeschNahOff,rotation);
+            motor(90,torwart?(GeschNahFakt*IRbest+GeschNahOff)/torTeiler:(GeschNahFakt*IRbest+GeschNahOff),rotation);
           }
-          // Serial.println("front");
+          Serial.println("front");
         }else if(Icball == 15){
           if(useMaus){
-            fahren(90-min(IRbest*naheAnfahrt+naheOffAnf,80),GeschNahFakt*IRbest+GeschNahOff,0,gyro,buttonGpressed,RetSurface); //90-35
+            fahren(90-min(IRbest*naheAnfahrt+naheOffAnf,89),torwart?(GeschNahFakt*IRbest+GeschNahOff)/torTeiler:(GeschNahFakt*IRbest+GeschNahOff),0,gyro,buttonGpressed,RetSurface); //90-35
+            Serial.print(GeschNahFakt*IRbest+GeschNahOff);Serial.print("   ");
+            Serial.println(90-min(IRbest*naheAnfahrt+naheOffAnf,89));
           }else{
-            motor(90-min(IRbest*naheAnfahrt+naheOffAnf,80),GeschNahFakt*IRbest+GeschNahOff,rotation);
+            motor(90-min(IRbest*naheAnfahrt+naheOffAnf,89),torwart?(GeschNahFakt*IRbest+GeschNahOff)/torTeiler:(GeschNahFakt*IRbest+GeschNahOff),rotation);
           }
-          // Serial.println("slightly right");
+          Serial.println("slightly right");
         }else if(Icball == 1){
           if(useMaus){
-            fahren(90+min(IRbest*naheAnfahrt+naheOffAnf,80),GeschNahFakt*IRbest+GeschNahOff,0,gyro,buttonGpressed,RetSurface); //90+35
+            fahren(90+min(IRbest*naheAnfahrt+naheOffAnf,89),torwart?(GeschNahFakt*IRbest+GeschNahOff)/torTeiler:(GeschNahFakt*IRbest+GeschNahOff),0,gyro,buttonGpressed,RetSurface); //90+35
           }else{
-            motor(90+min(IRbest*naheAnfahrt+naheOffAnf,80),GeschNahFakt*IRbest+GeschNahOff,rotation);
+            motor(90+min(IRbest*naheAnfahrt+naheOffAnf,89),torwart?(GeschNahFakt*IRbest+GeschNahOff)/torTeiler:(GeschNahFakt*IRbest+GeschNahOff),rotation);
           }
-          // Serial.println("slightly left");
+          Serial.println("slightly left");
         }else{
           // Serial.print(entfVelo);Serial.print(" | ");
           // Serial.print(wiVelo);Serial.print(" | ");
           // Serial.println(((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo);
           // fahren(richtung-addRot,entfVelo,0,gyro,buttonGpressed);        //aus Testzwecken nur Entfernung/Winkel reglen
           if(useMaus){
-            fahren(richtung-addRot,min(((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo,15),0,gyro,buttonGpressed,RetSurface);      //Konvexkombination über die beiden PID-Geschwindigkeiten; t ist normierte Entf. zum Ball
+            fahren(richtung-addRot,min(((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo,19),0,gyro,buttonGpressed,RetSurface);      //Konvexkombination über die beiden PID-Geschwindigkeiten; t ist normierte Entf. zum Ball
             // fahren(richtung-addRot,entfVelo,0,gyro,buttonGpressed,RetSurface);
           }else{
             // Serial.println(((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo);
@@ -141,6 +175,5 @@ void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, d
     else {                                                                //der Boden sieht etwas
       motor(bodenrichtung, 200,rotation);                                 //sehr schnell von der Linie wegfahren
     }
-
     setup=false;
 }

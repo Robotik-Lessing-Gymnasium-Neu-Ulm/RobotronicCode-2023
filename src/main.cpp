@@ -193,7 +193,7 @@ void setup() {
 #define Schusswinkel 8
 
 void loop() {
-  //torwart=false;
+  torwart=true;
   // Serial.println(torwart);
   // Serial.println(Pixy(pixy,piread));
   //// Serial.println(analogRead(LichtSchranke));
@@ -248,12 +248,15 @@ void loop() {
     }else{                                                                                                                          //der Boden sieht etwas
       motor(bodenrichtung, 200,rotation);                                                                                           //sehr schnell von der Linie wegfahren
     }
-  }else if(torwart){    //torwart                                                                                                          //Als Torwart verhalten
-    //Serial.println("Torwart");
-    bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
-    // motor(90,0,10);
-    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread2,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,Photo,gesehenSensor,bodenrichtung,alteZeit,entfSet,addRotTime,surface,accel);
-  }else{    //!torwart
+  }
+  // else if(torwart){    //torwart                                                                                                          //Als Torwart verhalten
+  //   //Serial.println("Torwart");
+  //   bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
+  //   // motor(90,0,10);
+  //   // torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread2,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,Photo,gesehenSensor,bodenrichtung,alteZeit,entfSet,addRotTime,surface,accel);
+  //   torwartProgramm(pixy2,piread,gyro,buttonGpressed,minus,alterWinkel,addRot,rotation,PixyG,hBall,accel,minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,alteZeit,piread,PixyG2,hBall,torwart,surface,IR,IRbest,Icball, richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,entfSet,addRotTime);
+  // }
+  else{    //!torwart
     piread=false;
     //Serial.println("Stuermer");
     verfolgeBall(IRbest,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hBall,torwart,IR,Icball,richtung,entfSet,wiIn,minWert,irAutoCalibration,WinkelBall,addRotTime,IRsave,surface,accel);

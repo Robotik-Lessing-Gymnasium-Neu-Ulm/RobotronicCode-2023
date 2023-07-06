@@ -209,7 +209,7 @@ void bodenverarbeiten(bool* gesehenSensor,bool& minEinerDa,bool* Photo, double& 
 
     while (millis() - zeitlinieda <= 75) {
       bluetooth(torwart,hBall,surface);
-      Serial.println(LED[1]);
+      // Serial.println(LED[1]);
       for (int i = 0; i < 32; i++) {
         if (Photo[i] && AnzahlSens <= 30 && !gesehenSensor[i]) {
           gesehenSensor[i] = true;

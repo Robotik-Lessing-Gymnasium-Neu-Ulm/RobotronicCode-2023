@@ -36,8 +36,13 @@ int lesenMultiplexerOben(int s0, int s1, int s2, int s3) {           //Verkürzu
 void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfSet, double &wiIn, PID &wiPID, int* minWert, bool& irAutoCalibration, double& addRot, double& WinkelBall, unsigned long& addRotTime, bool& torwart, bool& IRsave) {
   if(!irAutoCalibration){
     static double AnfahrtsRadius=26;                                   //Achtung: auch bei der IR Kalibration ändern!
+    if(torwart){
+      AnfahrtsRadius=40;
+    }else{
+      AnfahrtsRadius=26;
+    }
     static double BallWegRadius=195;
-    entfSet=AnfahrtsRadius+3;
+    entfSet=AnfahrtsRadius; //LÖSCHEN (+3) und ausprobieren
     // static int min=1023;
     // int gelesen=lesenMultiplexerOben(0,1,0,0);
     // if(min>gelesen){
@@ -252,6 +257,8 @@ void IRsensTW(int* IR, double& IRbest, int& Icball, double& richtung, double &wi
     Serial.println(";");
   }
 }
+
+
 
 void irAutoCal(int* minWert, bool& irAutoCalibration){
   for(int i=0;i<16;i++){
