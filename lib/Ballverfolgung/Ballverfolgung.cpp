@@ -8,13 +8,13 @@
 #include<Motoren.h>
 
 void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, double& entfVelo,double& wiVelo,bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation,double &addRot, bool piread, int PixyG, int PixyG2, bool hBall, bool torwart, int* IR, int& Icball, double& richtung,double &entfSet, double &wiIn, int* minWert, bool& irAutoCalibration, double& WinkelBall, unsigned long& addRotTime, bool& IRsave, bool& RetSurface,double& accel){
-  static const bool useMaus=(Roboter!=LILA);
-  // static const bool useMaus=false;
-  static int naheAnfahrt=useMaus?0.8:0.82;     //erster Wert: wenn die Maus aktiviert ist, zweiter wenn nicht; für den Winkel, wenn der Ball vorne fährt (gewichtung des Abstands)
-  static int naheOffAnf=17;                      //für den Winkel, wenn der Ball vorne fährt
+  // static const bool useMaus=(Roboter!=LILA);
+  static const bool useMaus=false;
+  static double naheAnfahrt=useMaus?0.8:0.82;     //erster Wert: wenn die Maus aktiviert ist, zweiter wenn nicht; für den Winkel, wenn der Ball vorne fährt (gewichtung des Abstands)
+  static double naheOffAnf=17;                      //für den Winkel, wenn der Ball vorne fährt
   static double GeschNahOff=useMaus?8.5:55;        //die Geschw., wenn der Ball vorne liegt (Sensor 15 oder 1), aber nicht exakt (nicht 0)
   static double GeschNahFakt=useMaus?0.1:0.5;                //Geschwindigkeit wenn der Ball bei Sensor 0 ist
-  constexpr double torTeiler{1.5};
+  constexpr double torTeiler{1.3};
     // Serial.print(Icball);Serial.print(" ");
     // Serial.println(IRbest);
     static bool setup{true};
@@ -29,13 +29,17 @@ void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, d
           wiPID.SetOutputLimits(-24,24);
           naheAnfahrt=0.2;
           naheOffAnf=15;
+          GeschNahOff=8.5;
+          GeschNahFakt=0.1;
         }else{//!useMaus
           entfPID.SetTunings(2.5,0,2);
           wiPID.SetTunings(2.5,0,0.98);
           entfPID.SetOutputLimits(-200,300);
           wiPID.SetOutputLimits(-200,300);
-          naheAnfahrt=0.7;
-          naheOffAnf=16;
+          naheAnfahrt=0.77;
+          naheOffAnf=17;
+          GeschNahOff=64;
+          GeschNahFakt=0.7;
         }
 
         // if(Roboter==LILA){

@@ -37,10 +37,11 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
   if(!irAutoCalibration){
     static double AnfahrtsRadius=26;                                   //Achtung: auch bei der IR Kalibration ändern!
     if(torwart){
-      AnfahrtsRadius=40;
+      AnfahrtsRadius=50;
     }else{
       AnfahrtsRadius=26;
     }
+    Serial.println(IRbest);
     static double BallWegRadius=195;
     entfSet=AnfahrtsRadius; //LÖSCHEN (+3) und ausprobieren
     // static int min=1023;
