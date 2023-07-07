@@ -207,7 +207,7 @@ void bodenverarbeiten(bool* gesehenSensor,bool& minEinerDa,bool* Photo, double& 
 
     long zeitlinieda = millis();
 
-    while (millis() - zeitlinieda <= 75) {
+    while (millis() - zeitlinieda <= 60) {  //Ursprünglich 75
       bluetooth(torwart,hBall,surface);
       // Serial.println(LED[1]);
       for (int i = 0; i < 32; i++) {
@@ -276,7 +276,7 @@ void bodenverarbeiten(bool* gesehenSensor,bool& minEinerDa,bool* Photo, double& 
         }
       }
       compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,piread,pixyG,pixyG2,hatBall,torwart,accel);
-      motor(bodenrichtung, 150,rotation);
+      motor(bodenrichtung, 270,rotation);   //Ursprünglich 150
       //Serial.println(LED[1]);
       digitalWrite(LEDIV, HIGH);
       if (digitalRead(ButtonI) == LOW) {

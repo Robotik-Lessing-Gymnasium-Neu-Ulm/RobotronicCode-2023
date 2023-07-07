@@ -62,4 +62,6 @@
 #define Schuss_RW 21
 #define Schuss_PWM 22
 
+#define SuperTeamBT 30
+
 #endif

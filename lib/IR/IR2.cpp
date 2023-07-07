@@ -37,11 +37,11 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
   if(!irAutoCalibration){
     static double AnfahrtsRadius=26;                                   //Achtung: auch bei der IR Kalibration ändern!
     if(torwart){
-      AnfahrtsRadius=50;
+      AnfahrtsRadius=77; //75 bis 79
     }else{
       AnfahrtsRadius=26;
     }
-    Serial.println(IRbest);
+    // Serial.println(IRbest);
     static double BallWegRadius=195;
     entfSet=AnfahrtsRadius; //LÖSCHEN (+3) und ausprobieren
     // static int min=1023;
@@ -62,12 +62,14 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
     IR[8] = map(lesenMultiplexerOben(1, 0, 0, 0), minWert[8] , 1023, 0, 200);
     IR[9] = map(lesenMultiplexerOben(1, 0, 0, 1), minWert[9] , 1023, 0, 200);
     IR[10] = map(lesenMultiplexerOben(1, 0, 1, 0),minWert[10], 1023, 0, 200);
-    IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1),minWert[11], 1023, 0, 200);
+    // IR[11] = map(lesenMultiplexerOben(1, 0, 1, 1),minWert[11], 1023, 0, 200);
+    IR[11] = 200;
     IR[12] = map(lesenMultiplexerOben(1, 1, 0, 0),minWert[12], 1023, 0, 200);
     IR[13] = map(lesenMultiplexerOben(1, 1, 0, 1),minWert[13], 1023, 0, 200);
     IR[14] = map(lesenMultiplexerOben(1, 1, 1, 0),minWert[14], 1023, 0, 200);
     IR[15] = map(lesenMultiplexerOben(1, 1, 1, 1),minWert[15], 1023, 0, 200);
-    //Serial.println(lesenMultiplexerOben(0, 0, 1, 0));
+    // Serial.println(lesenMultiplexerOben(1, 0, 1, 1));
+    // Serial.println(Icball);
     IRbest = 200;                                                        //bestimmen des niedrigsten, gemessenen Wertes und Speichern des Index in Icball
     for (int i = 0; i < 16; i++) {
       if (IR[i] < IRbest) {
@@ -75,6 +77,7 @@ void IRsens(int* IR, double& IRbest, int& Icball, double& richtung,double &entfS
         Icball = i;
       }
     }
+    Serial.println(Icball);
     for(int i=0;i<16;i++){
       if(IR[i]<0){
         minWert[i]--;

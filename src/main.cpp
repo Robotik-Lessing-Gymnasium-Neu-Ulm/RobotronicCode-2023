@@ -193,13 +193,19 @@ void setup() {
 #define Schusswinkel 8
 
 void loop() {
-  torwart=true;
+  torwart=false;
   // Serial.println(torwart);
   // Serial.println(Pixy(pixy,piread));
   //// Serial.println(analogRead(LichtSchranke));
-  digitalWrite(Schuss_FW,LOW);
-  digitalWrite(Schuss_RW,LOW);
-  analogWrite(Schuss_PWM,255);
+  // digitalWrite(Schuss_FW,LOW);
+  // digitalWrite(Schuss_RW,LOW);
+  // analogWrite(Schuss_PWM,255);
+  static unsigned long lastShotTime{millis()};
+  if(millis()>=lastShotTime+20){
+    digitalWrite(Schuss_FW,LOW);
+    digitalWrite(Schuss_RW,LOW);
+    analogWrite(Schuss_PWM,0);
+  }
   bool hBall= hatBall(minWertLS) && ( Icball == 0 || Icball == 15 || Icball == 1);
   IRsens(IR,IRbest,Icball,richtung,entfSet,wiIn,wiPID,minWert,irAutoCalibration, addRot,WinkelBall, addRotTime, torwart,IRsave);//
    if(bt){  
@@ -232,10 +238,7 @@ void loop() {
           digitalWrite(Schuss_FW,LOW);
           digitalWrite(Schuss_RW,HIGH);
           analogWrite(Schuss_PWM,255);
-          delay(30);
-          digitalWrite(Schuss_FW,HIGH);
-          digitalWrite(Schuss_RW,LOW);
-          analogWrite(Schuss_PWM,0);
+          lastShotTime=millis();
         }
         motor(90-PixyG, 100,rotation);                                                                                                    //aufs Tor zufahren, mit Ausrichtung aufs Tor
         // motor(0,0,rotation);

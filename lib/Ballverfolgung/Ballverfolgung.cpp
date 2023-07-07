@@ -8,13 +8,13 @@
 #include<Motoren.h>
 
 void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, double& entfVelo,double& wiVelo,bool &minEinerDa,int* LED,int* Schwellwerte, bool* Photo,bool* gesehenSensor,double& bodenrichtung,Adafruit_BNO055& gyro,bool& buttonGpressed, double& minus, long& alteZeit, int& alterWinkel, double& rotation,double &addRot, bool piread, int PixyG, int PixyG2, bool hBall, bool torwart, int* IR, int& Icball, double& richtung,double &entfSet, double &wiIn, int* minWert, bool& irAutoCalibration, double& WinkelBall, unsigned long& addRotTime, bool& IRsave, bool& RetSurface,double& accel){
-  // static const bool useMaus=(Roboter!=LILA);
-  static const bool useMaus=false;
+  static const bool useMaus=(Roboter!=LILA);
+  // static const bool useMaus=false;
   static double naheAnfahrt=useMaus?0.8:0.82;     //erster Wert: wenn die Maus aktiviert ist, zweiter wenn nicht; für den Winkel, wenn der Ball vorne fährt (gewichtung des Abstands)
   static double naheOffAnf=17;                      //für den Winkel, wenn der Ball vorne fährt
   static double GeschNahOff=useMaus?8.5:55;        //die Geschw., wenn der Ball vorne liegt (Sensor 15 oder 1), aber nicht exakt (nicht 0)
   static double GeschNahFakt=useMaus?0.1:0.5;                //Geschwindigkeit wenn der Ball bei Sensor 0 ist
-  constexpr double torTeiler{1.3};
+  constexpr double torTeiler{1.12};
     // Serial.print(Icball);Serial.print(" ");
     // Serial.println(IRbest);
     static bool setup{true};
@@ -23,23 +23,48 @@ void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, d
         wiPID.SetMode(AUTOMATIC);
 
         if(useMaus){
-          entfPID.SetTunings(0.4,0,0.09);
-          entfPID.SetOutputLimits(-14,19);
-          wiPID.SetTunings(1,0,0.095);
-          wiPID.SetOutputLimits(-24,24);
-          naheAnfahrt=0.2;
-          naheOffAnf=15;
-          GeschNahOff=8.5;
-          GeschNahFakt=0.1;
+          // entfPID.SetTunings(0.3,0,0);
+          // entfPID.SetOutputLimits(-14,19);
+          // wiPID.SetTunings(0.1,0,0);
+          // wiPID.SetOutputLimits(-24,24);
+
+          // entfPID.SetTunings(0.4,0,0);
+          // entfPID.SetOutputLimits(-14,19);
+          // wiPID.SetTunings(0.5,0,0);
+          // wiPID.SetOutputLimits(-24,24);
+
+          // entfPID.SetTunings(0.4,0,0.09);
+          // entfPID.SetOutputLimits(-14,19);
+          // wiPID.SetTunings(1,0,0.095);
+          // wiPID.SetOutputLimits(-24,24);
+
+          entfPID.SetTunings(2.5,0,2);
+          wiPID.SetTunings(2.5,0,0.98);
+          entfPID.SetOutputLimits(-200,300);
+          wiPID.SetOutputLimits(-200,300);
+
+          naheAnfahrt=0.27;
+          naheOffAnf=21;
+          GeschNahOff=9;
+          GeschNahFakt=0.08;
+
+          // naheAnfahrt=0.2;
+          // naheOffAnf=15;
+          // GeschNahOff=8.5;
+          // GeschNahFakt=0.1;
         }else{//!useMaus
           entfPID.SetTunings(2.5,0,2);
           wiPID.SetTunings(2.5,0,0.98);
           entfPID.SetOutputLimits(-200,300);
           wiPID.SetOutputLimits(-200,300);
-          naheAnfahrt=0.77;
-          naheOffAnf=17;
-          GeschNahOff=64;
-          GeschNahFakt=0.7;
+          // naheAnfahrt=0.74;
+          // naheOffAnf=17;
+          // GeschNahOff=64;
+          // GeschNahFakt=0.7;
+          naheAnfahrt=0.58;
+          naheOffAnf=10;
+          GeschNahOff=70;
+          GeschNahFakt=0.4;  //0.65
         }
 
         // if(Roboter==LILA){
@@ -149,19 +174,10 @@ void verfolgeBall(double& IRbest, PID& entfPID,PID& wiPID,double& offsetVorne, d
           }
           Serial.println("slightly left");
         }else{
-          // Serial.print(entfVelo);Serial.print(" | ");
-          // Serial.print(wiVelo);Serial.print(" | ");
           // Serial.println(((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo);
-          // fahren(richtung-addRot,entfVelo,0,gyro,buttonGpressed);        //aus Testzwecken nur Entfernung/Winkel reglen
-          if(useMaus){
-            fahren(richtung-addRot,min(((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo,19),0,gyro,buttonGpressed,RetSurface);      //Konvexkombination über die beiden PID-Geschwindigkeiten; t ist normierte Entf. zum Ball
-            // fahren(richtung-addRot,entfVelo,0,gyro,buttonGpressed,RetSurface);
-          }else{
-            // Serial.println(((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo);
-            motor(richtung-addRot,((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo,rotation);      //Konvexkombination über die beiden PID-Geschwindigkeiten; t ist normierte Entf. zum Ball
-            // Serial.println(((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo);
-            // motor(richtung-addRot,entfVelo,rotation);Serial.println(entfVelo);
-          }
+          motor(richtung-addRot,((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo,rotation);      //Konvexkombination über die beiden PID-Geschwindigkeiten; t ist normierte Entf. zum Ball
+          // Serial.println(((IRbest-entfSet)/(195-entfSet))*entfVelo+(1-(IRbest-entfSet)/(195-entfSet))*wiVelo);
+          // motor(richtung-addRot,entfVelo,rotation);Serial.println(entfVelo);
           int delay=50;
           if(addRot!=0){
             delay=700; 
