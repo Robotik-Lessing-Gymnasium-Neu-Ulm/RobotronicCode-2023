@@ -5,15 +5,16 @@
 #include<Boden.h>
 #include<myPixy.h>
 #include<Ballverfolgung.h>
+#include<Defines.h>
 
-#define ballUndLinie false //Solle er, wenn er die linie sieht immernoch auf den Ball reagiern?
-#define Abweichung 10 //Wie schräg soll er fahren, wenn er auf den Ball und die Linie reagieren soll
+#define ballUndLinie false  //Solle er, wenn er die linie sieht immernoch auf den Ball reagiern?
+#define Abweichung 10       //Wie schräg soll er fahren, wenn er auf den Ball und die Linie reagieren soll
 
-void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055 &gyro, bool &buttonGpressed, double &minus, int &alterWinkel, double &addRot, bool piread2,bool piread, int pixyG2, int& PixyG, int *IR, double &IRbest, int &Icball, double &richtung, double &wiIn, int *minWert, bool &irAutoCalibration, double &WinkelBall, bool &IRsave, bool hatBall, bool& torwart, PID& entfPID,PID& wiPID,double& offsetVorne, double& entfVelo,double& wiVelo,bool &minEinerDa, bool* Photo,bool* gesehenSensor,double& bodenrichtung,long& alteZeit,double &entfSet,unsigned long& addRotTime,bool& surface,double& accel,int& TorHoehe2){
+void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055 &gyro, bool &buttonGpressed, double &minus, int &alterWinkel, double &addRot, bool piread2,bool piread, int PixyG2, int& PixyG, int *IR, double &IRbest, int &Icball, double &richtung, double &wiIn, int *minWert, bool &irAutoCalibration, double &WinkelBall, bool &IRsave, bool hatBall, bool& torwart, PID& entfPID,PID& wiPID,double& offsetVorne, double& entfVelo,double& wiVelo,bool &minEinerDa, bool* Photo,bool* gesehenSensor,double& bodenrichtung,long& alteZeit,double &entfSet,unsigned long& addRotTime,bool& surface,double& accel,int& TorHoehe2){
     constexpr int Grenze{46};
-    pixyG2 = Pixy2(pixy2,piread2,TorHoehe2);
+    PixyG2 = Pixy2(pixy2,piread2,TorHoehe2);
     // Serial.println(pixyG2);
-    double winkel=compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,piread2,PixyG,pixyG2,hatBall,true,accel);
+    double winkel=compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,piread2,PixyG,PixyG2,hatBall,true,accel);
     Serial.println(winkel);
     IRsensTW(IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,rotation,addRot,WinkelBall,IRsave);
     //Serial.println(wiIn);
@@ -26,7 +27,7 @@ void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation
     } else {
         if (onLine(LED,Schwellwerte)) {
             if(IRbest<Grenze){
-                verfolgeBall(IRbest,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,pixyG2,hatBall,torwart,IR,Icball,richtung,entfSet,wiIn,minWert,irAutoCalibration,WinkelBall,addRotTime,IRsave,surface,accel);
+                verfolgeBall(IRbest,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hatBall,torwart,IR,Icball,richtung,entfSet,wiIn,minWert,irAutoCalibration,WinkelBall,addRotTime,IRsave,surface,accel);
             }
             else if (wiIn == 0) {
                 Serial.println("vorne");
@@ -45,7 +46,7 @@ void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation
         }
         else {
             if(IRbest<Grenze&&abs(winkel)<35){
-                verfolgeBall(IRbest,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,pixyG2,hatBall,torwart,IR,Icball,richtung,entfSet,wiIn,minWert,irAutoCalibration,WinkelBall,addRotTime,IRsave,surface,accel);
+                verfolgeBall(IRbest,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hatBall,torwart,IR,Icball,richtung,entfSet,wiIn,minWert,irAutoCalibration,WinkelBall,addRotTime,IRsave,surface,accel);
             }
             else{
                 if(piread2== false){
@@ -93,5 +94,10 @@ void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation
                 }
             }
         }
+    }
+    PixyG2 = Pixy2(pixy2,piread2,TorHoehe2);              //aktualisieren des Winkels zum Tor
+    bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
+    if(Photo[0]||Photo[1]||Photo[2]||Photo[3]||Photo[30]||Photo[31]){
+        motor(90,100,rotation);
     }
 }
