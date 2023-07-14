@@ -40,6 +40,12 @@ int minWert[16];
 
 int PixyG;
 int PixyG2;
+int TorHoehe;
+int TorHoehe2;
+int xH;
+int yH;
+int xV;
+int yV;
 
 
 /*//Variablen US
@@ -164,7 +170,7 @@ void setup() {
   wiPID.SetMode(AUTOMATIC);
 
   if(Roboter==LILA){
-    torwart=true;
+    torwart=false;
     entfPID.SetTunings(1,0,0);
     wiPID.SetTunings(1,0,0);
     // entfPID.SetTunings(3.9,0,0.8);
@@ -189,10 +195,11 @@ void setup() {
   pixy2.init(0x53);
 }
 
-#define bt true
+#define bt false
 #define Schusswinkel 8
 
 void loop() {
+  //Serial.println(Pixy2(pixy2,piread2,TorHoehe));
   //torwart=false;
   // Serial.println(torwart);
   // Serial.println(Pixy(pixy,piread));
@@ -213,8 +220,8 @@ void loop() {
     Boden(minEinerDa,LED,Schwellwerte,Photo,gesehenSensor,bodenrichtung,gyro,buttonGpressed,minus,alteZeit,alterWinkel,rotation,addRot,piread,PixyG,PixyG2,hBall,torwart,hBall,surface,accel);  //HIER
     compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,piread,PixyG,PixyG2,hBall,torwart,accel);
     if (bodenrichtung == -1) {
-      PixyG=Pixy(pixy,piread);
-      PixyG2=Pixy2(pixy2,piread2);                                                                                                    //Pixy auslesen
+      PixyG=Pixy(pixy,piread,TorHoehe);
+      PixyG2=Pixy2(pixy2,piread2,TorHoehe2);                                                                                                    //Pixy auslesen
       compass(gyro,buttonGpressed,minus,rotation,alterWinkel, addRot,true,PixyG,PixyG2,hBall,torwart,accel);                                                   //Ausrichtungs-Funktion aufrufen, wobei die Kamera beachtet werden soll
       if(accel>-10&&accel<0&&rausdreh == 70){
         if(PixyG2<0){
@@ -252,7 +259,7 @@ void loop() {
     //Serial.println("Torwart");
     bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
     // motor(90,0,10);
-    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread2,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,Photo,gesehenSensor,bodenrichtung,alteZeit,entfSet,addRotTime,surface,accel);
+    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread2,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,Photo,gesehenSensor,bodenrichtung,alteZeit,entfSet,addRotTime,surface,accel,TorHoehe);
   }else{    //!torwart
     piread=false;
     //Serial.println("Stuermer");
@@ -260,4 +267,13 @@ void loop() {
   }
   buttonGpressed=false;
   Serial3.flush();
+  /*position(pixy,piread,TorHoehe,pixy2,piread2 ,TorHoehe,xH,yH,xV,yV);
+  if(xV <30){
+    motor(180,50,rotation);
+  }else if(xV > 35){
+    motor(0,50,rotation);
+  }else{
+    motor(0,0,rotation);
+  }*/
+
 }

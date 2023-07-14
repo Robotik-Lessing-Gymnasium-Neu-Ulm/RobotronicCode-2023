@@ -9,9 +9,9 @@
 #define ballUndLinie false //Solle er, wenn er die linie sieht immernoch auf den Ball reagiern?
 #define Abweichung 10 //Wie schräg soll er fahren, wenn er auf den Ball und die Linie reagieren soll
 
-void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055 &gyro, bool &buttonGpressed, double &minus, int &alterWinkel, double &addRot, bool piread2,bool piread, int pixyG2, int& PixyG, int *IR, double &IRbest, int &Icball, double &richtung, double &wiIn, int *minWert, bool &irAutoCalibration, double &WinkelBall, bool &IRsave, bool hatBall, bool& torwart, PID& entfPID,PID& wiPID,double& offsetVorne, double& entfVelo,double& wiVelo,bool &minEinerDa, bool* Photo,bool* gesehenSensor,double& bodenrichtung,long& alteZeit,double &entfSet,unsigned long& addRotTime,bool& surface,double& accel){
+void torwartProgramm(Pixy2I2C& pixy2,int* LED,int* Schwellwerte, double rotation,Adafruit_BNO055 &gyro, bool &buttonGpressed, double &minus, int &alterWinkel, double &addRot, bool piread2,bool piread, int pixyG2, int& PixyG, int *IR, double &IRbest, int &Icball, double &richtung, double &wiIn, int *minWert, bool &irAutoCalibration, double &WinkelBall, bool &IRsave, bool hatBall, bool& torwart, PID& entfPID,PID& wiPID,double& offsetVorne, double& entfVelo,double& wiVelo,bool &minEinerDa, bool* Photo,bool* gesehenSensor,double& bodenrichtung,long& alteZeit,double &entfSet,unsigned long& addRotTime,bool& surface,double& accel,int& TorHoehe2){
     constexpr int Grenze{46};
-    pixyG2 = Pixy2(pixy2,piread2);
+    pixyG2 = Pixy2(pixy2,piread2,TorHoehe2);
     // Serial.println(pixyG2);
     double winkel=compass(gyro,buttonGpressed,minus,rotation,alterWinkel,addRot,piread2,PixyG,pixyG2,hatBall,true,accel);
     Serial.println(winkel);
