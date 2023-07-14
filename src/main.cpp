@@ -261,7 +261,7 @@ void loop() {
     //Serial.println("Torwart");
     bodenlesen(minEinerDa,LED,Schwellwerte,Photo);
     // motor(90,0,10);
-    torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread2,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,Photo,gesehenSensor,bodenrichtung,alteZeit,entfSet,addRotTime,surface,accel);
+    //torwartProgramm(pixy2,LED,Schwellwerte,rotation,gyro,buttonGpressed,minus,alterWinkel,addRot,piread2,piread,PixyG2,PixyG,IR,IRbest,Icball,richtung,wiIn,minWert,irAutoCalibration,WinkelBall,IRsave,hBall,torwart,entfPID,wiPID,offsetVorne,entfVelo,wiVelo,minEinerDa,Photo,gesehenSensor,bodenrichtung,alteZeit,entfSet,addRotTime,surface,accel,TorHoehe);
   }else{    //!torwart
     piread=false;
     //Serial.println("Stuermer");
